@@ -1,9 +1,10 @@
 # ACT / ALOHA consumer setup
 
 This experimental skill environment locks macOS arm64/MPS and Linux aarch64
-with Python3.12. Linux validation selects CPU inference and OSMesa rendering;
-this does not qualify CUDA execution, other architectures or the visual Agent
-backend. See the [Linux consumer path](#linux-consumer-path) for its exact scope.
+with Python3.12. Linux validation selects CPU inference and OSMesa rendering,
+covering deterministic execution and one normal visual Agent task. CUDA execution,
+other architectures and visual reliability remain unqualified. See the
+[Linux consumer path](#linux-consumer-path) for its exact scope.
 The existing Mac dependency versions and sources are preserved.
 
 The application bundles `robot_agent.aloha_worker`, not model weights. This worker
@@ -122,7 +123,7 @@ Inside the container, create a new environment and install both packages:
 export UV_CACHE_DIR=/workspace/.uv-cache UV_PYTHON_INSTALL_DIR=/workspace/.python
 uv sync --frozen --project robot-agent/skills/aloha --python 3.12.14
 python_bin=/workspace/robot-agent/skills/aloha/.venv/bin/python
-uv pip install --python "$python_bin" --no-deps ./robot-agent
+uv pip install --python "$python_bin" --no-deps "./robot-agent[vision]"
 cmake -S robot-harness -B build-agent -DROBOT_HARNESS_BUILD_PYTHON=ON \
   -DCMAKE_INSTALL_LIBDIR=lib -DPython3_EXECUTABLE="$python_bin"
 cmake --build build-agent --target _core --parallel 2
@@ -167,10 +168,72 @@ receipts, stale-reference rejection, explicit reset and process reaping.
 Completion is execution evidence; business success requires the separate fixed
 physical evaluator. It does not establish observation-driven visual decisions.
 
-Network is needed only for explicit environment/model preparation. The native
-run can use a separate container with `--network none`, the same mounted workspace
-and the same image. Do not transfer host credentials into that container.
-For the actual business application, a separately installed, operator-authenticated
-Codex CLI and selected model must be validated in Linux before running
-`robot-agent-handoff --device cpu`; that complete Linux application is pending.
-Ordinary CI remains the22 lightweight control/preparation checks.
+The deterministic native run needs network only for explicit environment/model
+preparation. It can use a separate container with `--network none`, the same
+mounted workspace and image. The visual application below also needs network
+for its three model requests. Do not transfer host credentials into either
+container. Ordinary CI remains the22 lightweight control/preparation checks.
+
+### Real visual Agent in Linux
+
+Use the same prepared Linux environment, migrated checkpoint and exact Harness
+revision. The selected visual backend is the official Codex0.159.0 Linux aarch64
+musl binary. On the host, from the dedicated workspace above, download/extract
+that fixed release using GitHub CLI (`gh`) and `tar`:
+
+```sh
+mkdir -p codex-download codex-bin
+gh release download rust-v0.159.0 --repo openai/codex \
+  --pattern codex-aarch64-unknown-linux-musl.tar.gz --dir codex-download
+tar -xzf codex-download/codex-aarch64-unknown-linux-musl.tar.gz -C codex-bin
+```
+
+Mount the binary read-only into a network-enabled container. Authentication stays
+inside this container; it is not included in the image or workspace mount:
+
+```sh
+docker run --rm --name robot-agent-aloha-visual --memory 6g --cpus 6 -it \
+  --mount type=bind,src="$PWD",dst=/workspace \
+  --mount type=bind,src="$PWD/codex-bin/codex-aarch64-unknown-linux-musl",dst=/usr/local/bin/codex,readonly \
+  robot-agent-aloha:ubuntu22.04-arm64
+```
+
+Inside that container, the operator signs in through the
+[official device authentication flow](https://learn.chatgpt.com/docs/auth),
+checks status and selects an available model explicitly. The qualified run
+requested `gpt-6-sol` with the adapter's existing high reasoning setting:
+
+```sh
+codex --version
+codex login --device-auth
+codex login status
+python_bin=/workspace/robot-agent/skills/aloha/.venv/bin/python
+export PYTHONPATH=/workspace/harness-prefix/lib/robot-harness/python
+export HF_HUB_OFFLINE=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1
+cd /tmp
+"$python_bin" -m robot_agent.cli --output /workspace/visual-run \
+  --checkpoint /workspace/migration/checkpoint --device cpu --seed 0 \
+  --model gpt-6-sol
+```
+
+Login confirms authentication, not model access or task success. This disposable
+container's login cache disappears when it exits; sign in again for a new
+container. Keep recordings and reports in the dedicated workspace. Never put
+login codes, credential files or tokens in the repository, image or task report.
+
+A separate real Linux visual run completed in75.476 seconds using the installed
+Agent, fresh Harness installation and CPU/OSMesa. Three actual camera/joint
+proposals selected transfer, hold and `observed_success` at sequences0/400/450
+in epoch0; the two operations executed400+50 steps with correlated delivered,
+settled receipts. All451640×480 video frames decoded. Host, worker and three
+Codex decision processes exited, corroborated by container process observations.
+The same-run fixed physical evaluator independently passed its one-second hold;
+Agent/Core `task_verdict` stays `unassessed`. A model-list refresh timeout was
+retained in the final decision's diagnostics. CLI events also reported an
+unavailable optional Code Mode host, which failed closed; this proposal backend
+used no tools. The actual structured requests completed, and no application
+retry or fallback was added.
+
+This qualifies one seed0 Linux ARM/CPU normal visual task. It does not establish
+visual fault handling, reliability, CUDA/amd64, physical robots or a released
+support matrix. The Docker image still contains no Codex or authentication.

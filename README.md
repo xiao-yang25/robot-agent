@@ -116,7 +116,10 @@ commit alongside that exact revision. The first normal-task increment is merged
 as `06cbee4`; M5e adds a Linux consumer environment. Its deterministic ACT/MuJoCo
 path passed a fresh Linux environment/build, seed0 normal execution,451-frame
 recording, same-run fixed physical evaluation and native process reaping. This
-path is separate from the complete visual application; see the
+deterministic result remains separate from the visual application. A later
+installed Linux CPU/OSMesa visual run completed three real camera-based proposals,
+400+50 steps, two settled receipts,451 decoded frames and process exits; its
+same-run fixed physical evaluation passed. See the
 [Linux scope](skills/aloha/README.md#linux-consumer-path). No physical-robot
 qualification, continuous robot safety, Host restart recovery or hard stop bound.
 
