@@ -67,8 +67,10 @@ class CodexDecision:
             with tempfile.TemporaryDirectory(prefix='robot-agent-decision-') as cwd, \
                     (run / 'events.jsonl').open('w') as stdout, (run / 'stderr.log').open('w') as stderr:
                 command += ['--cd', cwd, '--image', str(image), '-']
-                if stop_requested() or time.monotonic() >= deadline:
-                    raise TimeoutError('decision cancelled or expired before launch')
+                if stop_requested():
+                    raise InterruptedError('decision cancelled before launch')
+                if time.monotonic() >= deadline:
+                    raise TimeoutError('decision expired before launch')
                 process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=stdout,
                                            stderr=stderr, text=True)
                 process.stdin.write(prompt)
@@ -79,6 +81,12 @@ class CodexDecision:
                     if time.monotonic() >= deadline:
                         raise TimeoutError('decision deadline elapsed')
                     time.sleep(.01)
+                # Completion may race with cancellation/expiry between polls.
+                # A completed process does not revive a withdrawn proposal.
+                if stop_requested():
+                    raise InterruptedError('decision cancelled')
+                if time.monotonic() >= deadline:
+                    raise TimeoutError('decision deadline elapsed')
                 if process.returncode != 0:
                     raise RuntimeError(f'decision CLI exited {process.returncode}; see retained logs')
                 events = [json.loads(line) for line in (run / 'events.jsonl').read_text().splitlines()]

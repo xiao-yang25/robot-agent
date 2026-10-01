@@ -2,7 +2,7 @@
 
 Bounded, observation-driven task applications for
 [Robot Harness](https://github.com/xiao-yang25/robot-harness). Experimental project;
-the first Mac normal-task increment is merged. No release yet.
+the selected Mac and Linux normal consumer increments are merged. No release yet.
 
 The first application attempts an ALOHA cube transfer followed by one simulated
 second of holding. Its task state and visual decisions live here; ACT supplies
@@ -48,9 +48,12 @@ are excluded from every model input and do not authorize hold.
 
 ## Run
 
-Python3.10+; lightweight task tests require only the standard library:
+Python3.10+. The task/preparation tests use the standard library; the full suite
+also exercises real camera-PNG and subprocess boundaries using the existing
+`vision` extra. ACT, MuJoCo and authenticated Codex are not needed for these tests:
 
 ```sh
+python -m pip install '.[vision]'
 PYTHONPATH=src python -m unittest discover -s tests -v
 ```
 
@@ -95,8 +98,12 @@ Lightweight Ubuntu CI checks these boundaries and installed entry points. See
 [Actions](https://github.com/xiao-yang25/robot-agent/actions) for revision-specific
 remote results; it does not run ACT, MuJoCo or a visual model.
 
-Locally qualified: 17 task-control tests and five preparation-boundary tests,
-plus focused independent code reviews, passed.
+Locally qualified: 17 task-control, five preparation-boundary and eight real
+subprocess-control tests passed. The subprocess cases cover cancellation/expiry
+before launch, late answers written during termination, completed-process races,
+and a child that ignores termination and needs kill/reap. They use controlled
+local executables, not the model service. Ordinary Ubuntu CI runs this full suite
+with the `vision` extra; fixture tests do not establish visual-model qualification.
 One final macOS/MPS seed0 run used three real visual proposals at sequences0/400/450,
 completed400+50 steps in the same episode, delivered two settled Core receipts and
 retained451 video frames. The fixed independent evaluator passed the one-second
@@ -122,6 +129,41 @@ installed Linux CPU/OSMesa visual run completed three real camera-based proposal
 same-run fixed physical evaluation passed. See the
 [Linux scope](skills/aloha/README.md#linux-consumer-path). No physical-robot
 qualification, continuous robot safety, Host restart recovery or hard stop bound.
+
+A seed0 Linux research counterexample then relocated only the cube to the table
+before native step 400, preserving robot state and simulation time. Actual MuJoCo
+rendering supplied the new image; fault labels/physics truth were excluded from
+the model input. The same visual backend chose `help`, and the task reported
+`needs_help` after 48.657 seconds, with one settled 400-step transfer, zero hold
+submissions/steps, 401 decoded frames and observed process cleanup. The fixed
+whole-task evaluator remained `unknown` without an executed hold window;
+`task_verdict` remained `unassessed`. This is one explicit simulator disturbance,
+not a naturally occurring drop or a general perception/safety guarantee. Two
+prior fixture setup failures are retained separately. The trusted research
+fixture is outside this repository and is not a supported plugin API. Slow,
+cancelled/late decisions have separate selected checks below; comparable native
+evidence and broader fault qualification remain M5f work.
+
+Two later Linux seed0 temporal cases each used a declared deterministic initial
+transfer proposal and the real ACT/MuJoCo runtime, then exercised the decision at
+sequence 400. An actual Codex0.159.0 client emitted `turn.started` and was cancelled;
+the task reported `cancelled` after 36.628 seconds and reaped the client. This
+establishes local client cancellation, not remote model acceptance or termination;
+an optional Code Mode host error was retained, and no model turn completed.
+A separate controlled CLI exceeded a one-second decision budget, wrote a valid
+bound `hold` answer while handling termination, and exited normally. That answer
+was retained without being accepted, and the task reported `needs_help` after
+35.574 seconds. Each case retained one delivered/settled/released 400-step transfer,
+zero hold submissions or hold steps, 401 decoded frames, and no remaining sampled
+related processes. They are temporal-boundary checks with mixed callers, not two
+complete model-driven tasks or whole-task successes; `task_verdict` stayed
+`unassessed` and no complete-hold physical evaluation was run.
+
+The proposal adapter checks cancellation and expiry again after process exit;
+process completion cannot restore a withdrawn proposal. These remain cooperative
+checks with terminate/kill/reap, not a hard physical stop deadline, guaranteed
+termination of every descendant, or recovery from a dead Host. Comparable native
+cost/behavior evidence and overall M5f delivery remain pending.
 
 ## License
 
