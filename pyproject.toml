@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "robot-agent"
+version = "0.0.0"
+description = "Bounded observation-driven task applications for Robot Harness"
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+vision = ["Pillow>=10,<13"]
+
+[project.scripts]
+robot-agent-handoff = "robot_agent.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

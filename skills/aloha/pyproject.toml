@@ -1,0 +1,19 @@
+[project]
+name = "robot-agent-aloha-environment"
+version = "0.0.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "lerobot",
+  "gym-aloha",
+  "imageio[ffmpeg]>=2.34,<3",
+  "Pillow==12.3.0",
+  "httpx[socks]>=0.27,<1",
+]
+
+[tool.uv]
+package = false
+environments = ["sys_platform == 'darwin' and platform_machine == 'arm64'"]
+
+[tool.uv.sources]
+lerobot = { git = "https://github.com/huggingface/lerobot.git", rev = "e595b7902714ba51f91e47523f66f89c5181b649" }
+gym-aloha = { git = "https://github.com/huggingface/gym-aloha.git", rev = "bd3325740ea8d1c97411c41ea1e0f4ce0a7de8da" }
