@@ -1,9 +1,10 @@
 # ACT / ALOHA consumer setup
 
-This is the first experimental skill environment: macOS arm64, Python3.12 and
-MPS, with the versions in `uv.lock`. Linux model/render qualification is pending;
-the lock deliberately covers only this platform. Selecting `cpu` is supported by
-the worker but has not qualified this complete application.
+This experimental skill environment locks macOS arm64/MPS and Linux aarch64
+with Python3.12. Linux validation selects CPU inference and OSMesa rendering;
+this does not qualify CUDA execution, other architectures or the visual Agent
+backend. See the [Linux consumer path](#linux-consumer-path) for its exact scope.
+The existing Mac dependency versions and sources are preserved.
 
 The application bundles `robot_agent.aloha_worker`, not model weights. This worker
 uses the pinned Harness's private version2 candidate transport; it is not a
@@ -93,3 +94,83 @@ Credits: ACT/ALOHA model and migration from
 [LeRobot](https://github.com/huggingface/lerobot/tree/e595b7902714ba51f91e47523f66f89c5181b649),
 simulator from [gym-aloha](https://github.com/huggingface/gym-aloha/tree/bd3325740ea8d1c97411c41ea1e0f4ce0a7de8da).
 Upstream sources/model retain their own terms; this project's license is pending.
+
+## Linux consumer path
+
+The selected environment is Ubuntu22.04, aarch64, Python3.12.14, CPU ACT and
+OSMesa software rendering. The Docker recipe contains build/render tools and
+uv0.12.13; it contains no source, model weights, Codex CLI or credentials.
+It uses [dm_control's OSMesa option](https://github.com/google-deepmind/dm_control#rendering).
+System packages follow Ubuntu updates; this is a pinned Python/source combination,
+not a byte-identical OS image or an amd64/CUDA support matrix.
+
+Use a **new dedicated workspace** with `robot-agent/` and `robot-harness/` as
+siblings, checking Harness out at the revision from `workspace.repos`. Run from
+that parent directory. Mount only this workspace, never your home directory:
+
+```sh
+docker build --platform linux/arm64 -t robot-agent-aloha:ubuntu22.04-arm64 \
+  robot-agent/skills/aloha/docker
+docker run --name robot-agent-aloha-linux --memory 6g --cpus 6 -it \
+  --mount type=bind,src="$PWD",dst=/workspace \
+  robot-agent-aloha:ubuntu22.04-arm64
+```
+
+Inside the container, create a new environment and install both packages:
+
+```sh
+export UV_CACHE_DIR=/workspace/.uv-cache UV_PYTHON_INSTALL_DIR=/workspace/.python
+uv sync --frozen --project robot-agent/skills/aloha --python 3.12.14
+python_bin=/workspace/robot-agent/skills/aloha/.venv/bin/python
+uv pip install --python "$python_bin" --no-deps ./robot-agent
+cmake -S robot-harness -B build-agent -DROBOT_HARNESS_BUILD_PYTHON=ON \
+  -DCMAKE_INSTALL_LIBDIR=lib -DPython3_EXECUTABLE="$python_bin"
+cmake --build build-agent --target _core --parallel 2
+cmake --install build-agent --prefix /workspace/harness-prefix
+export PYTHONPATH=/workspace/harness-prefix/lib/robot-harness/python
+```
+
+The pinned upstream LeRobot source selects PyTorch2.11.0+cu128 and
+TorchVision0.26.0+cu128 on Linux. These builds include CUDA dependencies even
+though this path explicitly uses `--device cpu` with no GPU. The environment
+occupies about6.6GiB; reserve additional space for package download/cache,
+Python, model originals/migration and recordings. Do not force a CPU-index
+override that conflicts with the upstream package sources. No dependency upgrade
+or implicit accelerator fallback is part of this qualification.
+
+Use the explicit download/migration entry above, with new destinations:
+
+```sh
+"$python_bin" -m robot_agent.prepare_aloha download --output /workspace/original
+"$python_bin" -m robot_agent.prepare_aloha migrate \
+  --source /workspace/original --output /workspace/migration
+export HF_HUB_OFFLINE=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1
+worker_script=$("$python_bin" -c 'import robot_agent.aloha_worker as w; print(w.__file__)')
+cd /tmp
+"$python_bin" /workspace/robot-harness/examples/mujoco_handoff.py \
+  --output /workspace/normal-run --worker-script "$worker_script" \
+  --checkpoint /workspace/migration/checkpoint --device cpu --seed 0
+```
+
+A fresh Linux environment and Harness build/install passed22 application checks
+and offline migration with234 learned tensors preserved. With the public Docker
+recipe, seed0 completed400+50 steps, produced451 fully decoded640×480 frames,
+rejected a stale hold reference, reset explicitly and reaped both native processes.
+The same-run fixed physical evaluator passed the one-second holding window.
+This used already downloaded public original assets mounted read-only; it did not
+repeat the Hub download or qualify arbitrary supplied weights.
+
+This is the existing **deterministic caller**, which always selects transfer
+then hold. Its report checks continuous observations, two results/settled
+receipts, stale-reference rejection, explicit reset and process reaping.
+`episodes/episode-0.mp4` and its trace cover the same450-step episode.
+Completion is execution evidence; business success requires the separate fixed
+physical evaluator. It does not establish observation-driven visual decisions.
+
+Network is needed only for explicit environment/model preparation. The native
+run can use a separate container with `--network none`, the same mounted workspace
+and the same image. Do not transfer host credentials into that container.
+For the actual business application, a separately installed, operator-authenticated
+Codex CLI and selected model must be validated in Linux before running
+`robot-agent-handoff --device cpu`; that complete Linux application is pending.
+Ordinary CI remains the22 lightweight control/preparation checks.

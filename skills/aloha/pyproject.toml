@@ -12,7 +12,10 @@ dependencies = [
 
 [tool.uv]
 package = false
-environments = ["sys_platform == 'darwin' and platform_machine == 'arm64'"]
+environments = [
+  "sys_platform == 'darwin' and platform_machine == 'arm64'",
+  "sys_platform == 'linux' and platform_machine == 'aarch64'",
+]
 
 [tool.uv.sources]
 lerobot = { git = "https://github.com/huggingface/lerobot.git", rev = "e595b7902714ba51f91e47523f66f89c5181b649" }

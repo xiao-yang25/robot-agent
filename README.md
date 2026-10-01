@@ -2,7 +2,7 @@
 
 Bounded, observation-driven task applications for
 [Robot Harness](https://github.com/xiao-yang25/robot-harness). Experimental project;
-the first application is delivered through pull-request review. No release yet.
+the first Mac normal-task increment is merged. No release yet.
 
 The first application attempts an ALOHA cube transfer followed by one simulated
 second of holding. Its task state and visual decisions live here; ACT supplies
@@ -55,8 +55,8 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 ```
 
 For the real task, follow [ACT / ALOHA setup](skills/aloha/README.md). It provides a
-Mac arm64 dependency lock, bundled ACT worker, explicit pinned model download and
-offline migration commands. [`workspace.repos`](workspace.repos) pins the Harness
+Mac arm64 and Linux aarch64 dependency lock, bundled ACT worker, explicit pinned
+model download and offline migration commands. [`workspace.repos`](workspace.repos) pins the Harness
 dependency; weights remain operator-prepared assets outside Git.
 
 The visual adapter requires Pillow (install the `vision` extra when preparing
@@ -112,9 +112,12 @@ it is not a clean-machine or Linux reproduction. Migration preserved all234
 learned tensor keys/values. The preparation path uploads nothing.
 
 [`workspace.repos`](workspace.repos) pins the Harness dependency. Use the Agent
-commit reviewed in the pull request alongside that exact revision. M5d delivery
-is subject to review/merge; full clean-consumer and Linux model/render reproduction
-belong to the next stage. No Linux ACT or physical robot
+commit alongside that exact revision. The first normal-task increment is merged
+as `06cbee4`; M5e adds a Linux consumer environment. Its deterministic ACT/MuJoCo
+path passed a fresh Linux environment/build, seed0 normal execution,451-frame
+recording, same-run fixed physical evaluation and native process reaping. This
+path is separate from the complete visual application; see the
+[Linux scope](skills/aloha/README.md#linux-consumer-path). No physical-robot
 qualification, continuous robot safety, Host restart recovery or hard stop bound.
 
 ## License
