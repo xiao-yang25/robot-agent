@@ -119,8 +119,21 @@ it is not a clean-machine or Linux reproduction. Migration preserved all234
 learned tensor keys/values. The preparation path uploads nothing.
 
 [`workspace.repos`](workspace.repos) pins the Harness dependency. Use the Agent
-commit alongside that exact revision. The first normal-task increment is merged
-as `06cbee4`; M5e adds a Linux consumer environment. Its deterministic ACT/MuJoCo
+commit alongside that exact revision. The dependency now includes strict candidate
+identity validation: consumed JSON fields must match both type and value, while
+unrelated optional metadata is allowed.
+A fresh installed combination of the unchanged Agent runtime source (`3482858`)
+and Harness `0de9eb0` passed all30 application tests on macOS and Linux. A new
+offline Ubuntu22.04 ARM64 CPU/OSMesa task used the bundled default ACT worker and
+explicit deterministic proposals. It completed400+50 steps, two delivered/settled/
+released receipts,451 decoded frames and observed process cleanup in38.853 seconds.
+The same-run fixed physical evaluator passed the bounded one-second hold; the
+application task verdict remained `unassessed`. This verifies normal consumption
+of the new pin, not a new visual-model qualification or a performance benchmark.
+Earlier visual results below used Harness `3acc9aa` and retain their original scope.
+
+The first normal-task increment is merged as `06cbee4`; M5e adds a Linux consumer
+environment. Its deterministic ACT/MuJoCo
 path passed a fresh Linux environment/build, seed0 normal execution,451-frame
 recording, same-run fixed physical evaluation and native process reaping. This
 deterministic result remains separate from the visual application. A later
@@ -141,8 +154,9 @@ whole-task evaluator remained `unknown` without an executed hold window;
 not a naturally occurring drop or a general perception/safety guarantee. Two
 prior fixture setup failures are retained separately. The trusted research
 fixture is outside this repository and is not a supported plugin API. Slow,
-cancelled/late decisions have separate selected checks below; comparable native
-evidence and broader fault qualification remain M5f work.
+cancelled/late decisions have separate selected checks below. The
+[selected native comparison](https://github.com/xiao-yang25/robot-harness/blob/0de9eb0ee9de670adc22abc34ae294ea6a486dcd/docs/TESTING.md#m5f-task-owner-comparison)
+covers the declared task/control scope; broader fault qualification remains open.
 
 Two later Linux seed0 temporal cases each used a declared deterministic initial
 transfer proposal and the real ACT/MuJoCo runtime, then exercised the decision at
@@ -162,8 +176,10 @@ complete model-driven tasks or whole-task successes; `task_verdict` stayed
 The proposal adapter checks cancellation and expiry again after process exit;
 process completion cannot restore a withdrawn proposal. These remain cooperative
 checks with terminate/kill/reap, not a hard physical stop deadline, guaranteed
-termination of every descendant, or recovery from a dead Host. Comparable native
-cost/behavior evidence and overall M5f delivery remain pending.
+termination of every descendant, or recovery from a dead Host. The selected
+comparison found overlapping wall-time ranges and reusable execution/task
+responsibilities, without establishing general speed, memory or net development
+time benefits. Overall M5f delivery still requires the pinned combination on main.
 
 ## License
 
