@@ -4,6 +4,8 @@ Apply the host's shared engineering entry. Resolve shared guide locations from
 that host; do not copy personal paths or model/account configuration here.
 
 - [README](README.md) owns this application's task contract, acceptance and limits.
+- [Documentation](docs/README.md) provides navigation; [Testing](docs/TESTING.md)
+  records verification scope; [Contributing](CONTRIBUTING.md) covers onboarding.
 - This repository owns goal, task state, budget, visual proposals and task reports.
   Robot Harness owns execution authority, native resources and Core settlement.
   Depend on Harness in one direction; do not import private Host/Core internals.
