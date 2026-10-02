@@ -31,7 +31,7 @@ Use an existing checkout at that commit, or clone beside this repository:
 
 ```sh
 git clone https://github.com/xiao-yang25/robot-harness.git ../robot-harness
-git -C ../robot-harness checkout 3acc9aa08f0ae2b976030c03092e47e64947dc40
+git -C ../robot-harness checkout 0de9eb0ee9de670adc22abc34ae294ea6a486dcd
 cmake -S ../robot-harness -B ../robot-harness/build-agent \
   -DROBOT_HARNESS_BUILD_PYTHON=ON -DCMAKE_INSTALL_LIBDIR=lib \
   -DPython3_EXECUTABLE="$PWD/skills/aloha/.venv/bin/python"
@@ -40,13 +40,23 @@ cmake --install ../robot-harness/build-agent --prefix "$PWD/skills/aloha/harness
 export PYTHONPATH="$PWD/skills/aloha/harness-prefix/lib/robot-harness/python"
 ```
 
-See [Harness build requirements](https://github.com/xiao-yang25/robot-harness/blob/3acc9aa08f0ae2b976030c03092e47e64947dc40/bindings/python/README.md#build-and-run).
+See [Harness build requirements](https://github.com/xiao-yang25/robot-harness/blob/0de9eb0ee9de670adc22abc34ae294ea6a486dcd/bindings/python/README.md#build-and-run).
 The extension must match the interpreter ABI. Do not replace an existing checkout
 or prefix that contains other work; choose new paths instead. Record the Agent's
 actual checkout commit alongside this pinned dependency for a delivered combination.
 Obtain this application from [Robot Agent](https://github.com/xiao-yang25/robot-agent)
 at the actual commit reviewed in its pull request. The Agent checkout identifies
 its own version; the manifest pins its one-way Harness dependency.
+
+The current pin includes strict consumed-field candidate identity checks. Its
+private version2 transport was qualified with the unchanged Agent runtime source
+(`3482858`), the installed bundled worker and a fresh Harness build/install from
+public revision `0de9eb0`. In offline Ubuntu22.04 ARM64 CPU/OSMesa, explicit
+deterministic proposals completed400+50 steps, two accepted/settled/released
+receipts,451 decoded frames, process exit and the fixed one-second physical hold
+evaluation. All30 application tests passed on macOS and Linux. This normal
+consumption check does not repeat the earlier real visual Agent qualification;
+those historical results used Harness `3acc9aa`. See [acceptance and limits](../../README.md#acceptance-and-delivery).
 
 ## Prepare weights explicitly
 
@@ -172,7 +182,8 @@ The deterministic native run needs network only for explicit environment/model
 preparation. It can use a separate container with `--network none`, the same
 mounted workspace and image. The visual application below also needs network
 for its three model requests. Do not transfer host credentials into either
-container. Ordinary CI remains the22 lightweight control/preparation checks.
+container. Ordinary CI runs the30 lightweight control/preparation/subprocess checks;
+it does not run ACT, MuJoCo or a visual model.
 
 ### Real visual Agent in Linux
 
