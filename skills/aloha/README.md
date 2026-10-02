@@ -5,7 +5,6 @@ with Python3.12. Linux validation selects CPU inference and OSMesa rendering,
 covering deterministic execution and one normal visual Agent task. CUDA execution,
 other architectures and visual reliability remain unqualified. See the
 [Linux consumer path](#linux-consumer-path) for its exact scope.
-The existing Mac dependency versions and sources are preserved.
 
 The application bundles `robot_agent.aloha_worker`, not model weights. This worker
 uses the pinned Harness's private version2 candidate transport; it is not a
@@ -23,8 +22,7 @@ uv pip install --python skills/aloha/.venv/bin/python --no-deps .
 
 The setup requires access to the package index and the two pinned Git sources.
 It creates a separate local environment; it does not change global Python or
-install research tools. The dependency lock records provider-supplied identities;
-there is no additional project digest chain.
+install research tools. The dependency lock records provider-supplied identities.
 
 [`workspace.repos`](../../workspace.repos) pins the Harness source dependency.
 Use an existing checkout at that commit, or clone beside this repository:
@@ -48,15 +46,7 @@ Obtain this application from [Robot Agent](https://github.com/xiao-yang25/robot-
 at the actual commit reviewed in its pull request. The Agent checkout identifies
 its own version; the manifest pins its one-way Harness dependency.
 
-The current pin includes strict consumed-field candidate identity checks. Its
-private version2 transport was qualified with the unchanged Agent runtime source
-(`3482858`), the installed bundled worker and a fresh Harness build/install from
-public revision `0de9eb0`. In offline Ubuntu22.04 ARM64 CPU/OSMesa, explicit
-deterministic proposals completed400+50 steps, two accepted/settled/released
-receipts,451 decoded frames, process exit and the fixed one-second physical hold
-evaluation. All30 application tests passed on macOS and Linux. This normal
-consumption check does not repeat the earlier real visual Agent qualification;
-those historical results used Harness `3acc9aa`. See [acceptance and limits](../../README.md#acceptance-and-delivery).
+For qualified combinations and limits, see [Testing](../../docs/TESTING.md#qualified-scope).
 
 ## Prepare weights explicitly
 
@@ -184,14 +174,6 @@ cd /tmp
   --checkpoint /workspace/migration/checkpoint --device cpu --seed 0
 ```
 
-A fresh Linux environment and Harness build/install passed22 application checks
-and offline migration with234 learned tensors preserved. With the public Docker
-recipe, seed0 completed400+50 steps, produced451 fully decoded640×480 frames,
-rejected a stale hold reference, reset explicitly and reaped both native processes.
-The same-run fixed physical evaluator passed the one-second holding window.
-This used already downloaded public original assets mounted read-only; it did not
-repeat the Hub download or qualify arbitrary supplied weights.
-
 This is the existing **deterministic caller**, which always selects transfer
 then hold. Its report checks continuous observations, two results/settled
 receipts, stale-reference rejection, explicit reset and process reaping.
@@ -203,8 +185,7 @@ The deterministic native run needs network only for explicit environment/model
 preparation. It can use a separate container with `--network none`, the same
 mounted workspace and image. The visual application below also needs network
 for its three model requests. Do not transfer host credentials into either
-container. Ordinary CI runs the30 lightweight control/preparation/subprocess checks;
-it does not run ACT, MuJoCo or a visual model.
+container. Ordinary CI uses lightweight fixtures; see [CI scope](../../docs/TESTING.md#automated-checks).
 
 ### Real visual Agent in Linux
 
@@ -232,8 +213,7 @@ docker run --rm --name robot-agent-aloha-visual --memory 6g --cpus 6 -it \
 
 Inside that container, the operator signs in through the
 [official device authentication flow](https://learn.chatgpt.com/docs/auth),
-checks status and selects an available model explicitly. The qualified run
-requested `gpt-6-sol` with the adapter's existing high reasoning setting:
+checks status and selects an available model explicitly:
 
 ```sh
 codex --version
@@ -245,7 +225,7 @@ export HF_HUB_OFFLINE=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1
 cd /tmp
 "$python_bin" -m robot_agent.cli --output /workspace/visual-run \
   --checkpoint /workspace/migration/checkpoint --device cpu --seed 0 \
-  --model gpt-6-sol
+  --model YOUR_AVAILABLE_MODEL
 ```
 
 Login confirms authentication, not model access or task success. This disposable
@@ -253,19 +233,7 @@ container's login cache disappears when it exits; sign in again for a new
 container. Keep recordings and reports in the dedicated workspace. Never put
 login codes, credential files or tokens in the repository, image or task report.
 
-A separate real Linux visual run completed in75.476 seconds using the installed
-Agent, fresh Harness installation and CPU/OSMesa. Three actual camera/joint
-proposals selected transfer, hold and `observed_success` at sequences0/400/450
-in epoch0; the two operations executed400+50 steps with correlated delivered,
-settled receipts. All451640×480 video frames decoded. Host, worker and three
-Codex decision processes exited, corroborated by container process observations.
-The same-run fixed physical evaluator independently passed its one-second hold;
-Agent/Core `task_verdict` stays `unassessed`. A model-list refresh timeout was
-retained in the final decision's diagnostics. CLI events also reported an
-unavailable optional Code Mode host, which failed closed; this proposal backend
-used no tools. The actual structured requests completed, and no application
-retry or fallback was added.
-
-This qualifies one seed0 Linux ARM/CPU normal visual task. It does not establish
-visual fault handling, reliability, CUDA/amd64, physical robots or a released
-support matrix. The Docker image still contains no Codex or authentication.
+This recipe covers the selected Linux aarch64/CPU/OSMesa path. Qualification
+limits are recorded in [Testing](../../docs/TESTING.md#qualified-scope); the image
+contains neither Codex nor authentication. No CUDA/amd64 or physical-robot support
+is implied.
