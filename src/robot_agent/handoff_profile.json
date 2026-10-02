@@ -1,0 +1,13 @@
+{
+  "id": "aloha-left-handoff-hold-v1",
+  "scope": "Pinned ALOHA cube, stepped simulation, 400 ACT targets followed by 50 repeated final targets",
+  "policy_steps": 400,
+  "hold_steps": 50,
+  "control_dt_seconds": 0.02,
+  "relative_translation_limit_m": 0.005,
+  "relative_rotation_limit_degrees": 15.0,
+  "table_clearance_min_m": 0.005,
+  "cube_half_size_m": [0.02, 0.02, 0.02],
+  "left_fingers": ["vx300s_left/10_left_gripper_finger", "vx300s_left/10_right_gripper_finger"],
+  "rationale": "Finite one-second hold; 5mm is one eighth of the 40mm cube edge. A 15 degree rotation moves a face-center radius of 20mm by about 5.2mm. These are task tolerances, not physical safety limits or learned pass thresholds. Both left fingers and no other cube contacts are required for the entire anchor-plus-50-step window."
+}

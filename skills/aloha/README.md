@@ -106,6 +106,27 @@ Credits: ACT/ALOHA model and migration from
 simulator from [gym-aloha](https://github.com/huggingface/gym-aloha/tree/bd3325740ea8d1c97411c41ea1e0f4ce0a7de8da).
 Upstream sources/model retain their own terms; this project's license is pending.
 
+## Evaluate one closed episode
+
+The application includes its fixed task predicate and independent evaluator.
+After `robot-agent-handoff` has closed its Session, use the same skill environment:
+
+```sh
+skills/aloha/.venv/bin/robot-agent-evaluate-handoff \
+  --run /absolute/new-run/episodes --trace-name episode-0.jsonl \
+  --output /absolute/new-run/task-evaluation.json
+```
+
+For Linux, invoke `/workspace/robot-agent/skills/aloha/.venv/bin/robot-agent-evaluate-handoff`
+inside the consumer container with its corresponding run paths. No Codex login,
+ACT inference or dynamics stepping is needed for evaluation; the pinned MuJoCo
+model/assets and NumPy from this skill environment are reused. Run it once per
+trace and retain its new output. The CLI refuses an existing report before
+loading evidence. Exit0 means the fixed finite physical predicate passed, exit1
+means it failed, and exit2 means unknown or command/output error. Keep this
+verdict separate from the application/visual assessment; see
+[evaluation contract](../../README.md#evaluate-the-recorded-task-independently).
+
 ## Linux consumer path
 
 The selected environment is Ubuntu22.04, aarch64, Python3.12.14, CPU ACT and

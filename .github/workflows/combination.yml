@@ -1,0 +1,83 @@
+name: Installed Agent and Harness combination
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      harness_ref:
+        description: Optional full Harness commit to check instead of workspace.repos
+        type: string
+        default: ''
+  workflow_call:
+    inputs:
+      agent_ref:
+        description: Full known Agent commit used by a Harness caller
+        type: string
+        required: true
+      harness_ref:
+        description: Full candidate Harness commit
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  installed-combination:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: ${{ inputs.agent_ref && 'xiao-yang25/robot-agent' || github.repository }}
+          ref: ${{ inputs.agent_ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+      - name: Resolve one pinned Harness dependency
+        id: dependency
+        env:
+          HARNESS_CANDIDATE: ${{ inputs.harness_ref }}
+        run: |
+          python - <<'PY'
+          import os, re
+          from pathlib import Path
+          refs = re.findall(r'^    version: ([0-9a-f]{40})$', Path('workspace.repos').read_text(), re.M)
+          if len(refs) != 1:
+              raise SystemExit('expected one immutable Harness dependency')
+          ref = os.environ.get('HARNESS_CANDIDATE') or refs[0]
+          if not re.fullmatch(r'[0-9a-f]{40}', ref):
+              raise SystemExit('Harness candidate must be a full commit')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'ref={ref}\n')
+          PY
+      - uses: actions/checkout@v6
+        with:
+          repository: xiao-yang25/robot-harness
+          ref: ${{ steps.dependency.outputs.ref }}
+          path: harness-source
+          persist-credentials: false
+      - name: Build and install the real optional Core bridge
+        run: |
+          cmake -S harness-source -B "$RUNNER_TEMP/combination-build" \
+            -DROBOT_HARNESS_BUILD_PYTHON=ON -DBUILD_TESTING=OFF \
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=lib \
+            -DPython3_EXECUTABLE="$(command -v python)"
+          cmake --build "$RUNNER_TEMP/combination-build" --target _core --parallel 2
+          cmake --install "$RUNNER_TEMP/combination-build" --prefix "$RUNNER_TEMP/harness-installed"
+      - name: Install application and copy only integration fixtures
+        run: |
+          python -m pip install --target "$RUNNER_TEMP/agent-installed" '.[evaluation]'
+          cp -R tests/combination "$RUNNER_TEMP/combination-tests"
+          git rev-parse HEAD
+          git -C harness-source rev-parse HEAD
+      - name: Consume installed packages outside both source trees
+        working-directory: ${{ runner.temp }}
+        env:
+          COMBINATION_AGENT_PREFIX: ${{ runner.temp }}/agent-installed
+          COMBINATION_HARNESS_PREFIX: ${{ runner.temp }}/harness-installed
+        run: |
+          export PYTHONPATH="$COMBINATION_AGENT_PREFIX:$COMBINATION_HARNESS_PREFIX/lib/robot-harness/python:$RUNNER_TEMP/combination-tests/fixtures"
+          python -m unittest discover -s "$RUNNER_TEMP/combination-tests" -v

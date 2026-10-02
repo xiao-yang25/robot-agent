@@ -49,11 +49,11 @@ are excluded from every model input and do not authorize hold.
 ## Run
 
 Python3.10+. The task/preparation tests use the standard library; the full suite
-also exercises real camera-PNG and subprocess boundaries using the existing
-`vision` extra. ACT, MuJoCo and authenticated Codex are not needed for these tests:
+also exercises real camera-PNG/subprocess boundaries with `vision` and the
+independent task predicate with the optional NumPy-based `evaluation` extra. ACT, MuJoCo and authenticated Codex are not needed for these tests:
 
 ```sh
-python -m pip install '.[vision]'
+python -m pip install '.[vision,evaluation]'
 PYTHONPATH=src python -m unittest discover -s tests -v
 ```
 
@@ -83,6 +83,55 @@ trace/video. These can contain local operator paths and are not publication asse
 The CLI exits successfully only after all stages complete and cleanup is confirmed;
 its exit status does not establish independently verified business success.
 
+## Evaluate the recorded task independently
+
+The package ships one [fixed predicate](src/robot_agent/handoff_profile.json)
+and [evaluator](src/robot_agent/evaluate_handoff.py). In the same pinned
+[ALOHA skill environment](skills/aloha/README.md), after the task has closed:
+
+```sh
+skills/aloha/.venv/bin/robot-agent-evaluate-handoff \
+  --run /path/to/fresh-run/episodes --trace-name episode-0.jsonl \
+  --output /path/to/fresh-run/task-evaluation.json
+```
+
+The evaluator reconstructs cube/hand/table poses from recorded `qpos` using the
+pinned model's forward kinematics, without advancing dynamics. It checks the
+400-step transfer followed by 50 repeated targets and the anchor-plus-one-second
+window: both left fingers alone contact the cube, relative movement ≤5mm,
+rotation ≤15 degrees, and table clearance ≥5mm. This is a finite simulation
+predicate, not a physical safety guarantee or a general grasp detector.
+
+A complete passing trace reports `succeeded`; a complete trace that violates
+these physical conditions reports `failed`. Incomplete/invalid evidence or missing
+model dependencies reports `unknown`. Exit codes are 0/1/2 respectively; command
+usage/output errors also exit2. The report retains the consumed predicate and
+measurements. An existing output is refused before evaluation; evaluate each run
+once and retain the report. This separate report does not mutate `report.json`,
+change `task_verdict=unassessed`, or feed simulator truth into task decisions.
+The `evaluation` extra supplies NumPy only; real trace reconstruction requires
+the existing pinned skill environment/assets, not an additional model download.
+
+## Installed combination CI
+
+[Combination CI](.github/workflows/combination.yml) builds/installs the real
+Harness dependency from `workspace.repos`, installs Agent, then runs the
+[three boundary cases](tests/combination/test_installed.py) outside both source
+trees: normal transfer/hold with distinct settled Core receipts, help after
+transfer, and an old answer that cannot start hold. It verifies import locations,
+recorded action effects and Host/worker exit. Session, Host and Core are real;
+only camera/action/recording and policy providers are explicit no-physics
+fixtures. No ACT, MuJoCo, video, perception or physical-success claim follows.
+
+Agent PRs check their candidate against the fixed Harness version. The reusable
+workflow also accepts a full candidate Harness commit and a fixed known Agent
+commit, so a Harness PR can call the same tests after this Agent workflow has
+been published and qualified. The Harness-side caller is a subsequent delivery
+step; neither configuring this workflow nor local tests mean hosted CI passed.
+See [GitHub reusable workflows](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows)
+for the job-level caller mechanism. Actual ACT/model/physics qualification remains
+explicit and separate from this lightweight check.
+
 ## Acceptance and delivery
 
 The first increment must reject hold after an old answer, episode change, invalid
@@ -102,8 +151,8 @@ Locally qualified: 17 task-control, five preparation-boundary and eight real
 subprocess-control tests passed. The subprocess cases cover cancellation/expiry
 before launch, late answers written during termination, completed-process races,
 and a child that ignores termination and needs kill/reap. They use controlled
-local executables, not the model service. Ordinary Ubuntu CI runs this full suite
-with the `vision` extra; fixture tests do not establish visual-model qualification.
+local executables, not the model service. Ordinary Ubuntu CI also runs eight task-predicate and three evaluation-command
+regressions with the `vision,evaluation` extras; fixture tests do not establish visual-model qualification.
 One final macOS/MPS seed0 run used three real visual proposals at sequences0/400/450,
 completed400+50 steps in the same episode, delivered two settled Core receipts and
 retained451 video frames. The fixed independent evaluator passed the one-second
