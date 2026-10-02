@@ -179,7 +179,10 @@ checks with terminate/kill/reap, not a hard physical stop deadline, guaranteed
 termination of every descendant, or recovery from a dead Host. The selected
 comparison found overlapping wall-time ranges and reusable execution/task
 responsibilities, without establishing general speed, memory or net development
-time benefits. Overall M5f delivery still requires the pinned combination on main.
+time benefits. The pinned combination merged through PR5 as `c3b291c`, with a tree
+identical to reviewed `8f38cd0` and passing main Ubuntu30-test/installed-entry checks.
+M5f and the selected M5 task scope are delivered; broader qualification remains
+open. The next phase selects one heterogeneous combination and tests reuse.
 
 ## License
 
