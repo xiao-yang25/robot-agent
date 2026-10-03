@@ -55,8 +55,12 @@ a tool event before A has zero admissions, help after A has no B admission, and
 a final child that writes a valid answer while terminating after the original
 30-second deadline cannot complete the task or release pending B. Native results
 already accepted remain accepted after exact B revocation. All owned children,
-owner and socket must be cleaned up. Discovery now includes nine combination
-cases; these controlled tests do not run physics or a remote model service.
+owner and socket must be cleaned up. The additional
+[controlled tutorial case](../tests/combination/test_navigation_demo_installed.py)
+uses the installed tutorial proposal executable through the public CLI, requiring
+three accepted decisions, A settled/released, B accepted/pending and reaped children.
+Discovery includes ten combination cases; these controlled tests do not run
+physics or a remote model service.
 
 Agent changes use the Harness revision in [workspace.repos](../workspace.repos).
 Harness changes call this reusable workflow with a fixed Agent revision and the
@@ -102,7 +106,7 @@ the existing pinned skill environment/assets, not an additional model download.
 | Prior `0de9eb0` Harness combination | A fresh installed macOS/Linux test combination and deterministic Linux ACT/MuJoCo run passed normal consumption and the finite-hold evaluator. This did not repeat visual-model qualification. |
 
 Earlier real visual checks used Harness `3acc9aa`; the current manifest pins
-`ea7b1eb1a075cd91ef590475f2496a48d19ca52a`. Do not generalize older results to
+`ff645d6f0e0909d2fa045d3ce9fb7e7c958a6456`. Do not generalize older results to
 arbitrary dependency updates. New qualification must retain actual model inputs
 and answers, same-run progression/video/trace, separate evaluation and external
 process-exit evidence. Report help, failure or unknown honestly.
@@ -305,17 +309,19 @@ entire ROS image or repeat live-model qualification. Failed preparation and
 evaluation attempts were retained separately. The published videos above are
 distinct runs, rather than evidence for this new installation.
 
-The full reproduction still used research-only launcher selection, controlled
-proposal and passive-observer tools. The public owner launcher runs a deterministic
-request example; the Agent connection recipe assumes a prepared same-container
-owner and proposal executable. A public end-to-end setup/run/report/independent-check
-tutorial remains a delivery gap. Navigation has no installed physical evaluator;
+That reproduction used research-only launcher selection, controlled proposal
+and passive-observer tools. The new [controlled business tutorial](../examples/navigation/README.md)
+provides public preparation, launch and report inspection using the existing
+Harness supervisor and installed Agent CLI. Its new installation and native run
+require separate qualification; the host-to-container real-model path remains
+pending. Navigation has no installed physical evaluator;
 `robot-agent-evaluate-handoff` applies only to ALOHA. CLI completion and an owner's
 process-completion verification file cannot prove physical task success.
 
 Later Harness startup diagnostics in `03a357b` preserve the original service and
-context budgets and report individual child failure; this manifest still pins
-`ea7b1eb`. No diagnostic-fix qualification is implied for the older dependency.
+context budgets and report individual child failure. The new manifest includes
+those diagnostics and the trusted-client launcher in `ff645d6`; older recorded
+results retain their original versions and scope.
 GetState preparation-timeout cause, Owner loss/restart, full native cleanup,
 hard stop, hardware and general reliability remain unqualified. Application
 license/contribution terms and a versioned preview remain pending separately.
