@@ -106,7 +106,7 @@ the existing pinned skill environment/assets, not an additional model download.
 | Prior `0de9eb0` Harness combination | A fresh installed macOS/Linux test combination and deterministic Linux ACT/MuJoCo run passed normal consumption and the finite-hold evaluator. This did not repeat visual-model qualification. |
 
 Earlier real visual checks used Harness `3acc9aa`; the current manifest pins
-`ff645d6f0e0909d2fa045d3ce9fb7e7c958a6456`. Do not generalize older results to
+`13bc75e903f6005da3dd5d969f8242ce211d182f`. Do not generalize older results to
 arbitrary dependency updates. New qualification must retain actual model inputs
 and answers, same-run progression/video/trace, separate evaluation and external
 process-exit evidence. Report help, failure or unknown honestly.
@@ -320,7 +320,8 @@ process-completion verification file cannot prove physical task success.
 
 Later Harness startup diagnostics in `03a357b` preserve the original service and
 context budgets and report individual child failure. The new manifest includes
-those diagnostics and the trusted-client launcher in `ff645d6`; older recorded
+those diagnostics, trusted-client launcher and bounded B startup ordering in
+`13bc75e`; older recorded
 results retain their original versions and scope.
 GetState preparation-timeout cause, Owner loss/restart, full native cleanup,
 hard stop, hardware and general reliability remain unqualified. Application

@@ -29,7 +29,7 @@ Use an existing checkout at that commit, or clone beside this repository:
 
 ```sh
 git clone https://github.com/xiao-yang25/robot-harness.git ../robot-harness
-git -C ../robot-harness checkout ff645d6f0e0909d2fa045d3ce9fb7e7c958a6456
+git -C ../robot-harness checkout 13bc75e903f6005da3dd5d969f8242ce211d182f
 cmake -S ../robot-harness -B ../robot-harness/build-agent \
   -DROBOT_HARNESS_BUILD_PYTHON=ON -DCMAKE_INSTALL_LIBDIR=lib \
   -DPython3_EXECUTABLE="$PWD/skills/aloha/.venv/bin/python"
@@ -38,7 +38,7 @@ cmake --install ../robot-harness/build-agent --prefix "$PWD/skills/aloha/harness
 export PYTHONPATH="$PWD/skills/aloha/harness-prefix/lib/robot-harness/python"
 ```
 
-See [Harness build requirements](https://github.com/xiao-yang25/robot-harness/blob/ff645d6f0e0909d2fa045d3ce9fb7e7c958a6456/bindings/python/README.md#build-and-run).
+See [Harness build requirements](https://github.com/xiao-yang25/robot-harness/blob/13bc75e903f6005da3dd5d969f8242ce211d182f/bindings/python/README.md#build-and-run).
 The extension must match the interpreter ABI. Do not replace an existing checkout
 or prefix that contains other work; choose new paths instead. Record the Agent's
 actual checkout commit alongside this pinned dependency for a delivered combination.

@@ -121,7 +121,7 @@ owner-issued reference before submission. No automatic retry, reset or recovery.
 
 Build/install the exact Harness commit in [workspace.repos](workspace.repos),
 including its optional Python bridge, and prepare its isolated simulation owner
-as described in the [owner setup](https://github.com/xiao-yang25/robot-harness/tree/ff645d6f0e0909d2fa045d3ce9fb7e7c958a6456/integrations/ros2/nav2_session).
+as described in the [owner setup](https://github.com/xiao-yang25/robot-harness/tree/13bc75e903f6005da3dd5d969f8242ce211d182f/integrations/ros2/nav2_session).
 Install this Agent application, then connect to that owner's private endpoint:
 
 ```sh
