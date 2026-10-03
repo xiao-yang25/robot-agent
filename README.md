@@ -121,7 +121,7 @@ owner-issued reference before submission. No automatic retry, reset or recovery.
 
 Build/install the exact Harness commit in [workspace.repos](workspace.repos),
 including its optional Python bridge, and prepare its isolated simulation owner
-as described in the [owner setup](https://github.com/xiao-yang25/robot-harness/tree/ea7b1eb1a075cd91ef590475f2496a48d19ca52a/integrations/ros2/nav2_session).
+as described in the [owner setup](https://github.com/xiao-yang25/robot-harness/tree/13bc75e903f6005da3dd5d969f8242ce211d182f/integrations/ros2/nav2_session).
 Install this Agent application, then connect to that owner's private endpoint:
 
 ```sh
@@ -155,9 +155,8 @@ The owner's unconfigured final-close wait is 10 seconds; a model reply can excee
 it and leave the task needing help. This idle configuration does not increase
 native deadlines, observation TTL or physical stopping guarantees.
 
-This connection recipe assumes an operator has already prepared the owner and a
-working proposal executable in the same container. Harness's `simulate.py session`
-currently launches its deterministic request example; it does not launch this
-business application. The complete public simulation/business/independent-check
-tutorial is still pending. The recorded end-to-end experiments used research-only
-launch and observation tools. See [delivery scope](docs/TESTING.md#m6c-delivery-audit).
+For a complete controlled-proposal scene and installed business application, use
+the [navigation tutorial](examples/navigation/README.md). The connection recipe
+above still assumes a prepared same-container owner and working proposal
+executable. A public real-model scene connection and fresh-model qualification
+remain pending; see [delivery scope](docs/TESTING.md#m6c-delivery-audit).
