@@ -18,5 +18,6 @@ jobs:
         working-directory: ${{ runner.temp }}
         run: |
           robot-agent-handoff --help
+          robot-agent-navigation --help
           robot-agent-evaluate-handoff --help
           python -m robot_agent.prepare_aloha --help

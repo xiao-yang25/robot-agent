@@ -7,6 +7,8 @@ Experimental: no versioned release or physical-robot qualification yet.
 The first application attempts an ALOHA cube transfer followed by one simulated
 second of holding. A visual backend chooses bounded skills; ACT produces joint
 targets; Harness owns execution and resources. Task strategy and reports live here.
+The navigation application also visits registered A then B through the public
+NavigationSession, using bounded text proposals and fresh map feedback.
 Core is part of Harness. Existing-agent MCP consumers are a separate integration
 path, rather than this application's task controller.
 
@@ -83,7 +85,9 @@ Its report never changes the application report or authorizes another operation.
 ## Installed combination CI
 
 [Combination CI](.github/workflows/combination.yml) tests installed Agent and
-Harness together, using real Session/Host/Core with explicit no-physics providers.
+Harness together: ALOHA uses real Session/Host/Core, and navigation uses the public
+Unix Session, trusted-owner requests and real Core. External providers are explicit
+no-physics fixtures.
 See [CI scope](docs/TESTING.md#automated-checks); ACT, perception and physical task
 success require separate qualification.
 
@@ -95,7 +99,57 @@ real visual runs, deterministic execution and fixture tests. CUDA, other archite
 robot bodies, recovery and hard stop guarantees must not be inferred from those
 results. Future work will test reuse across a heterogeneous combination.
 
+See [application artifacts and reusable boundaries](docs/README.md#application-artifacts-and-reusable-boundaries)
+for what can be run today and which pieces remain task-specific. Future extraction
+of shared execution mechanics preserves this application's task contract.
+
 ## License
 
 License and patch contribution terms remain pending for this application.
 See [licensing status](CONTRIBUTING.md#licensing-status).
+
+
+## Navigation application
+
+[NavigationTask](src/robot_agent/navigation.py) is a separate A→B application for
+the prepared `scoped-two-context-nav2-shim-v1` owner. It borrows the public
+`NavigationSession`; no ROS, Core internals or simulator evaluation enter the Agent.
+The [task/measurement boundary](docs/README.md#navigation-application)
+keeps model proposals tied to their original observation, then revalidates a fresh
+owner-issued reference before submission. No automatic retry, reset or recovery.
+
+Build/install the exact Harness commit in [workspace.repos](workspace.repos),
+including its optional Python bridge, and prepare its isolated simulation owner
+as described in the [owner setup](https://github.com/xiao-yang25/robot-harness/tree/6f32578f8d9157fa7c26c1f4e2ece13e05ec6211/integrations/ros2/nav2_session).
+Install this Agent application, then connect to that owner's private endpoint:
+
+```sh
+robot-agent-navigation --endpoint /path/to/navigation.sock \
+  --output /path/to/new-task --model YOUR_MODEL
+```
+
+Budgets: 240 seconds including application startup, 30 per proposal and 160 per
+operation, respecting the owner's advertised native deadline maximum. At most
+three proposals and two site submissions. The CLI owns connection close; a close
+intent or local socket disposal does not prove native cleanup. The model adapter
+has a five-second version-probe timeout and a bounded proposal subprocess.
+
+One installed local Codex/GPT normal task completed with fresh map feedback and
+an independent simulation evaluator. A settled/released before B; B output was
+accepted with settlement pending. `status=completed` reports the application
+sequence and observation assessment; `task_verdict=unassessed`, pending execution
+cleanup and unknown native cleanup remain separate. See [qualification](docs/TESTING.md#navigation-candidate-qualification).
+The recorded model/simulation runs are local candidate qualification; installed
+combination checks verify the public dependency pin separately. This experimental
+application is not a general navigation Agent, obstacle-aware model or
+physical-robot qualification.
+
+
+The matching owner must also allow bounded caller think time. This
+30-second proposal application uses owner `--caller-wait-seconds 45`, covering
+proposal time and public RPC allowance. The in-container simulation shell also
+reads `M6_CALLER_WAIT_SECONDS=45`; setting it only on the host does not propagate
+it through the simulation launcher.
+The owner's unconfigured final-close wait is 10 seconds; a model reply can exceed
+it and leave the task needing help. This idle configuration does not increase
+native deadlines, observation TTL or physical stopping guarantees.

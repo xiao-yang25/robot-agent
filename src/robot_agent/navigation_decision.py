@@ -1,0 +1,41 @@
+"""Bounded text proposal backend; measurements only, no robot tools."""
+import json
+
+from .codex_decision import CodexDecision
+from ._codex_proposal import run_proposal
+
+
+class NavigationCodexDecision(CodexDecision):
+    """Reuse proposal process ownership, with navigation-specific input/schema."""
+    def decide(self, context, observation, deadline, stop_requested):
+        self.count += 1
+        run = self.output / f'decision-{self.count}'
+        run.mkdir()
+        inputs = {**context, 'measurement': observation, 'model_requested': self.model,
+                  'reasoning_requested': 'high', 'codex_version': self.version}
+        (run / 'input.json').write_text(json.dumps(inputs, indent=2, allow_nan=False) + '\n')
+        prompt = (
+            'You are only a decision backend for a bounded navigation simulation application. '
+            'Return one proposal, without tools, commands, file reads, browsing or delegation. '
+            'The application owns task state and all Harness calls; Nav2 owns navigation. '
+            'Choose only an allowed action. At prepare choose visit_a if the supplied valid '
+            'map pose/sensor health and registered sites are compatible with the goal, otherwise help. '
+            'After A choose visit_b only if fresh measured map pose confirms A within 0.3m. '
+            'At final choose observed_complete only if fresh map pose confirms B within 0.3m; '
+            'use not_met for contradictory feedback or help for uncertainty. '
+            'You have no camera, obstacle geometry or physical-evaluator truth: do not invent it. '
+            'An observation assessment does not prove task success, robot stop or resource settlement. '
+            'Preserve task_id, phase and every observation_reference field exactly.\n'
+            + json.dumps(inputs, allow_nan=False))
+        (run / 'prompt.txt').write_text(prompt + '\n')
+        reference_properties = {key: {'type': 'integer' if key == 'epoch' else 'string'}
+                                for key in context['observation_reference']}
+        properties = {'task_id': {'type': 'string'}, 'phase': {'type': 'string'},
+            'observation_reference': {'type': 'object', 'properties': reference_properties,
+                'required': list(reference_properties), 'additionalProperties': False},
+            'action': {'type': 'string', 'enum': context['allowed_actions']},
+            'reason': {'type': 'string'}}
+        schema = {'type': 'object', 'properties': properties, 'required': list(properties),
+                  'additionalProperties': False}
+        (run / 'schema.json').write_text(json.dumps(schema) + '\n')
+        return run_proposal(self.executable, self.model, run, prompt, deadline, stop_requested)
