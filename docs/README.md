@@ -11,19 +11,20 @@ Core belongs to Harness; the dependency runs from Agent to Harness.
 | [CodexDecision](../src/robot_agent/codex_decision.py) | Structured visual proposals used by that application | Task-specific cooperating model backend; not a general planner, memory system or execution authority |
 | [ACT worker and preparation](../skills/aloha/README.md) | Bundled candidate worker, pinned environment and explicit weight preparation | ALOHA-specific policy input/output; pinned Harness private candidate transport, not a stable skill plugin API |
 | `robot-agent-evaluate-handoff` and [fixed profile](../src/robot_agent/handoff_profile.json) | Installed offline evaluation of the declared recorded task | Task-specific predicate; evaluation does not drive decisions or authorize execution |
+| `robot-agent-navigation` and [NavigationTask](../src/robot_agent/navigation.py) | Installed bounded A→B application for a prepared isolated Nav2 owner | Same-container endpoint and working proposal executable required; complete simulation setup and offline check tutorial pending |
 | [Combination CI](../.github/workflows/combination.yml) | Reproducible installed Agent/Harness boundary checks | Explicit no-physics providers; not a model/robot task qualification |
 
 These delivered artifacts are useful applications, policies and verification
 tools. Their names and installation do not establish a general Agent framework.
 Test fixtures and run-specific setup are not reusable task APIs.
 
-The next heterogeneous task should preserve the current application's contract
-while exposing which invocation tracking, waiting and cancellation coordination
-can be shared by Harness Runtime. Goals, visual/context interpretation, skill
-selection and business retries remain with Agent. A documented execution engine
-must own a step once; application and Runtime must not both launch it. This is an
-evolution direction. The navigation application preserves `HandoffTask` behavior;
-the manifest pins the paired Harness implementation for both applications.
+ALOHA and navigation consume the same Harness execution coordinator for retained
+requests, authority, deadlines, results and settlement. Their native execution and
+closure remain backend-specific. Goals, context interpretation, skill selection
+and business retries remain with Agent; each native engine owns its work once.
+The navigation application preserves `HandoffTask` behavior; the manifest pins
+the paired Harness implementation for both applications. This is bounded reuse,
+not a generic skill-plugin framework or a physical-robot qualification.
 
 ## Models and algorithm providers
 
