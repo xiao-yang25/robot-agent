@@ -14,6 +14,7 @@ evaluation = ["numpy>=1.24,<3"]
 
 [project.scripts]
 robot-agent-handoff = "robot_agent.cli:main"
+robot-agent-navigation = "robot_agent.navigation_cli:main"
 robot-agent-evaluate-handoff = "robot_agent.evaluate_handoff:main"
 
 [tool.setuptools.packages.find]

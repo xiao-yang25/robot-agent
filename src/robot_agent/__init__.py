@@ -2,4 +2,6 @@
 
 from .handoff import HandoffTask
 
-__all__ = ['HandoffTask']
+from .navigation import NavigationTask
+
+__all__ = ['HandoffTask', 'NavigationTask']

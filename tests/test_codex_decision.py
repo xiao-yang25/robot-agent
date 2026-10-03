@@ -165,8 +165,8 @@ while True:
 
         clock = SimpleNamespace(monotonic=lambda: deadline + 1 if exited and not cancel else time.monotonic(),
                                 sleep=time.sleep)
-        with patch('robot_agent.codex_decision.subprocess.Popen', side_effect=popen), \
-                patch('robot_agent.codex_decision.time', clock):
+        with patch('robot_agent._codex_proposal.subprocess.Popen', side_effect=popen), \
+                patch('robot_agent._codex_proposal.time', clock):
             with self.assertRaises(InterruptedError if cancel else TimeoutError):
                 self.backend.decide(self.context, self.observation, deadline, lambda: exited and cancel)
         self.assertEqual(self.process_record()['returncode'], 0)

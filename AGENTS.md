@@ -9,8 +9,9 @@ that host; do not copy personal paths or model/account configuration here.
 - This repository owns goal, task state, budget, visual proposals and task reports.
   Robot Harness owns execution authority, native resources and Core settlement.
   Depend on Harness in one direction; do not import private Host/Core internals.
-- Model input is only the task context and camera/joint measurements. Simulator
-  contacts/poses and independent evaluation never drive the task's decisions.
+- Model input is task context and the measurements declared by each application:
+  ALOHA camera/joints or navigation public map pose/time/sensor health. Simulator
+  ground-truth contacts/poses and independent evaluation never drive decisions.
 - Never retry an ambiguous submission, reset automatically, fabricate settlement
   or promote a visual assessment to an independently verified task verdict.
 - Tests: `PYTHONPATH=src python -m unittest discover -s tests -v`.
