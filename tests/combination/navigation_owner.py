@@ -21,7 +21,11 @@ SITES = {'A': [0.7, -0.5, 0.0], 'B': [-1.5, -0.5, 0.0]}
 
 
 def main():
-    endpoint, audit_path = map(Path, sys.argv[1:])
+    endpoint, audit_path = map(Path, sys.argv[1:3])
+    hold_b = sys.argv[3:] == ['--hold-b']
+    wait_proposal = sys.argv[3:] == ['--wait-proposal']
+    if sys.argv[3:] and not (hold_b or wait_proposal):
+        raise ValueError('unsupported fixture mode')
     prefix = Path(os.environ['COMBINATION_HARNESS_PREFIX']).resolve()
     for module in (_core, sys.modules[ExecutionCoordinator.__module__],
                    sys.modules[NavigationRequests.__module__]):
@@ -58,7 +62,9 @@ def main():
         listener.listen(1)
         listener.settimeout(5)
         channel = Channel(listener.accept()[0])
-        deadline = time.monotonic()+15
+        # Only the real 30-second proposal expiry case needs a longer fixture
+        # lifetime. Application budgets and the normal fixture stay unchanged.
+        deadline = time.monotonic()+(45 if wait_proposal else 15)
         closing = False
         while time.monotonic() < deadline:
             execution.tick()
@@ -69,6 +75,14 @@ def main():
                 goal_id = uuid.uuid4().hex
                 record['goal_id'] = goal_id
                 accepted(execution.native(record, 'accepted', goal_id))
+                if hold_b and record['site'] == 'B':
+                    # This mode leaves real Core/native acceptance pending so
+                    # the external test can signal the actual application CLI.
+                    ready = audit_path.with_suffix('.running.json')
+                    temporary = ready.with_suffix('.tmp')
+                    temporary.write_text(json.dumps(execution.snapshot(record)))
+                    temporary.replace(ready)
+                    continue
                 accepted(execution.native(record, 'succeeded', goal_id))
                 execution.dispose_result(record, dict(goal_id=goal_id, stage=record['site']), lambda: {})
                 pose[:] = SITES[record['site']][:2]

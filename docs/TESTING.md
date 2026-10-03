@@ -39,7 +39,24 @@ revokes and schedules stop for exactly B once, without inventing settlement.
 Each case checks owner process exit and socket removal. Private Core/coordinator
 imports are confined to this trusted-owner test fixture, not the business Agent.
 These checks do not run ROS, Nav2, Gazebo or a model service, and do not establish
-physical stop or task success. Discovery runs all five combination cases.
+physical stop or task success.
+
+An additional [public CLI signal case](../tests/combination/test_navigation_cli_installed.py)
+starts the installed `navigation_cli` process and sends SIGINT after the trusted
+fixture accepts B. It requires explicit cancellation of exactly B, revoked
+authority with pending settlement, two accepted proposals and no final proposal,
+honest unknown cleanup, reaped children and owner/socket cleanup. The fixture
+uses synthetic native/pose facts; this is a process and installed-interface check,
+not a physics experiment. The signal check joins the original five cases; the
+existing workflow discovers the new test without a separate CI job. The additional
+[proposal fault cases](../tests/combination/test_navigation_proposal_installed.py)
+exercise the installed CLI's actual prepare/after-A/final decision boundaries:
+a tool event before A has zero admissions, help after A has no B admission, and
+a final child that writes a valid answer while terminating after the original
+30-second deadline cannot complete the task or release pending B. Native results
+already accepted remain accepted after exact B revocation. All owned children,
+owner and socket must be cleaned up. Discovery now includes nine combination
+cases; these controlled tests do not run physics or a remote model service.
 
 Agent changes use the Harness revision in [workspace.repos](../workspace.repos).
 Harness changes call this reusable workflow with a fixed Agent revision and the
@@ -85,7 +102,7 @@ the existing pinned skill environment/assets, not an additional model download.
 | Prior `0de9eb0` Harness combination | A fresh installed macOS/Linux test combination and deterministic Linux ACT/MuJoCo run passed normal consumption and the finite-hold evaluator. This did not repeat visual-model qualification. |
 
 Earlier real visual checks used Harness `3acc9aa`; the current manifest pins
-`6f32578f8d9157fa7c26c1f4e2ece13e05ec6211`. Do not generalize older results to
+`ea7b1eb1a075cd91ef590475f2496a48d19ca52a`. Do not generalize older results to
 arbitrary dependency updates. New qualification must retain actual model inputs
 and answers, same-run progression/video/trace, separate evaluation and external
 process-exit evidence. Report help, failure or unknown honestly.
@@ -151,12 +168,13 @@ No wait, freshness or physical criterion was loosened. First bare-interpreter
 checks lacked the declared test extras; later fixture PATH failures were fixed by
 using the actual test interpreter. All failed logs remain distinct from final checks.
 
-The public manifest now pins merged Harness `6f32578`, including the public
+The M6b delivery pinned merged Harness `6f32578`, including the public
 navigation entry. Its fresh installed combination check covers navigation and
 ALOHA separately from these earlier live model/simulation runs; the dependency
 update does not repeat physical or model qualification. Hosted results belong to
-the exact Agent commit in Actions. Navigation fault/model-abstention in real motion
-and external reproduction retain their own next steps.
+the exact Agent commit in Actions. Proposal failure at the actual decision call
+sites were subsequently checked below; external reproduction retains its own next step. The bounded public
+CLI motion-interruption candidate is recorded separately below.
 Independent code, raw-boundary evidence and focused final documentation reviews
 received bounded approval; controlled tests and the single normal run
 do not establish general task reliability or hardware safety.
@@ -175,13 +193,98 @@ cleanup unknown remain. This later recording has its own candidate scope and
 [public presentation notes](https://github.com/xiao-yang25/robot-harness/blob/master/docs/assets/demo/README.md).
 That recording does not itself establish hosted CI or paired public delivery.
 
-## Paired installed delivery
+## M6b paired installed delivery
 
-The manifest pins Harness `6f32578f8d9157fa7c26c1f4e2ece13e05ec6211`.
-The current application suite passed 56 checks on macOS; a fresh Agent wheel and
+That delivery pinned Harness `6f32578f8d9157fa7c26c1f4e2ece13e05ec6211`.
+The delivered application suite passed 56 checks on macOS; a fresh Agent wheel and
 Harness optional bridge installation passed all five combination checks outside
 both source trees. The owner fixture's process/socket cleanup was observed.
 Ubuntu CI executes the same installed cases against this immutable dependency;
 check Actions for the exact Agent commit's hosted result. These checks preserve
 ALOHA and public navigation consumption without repeating ACT, model or physics
-qualification. Real-motion fault scope and external reproduction remain separate.
+qualification. Additional fault scope and external reproduction remain separate.
+
+## Public CLI interruption candidate
+
+The local M6c candidate adds one installed CLI signal test; all six installed
+combination checks passed on macOS against the unchanged pinned Harness. The three
+navigation combination checks also passed against installed packages in the
+retained Ubuntu 22.04 amd64 environment. These were pre-delivery local checks;
+hosted qualification belongs to the exact Agent commit in Actions.
+
+Two separate Ubuntu 22.04 / Humble amd64 Gazebo runs consumed the installed public
+Agent CLI with controlled executable proposals. A settled/released before B;
+after B was natively accepted and moved over 0.5m, the CLI received one SIGINT.
+Both runs observed explicit cancellation of exactly B, Core revocation, native
+cancel scheduling, a sealed drive/wheel-zero ACK, and continuous rejection of old
+B commands during an independently observed quiet window. Each run had one
+offline evaluation; a focused independent review approved only this scope.
+
+The recorded run's window contained 36 fresh odometry samples over 3.502 simulated
+seconds; independent endpoint observations differed by approximately 0.000083 m
+and 0.00247 rad. The Agent exited with status 1 and reported cancelled, without a
+third proposal or new goal.
+Both proposal children were reaped; the owned containers were removed. Subsequent
+status/close connection failures remain in the report: task verdict unassessed,
+native cleanup unknown and settlement pending. The first recording attempt
+failed native preparation before any admission; its diagnostics remain retained.
+
+This establishes a finite business-signal consumption path under a live owner.
+It does not qualify real model failures, complete native closure, Owner loss,
+hard stopping deadlines, other robot embodiments or physical hardware. A local
+same-run video is prepared; it has not been published to the project homepage.
+
+## Proposal failure candidate
+
+Three additional installed public CLI cases exercise the actual decision calls:
+prepare rejects tool-event output before any admission; after_a help retains
+released A without submitting B; final exceeds the original 30-second deadline.
+The last child returns a valid, matching answer while handling termination and
+exits 0, but the expired proposal is not accepted. The task requests cancellation
+of exactly the retained B. Its accepted native result survives revocation with
+settlement pending. These are controlled executable providers, not remote model
+failures or concurrent decisions during robot motion.
+
+All nine installed combination cases passed on macOS against the unchanged
+manifest pin. The three new proposal cases also passed in the retained Ubuntu
+22.04 amd64 environment. The fixture's own lifetime is 45 seconds only for the
+late-proposal case, to cover the unchanged application deadline. CLI, owner and
+proposal children are owned and reaped; the socket is removed. Existing Ubuntu
+combination discovery includes these cases; the candidate has no new hosted result.
+
+A separate Humble/Gazebo run exercised final lateness with actual Nav2 A/B visits
+and a matching local Harness owner fix. The first run exposed a defect: after
+native sequence completion, explicit B cancellation was misclassified as an
+authority error. The corrected owner passed 12 focused checks, including that
+regression and preservation of normal terminal close. A new run passed one
+same-run evaluation in 108.362 seconds, with independently observed A/B distances
+0.198780/0.159009 m. Only two decisions were accepted; the valid late final answer
+was rejected and all three proposal children exited 0 and were reaped. The Agent
+exited 1 with needs_help; the owner and container exited 0. B remained native
+succeeded/output accepted, authority revoked, settlement pending; task verdict
+unassessed and native cleanup unknown. Subsequent status/close connection failures
+remain in the report. The failed first run is retained without reevaluation.
+
+The real simulation consumed the then-local Harness fix rather than the older
+`6f32578` owner. That exact source tree is now delivered in Harness
+[`ea7b1eb`](https://github.com/xiao-yang25/robot-harness/commit/ea7b1eb1a075cd91ef590475f2496a48d19ca52a).
+Agent runtime source is unchanged; the updated pairing is checked below. A local 71.7-second same-run video retains the full
+30-second wait; it is not published. This scope does not qualify model-service
+reliability, Owner loss, complete native closure, hard stop or physical hardware.
+
+## Updated fixed pairing
+
+[workspace.repos](../workspace.repos) pins delivered Harness
+`ea7b1eb1a075cd91ef590475f2496a48d19ca52a`, including the final cancellation fix.
+A fresh macOS ARM64 Core build and optional-package install, together with a newly
+built Agent wheel, passed all nine installed combination checks outside both
+source trees. All 56 application checks also passed against that installed Agent.
+The combination retains the three ALOHA and two normal/navigation-help cases,
+adding the public CLI SIGINT case and three selected proposal faults. These use
+controlled native/model edges and do not repeat physics or model qualification.
+
+The existing Ubuntu combination workflow discovers all nine cases against this
+immutable Harness dependency; the application workflow retains its 56 checks.
+Actual hosted results must be checked for the exact delivered Agent revision.
+No reciprocal Harness Agent pin is changed. Native comparison, external
+reproduction and public video presentation remain separate M6c work.
