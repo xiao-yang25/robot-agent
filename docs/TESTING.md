@@ -199,15 +199,15 @@ That delivery pinned Harness `6f32578f8d9157fa7c26c1f4e2ece13e05ec6211`.
 The delivered application suite passed 56 checks on macOS; a fresh Agent wheel and
 Harness optional bridge installation passed all five combination checks outside
 both source trees. The owner fixture's process/socket cleanup was observed.
-Ubuntu CI executes the same installed cases against this immutable dependency;
-check Actions for the exact Agent commit's hosted result. These checks preserve
+That delivery's Ubuntu CI ran the same installed cases against the then-fixed
+dependency; check Actions for that historical Agent commit's hosted result. These checks preserve
 ALOHA and public navigation consumption without repeating ACT, model or physics
 qualification. Additional fault scope and external reproduction remain separate.
 
 ## Public CLI interruption candidate
 
 The local M6c candidate adds one installed CLI signal test; all six installed
-combination checks passed on macOS against the unchanged pinned Harness. The three
+combination checks passed on macOS against the prior `6f32578` Harness pin. The three
 navigation combination checks also passed against installed packages in the
 retained Ubuntu 22.04 amd64 environment. These were pre-delivery local checks;
 hosted qualification belongs to the exact Agent commit in Actions.
@@ -245,8 +245,8 @@ of exactly the retained B. Its accepted native result survives revocation with
 settlement pending. These are controlled executable providers, not remote model
 failures or concurrent decisions during robot motion.
 
-All nine installed combination cases passed on macOS against the unchanged
-manifest pin. The three new proposal cases also passed in the retained Ubuntu
+All nine installed combination cases passed on macOS against the prior
+`6f32578` manifest pin. The three new proposal cases also passed in the retained Ubuntu
 22.04 amd64 environment. The fixture's own lifetime is 45 seconds only for the
 late-proposal case, to cover the unchanged application deadline. CLI, owner and
 proposal children are owned and reaped; the socket is removed. Existing Ubuntu
