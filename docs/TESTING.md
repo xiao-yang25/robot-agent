@@ -312,9 +312,9 @@ distinct runs, rather than evidence for this new installation.
 That reproduction used research-only launcher selection, controlled proposal
 and passive-observer tools. The new [controlled business tutorial](../examples/navigation/README.md)
 provides public preparation, launch and report inspection using the existing
-Harness supervisor and installed Agent CLI. Its new installation and native run
-require separate qualification; the host-to-container real-model path remains
-pending. Navigation has no installed physical evaluator;
+Harness supervisor and installed Agent CLI. The fixed new installation and
+controlled native run are qualified below; the host-to-container real-model path
+remains pending. Navigation has no installed physical evaluator;
 `robot-agent-evaluate-handoff` applies only to ALOHA. CLI completion and an owner's
 process-completion verification file cannot prove physical task success.
 
@@ -326,3 +326,30 @@ results retain their original versions and scope.
 GetState preparation-timeout cause, Owner loss/restart, full native cleanup,
 hard stop, hardware and general reliability remain unqualified. Application
 license/contribution terms and a versioned preview remain pending separately.
+
+## Public controlled navigation workflow
+
+Fresh GitHub checkouts of Agent `721140b` and its fixed Harness
+`13bc75e903f6005da3dd5d969f8242ce211d182f` exercised the published wheel, Linux
+preparation and launch commands. New Core and Agent installations used an existing
+qualified Ubuntu22.04/Humble amd64 image with Python3.10 headers; this did not
+rebuild the entire ROS image or test the optional header-download branch.
+The Linux Python Session check passed; exact-candidate hosted CI passed ten
+installed combination and 56 application checks. The preceding installation also
+passed ten local Linux combination cases, separately from physics.
+
+The final controlled scene had three accepted/reaped proposals, A settled/released
+before B admission, B accepted/pending, and unknown native cleanup. The public
+launcher exited zero without OOM and removed its container. A separate passive
+Gazebo observer and one offline evaluation measured A/B errors of 0.188/0.169m
+against the unchanged 0.35m predicate. These observations never drove decisions
+and do not change the application's unassessed task verdict.
+
+Two earlier attempts failed safely with zero admissions during B startup discovery.
+The fixed Owner now waits for its startup endpoint inside the original 70-second
+context deadline before the original bounded RPC checks. An intermediate run
+completed publicly but its research evaluation failed to import a helper; it was
+retained as incomplete, rather than reevaluated as pass. The final run is separate.
+No live model, hardware, general reliability or full native cleanup is qualified.
+Published videos retain their own recorded versions; no new video is claimed
+for this packaging increment. The public real-model path remains M6c delivery work.
