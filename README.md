@@ -97,7 +97,8 @@ The selected normal task and bounded failure checks are delivered. See
 [qualified scope](docs/TESTING.md#qualified-scope) for the distinction between
 real visual runs, deterministic execution and fixture tests. CUDA, other architectures,
 robot bodies, recovery and hard stop guarantees must not be inferred from those
-results. Future work will test reuse across a heterogeneous combination.
+results. ALOHA and navigation now consume shared Harness execution coordination;
+their physical and model qualifications remain specific to each recorded combination.
 
 See [application artifacts and reusable boundaries](docs/README.md#application-artifacts-and-reusable-boundaries)
 for what can be run today and which pieces remain task-specific. Future extraction
@@ -153,3 +154,10 @@ it through the simulation launcher.
 The owner's unconfigured final-close wait is 10 seconds; a model reply can exceed
 it and leave the task needing help. This idle configuration does not increase
 native deadlines, observation TTL or physical stopping guarantees.
+
+This connection recipe assumes an operator has already prepared the owner and a
+working proposal executable in the same container. Harness's `simulate.py session`
+currently launches its deterministic request example; it does not launch this
+business application. The complete public simulation/business/independent-check
+tutorial is still pending. The recorded end-to-end experiments used research-only
+launch and observation tools. See [delivery scope](docs/TESTING.md#m6c-delivery-audit).

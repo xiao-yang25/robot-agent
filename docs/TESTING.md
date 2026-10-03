@@ -231,8 +231,9 @@ failed native preparation before any admission; its diagnostics remain retained.
 
 This establishes a finite business-signal consumption path under a live owner.
 It does not qualify real model failures, complete native closure, Owner loss,
-hard stopping deadlines, other robot embodiments or physical hardware. A local
-same-run video is prepared; it has not been published to the project homepage.
+hard stopping deadlines, other robot embodiments or physical hardware. The
+[same-run video](https://xiao-yang25.github.io/robot-harness/#agent-stop-demo)
+was subsequently published; its recorded version and limits remain unchanged.
 
 ## Proposal failure candidate
 
@@ -269,7 +270,8 @@ The real simulation consumed the then-local Harness fix rather than the older
 `6f32578` owner. That exact source tree is now delivered in Harness
 [`ea7b1eb`](https://github.com/xiao-yang25/robot-harness/commit/ea7b1eb1a075cd91ef590475f2496a48d19ca52a).
 Agent runtime source is unchanged; the updated pairing is checked below. A local 71.7-second same-run video retains the full
-30-second wait; it is not published. This scope does not qualify model-service
+30-second wait; it is now [published](https://xiao-yang25.github.io/robot-harness/#late-proposal-demo).
+This scope does not qualify model-service
 reliability, Owner loss, complete native closure, hard stop or physical hardware.
 
 ## Updated fixed pairing
@@ -286,5 +288,34 @@ controlled native/model edges and do not repeat physics or model qualification.
 The existing Ubuntu combination workflow discovers all nine cases against this
 immutable Harness dependency; the application workflow retains its 56 checks.
 Actual hosted results must be checked for the exact delivered Agent revision.
-No reciprocal Harness Agent pin is changed. Native comparison, external
-reproduction and public video presentation remain separate M6c work.
+The delivered `ffad065` application and combination workflows passed the 56/9
+checks; these are software-boundary results, separate from the recorded simulation.
+No reciprocal Harness Agent pin is changed. Subsequent comparison, reproduction
+and presentation are recorded below, separately from these installed checks.
+
+## M6c delivery audit
+
+Selected live-owner interruption and proposal-failure paths, same-strategy native
+normal/late-proposal comparisons, and a fresh installed public-version normal run
+have bounded research evidence. The fresh run fetched this application's
+`ffad065` version and its immutable Harness `ea7b1eb` dependency, used new Linux
+build/install directories in an existing Ubuntu22.04/Humble image, and exercised
+three controlled proposals through the installed CLI. It did not rebuild the
+entire ROS image or repeat live-model qualification. Failed preparation and
+evaluation attempts were retained separately. The published videos above are
+distinct runs, rather than evidence for this new installation.
+
+The full reproduction still used research-only launcher selection, controlled
+proposal and passive-observer tools. The public owner launcher runs a deterministic
+request example; the Agent connection recipe assumes a prepared same-container
+owner and proposal executable. A public end-to-end setup/run/report/independent-check
+tutorial remains a delivery gap. Navigation has no installed physical evaluator;
+`robot-agent-evaluate-handoff` applies only to ALOHA. CLI completion and an owner's
+process-completion verification file cannot prove physical task success.
+
+Later Harness startup diagnostics in `03a357b` preserve the original service and
+context budgets and report individual child failure; this manifest still pins
+`ea7b1eb`. No diagnostic-fix qualification is implied for the older dependency.
+GetState preparation-timeout cause, Owner loss/restart, full native cleanup,
+hard stop, hardware and general reliability remain unqualified. Application
+license/contribution terms and a versioned preview remain pending separately.
