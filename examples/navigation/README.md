@@ -109,6 +109,48 @@ separately tested. Confirm `container_removed`; reconcile the recorded container
 identity if cleanup failed. Keep a required image and useful build/log directories;
 remove only resources belonging to failed or superseded runs.
 
+## Run the checkpoint task
+
+Build a new wheel and Linux installation from a checkout containing
+`CheckpointNavigationTask` and this tutorial. The released `v0.1.0a1` tag predates
+it. The default task and installed navigation CLI remain fixed A→B.
+Install the same wheel into a host environment, since this explicit mode uses
+the Agent's caller supervisor:
+
+```sh
+python3 -m venv navigation-checkpoint-host
+navigation-checkpoint-host/bin/python -m pip install --no-index --no-deps navigation-consumer/dist/robot_agent-0.1.0a1-py3-none-any.whl
+navigation-checkpoint-host/bin/python examples/navigation/run.py --task checkpoint \
+  --instruction finish_at_a --instruction-delay 4 \
+  --harness-source ../harness-navigation --python-prefix navigation-consumer/install \
+  --agent-prefix navigation-consumer/agent-install --image robot-navigation-demo:humble \
+  --output runs/checkpoint-finish-01
+```
+
+Use `--instruction continue_b` and a different output directory for the second
+branch. This is a controlled business provider: the configured answer is delivered
+once, after released A, with the task/checkpoint/session/map/epoch/frame identity.
+It does not perform human intent recognition or inspect the scene. The optional
+delay is 0–9 seconds inside the task's ten-second instruction window; collection,
+the following proposal and validation share the original thirty-second deadline.
+The default proposal is also controlled and makes no model requests.
+
+To use a host model, add `--provider host-codex --model YOUR_MODEL --executable codex`
+and a separate new `--host-output` to the same checkpoint command. The host worker
+must be explicitly in checkpoint mode, forwards only the normalized bound
+instruction and declared measurements, and requests at most two proposals for
+finish-A or three for continue-B. Model credentials stay outside the container.
+No business instruction is inferred from a model response.
+
+Read `agent/instruction.jsonl` for the single request/answer and `agent/report.json`
+for instruction acceptance, decisions and operation dispositions. Finish-A reports
+`completed_sites: ['A']` and unknown native cleanup; prepared B resources may still
+exist. Continue-B reports A released and B current/pending. A task result stays
+unassessed. Caller close, owner exit and physical success are different outcomes.
+Host mode also writes `agent-proposals/` relay records and private host model
+records. The supervisor keeps its exact client bind file through Harness cleanup.
+Use new run directories and retain failed diagnostics; no replay is provided.
+
 ## Run with a host model
 
 Use the same wheel and Linux prefixes above. Install that wheel into a separate

@@ -61,7 +61,7 @@ editing constants in these fixed applications is not a supported configuration A
 [CheckpointNavigationTask](../src/robot_agent/navigation_checkpoint.py) visits A,
 then accepts one business instruction to continue to B or finish its own task at A.
 This experimental Python interface borrows a prepared Session. The existing
-`NavigationTask`, CLI, host relay and developer preview still require A→B;
+`NavigationTask`, installed navigation CLI and released developer preview still require A→B;
 returning `help` at A remains needs-help for that original goal.
 
 The checkpoint requires A's correlated accepted result and settled/released
@@ -97,9 +97,12 @@ Continuing preserves B's current/pending disposition; ambiguous B submission
 retains cancellation of exactly that request and never authorizes replay.
 The task instance cannot be run again.
 
+The [explicit checkpoint tutorial](../examples/navigation/README.md#run-the-checkpoint-task)
+selects this application separately and can use controlled or opt-in host proposals.
+The host relay reconstructs its bound instruction only in explicit checkpoint mode.
 Application and installed-package checks use controlled instruction/model/native
-providers. Real Humble/Nav2 instruction consumption, model qualification and a
-same-run demonstration remain separate work. General routes, in-motion replanning,
+providers; actual qualification is recorded separately in [Testing](TESTING.md).
+General routes, in-motion replanning,
 recovery, network instruction delivery and a generic skill framework are outside
 this application.
 
