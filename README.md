@@ -106,8 +106,11 @@ of shared execution mechanics preserves this application's task contract.
 
 ## License
 
-License and patch contribution terms remain pending for this application.
-See [licensing status](CONTRIBUTING.md#licensing-status).
+Except for third-party material with its own notices, Robot Agent is licensed
+under [MIT](LICENSE-MIT) OR [Apache-2.0](LICENSE-APACHE), at your option.
+See the [project declaration](LICENSE) and
+[contribution terms](CONTRIBUTING.md#licensing-status).
+Models, dependencies and simulator assets retain their own terms.
 
 
 ## Navigation application

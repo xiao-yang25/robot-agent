@@ -98,8 +98,9 @@ experiments, checkpoints and private configuration outside this repository.
 
 [Existing-agent MCP integration](https://github.com/xiao-yang25/robot-harness/tree/master/integrations/mcp)
 is another Harness consumer path. It does not replace this application's task
-state. Licensing and a versioned preview remain pending; see
-[licensing status](../CONTRIBUTING.md#licensing-status).
+state. The application uses [MIT OR Apache-2.0](../LICENSE); see
+[contribution terms](../CONTRIBUTING.md#licensing-status). A versioned preview
+and actual external reproduction remain pending.
 
 ## Navigation application
 

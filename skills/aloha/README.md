@@ -94,7 +94,9 @@ Reports and recordings are private local evidence; do not commit them or weights
 Credits: ACT/ALOHA model and migration from
 [LeRobot](https://github.com/huggingface/lerobot/tree/e595b7902714ba51f91e47523f66f89c5181b649),
 simulator from [gym-aloha](https://github.com/huggingface/gym-aloha/tree/bd3325740ea8d1c97411c41ea1e0f4ce0a7de8da).
-Upstream sources/model retain their own terms; this project's license is pending.
+Upstream sources/model retain their own terms. The application uses
+[MIT OR Apache-2.0](../../LICENSE); this grant does not relicense the upstream
+code, model weights or simulator assets.
 
 ## Evaluate one closed episode
 

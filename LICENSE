@@ -1,0 +1,17 @@
+Robot Agent
+Copyright (c) 2026 Robot Agent contributors
+
+Except for third-party material with its own notices, this project's code,
+documentation and original assets are licensed under either:
+
+  - the MIT License, in LICENSE-MIT; or
+  - the Apache License, Version 2.0, in LICENSE-APACHE,
+
+at your option.
+
+SPDX-License-Identifier: MIT OR Apache-2.0
+
+Third-party notices are not replaced by this grant. Robot Harness, dependencies,
+model weights and simulator assets supplied by other projects retain their own
+license terms. This application does not bundle model weights or upstream
+simulator sources.
