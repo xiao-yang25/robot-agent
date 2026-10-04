@@ -55,34 +55,53 @@ record model/physics evidence for the changed behavior. Fixture checks alone do
 not qualify it. A different goal or sequence should define its own task contract;
 editing constants in these fixed applications is not a supported configuration API.
 
-### Next application candidate: checkpoint navigation
+<a id="next-application-candidate-checkpoint-navigation"></a>
+### Checkpoint navigation application
 
-The next bounded business task is to visit A, then accept one caller instruction
-to continue to B or finish that task at A. This is a design candidate; the current
-`NavigationTask`, CLI and developer preview still require A→B. Returning `help`
-at A remains needs-help, rather than completion of that original goal.
+[CheckpointNavigationTask](../src/robot_agent/navigation_checkpoint.py) visits A,
+then accepts one business instruction to continue to B or finish its own task at A.
+This experimental Python interface borrows a prepared Session. The existing
+`NavigationTask`, CLI, host relay and developer preview still require A→B;
+returning `help` at A remains needs-help for that original goal.
 
-The candidate checkpoint requires A's correlated result and settled/released
-receipt plus fresh feedback at A. A caller instruction must match the task,
-checkpoint and fixed session/map/epoch. It is consumed once; missing, invalid or
-late instructions lead to help without a default B submission. Instruction
-collection takes at most ten seconds and shares the original thirty-second
-decision budget with the following proposal. The owner uses the existing explicit
-45-second caller wait; its default 15-second wait is not this candidate's entry.
-All work remains within the 240-second task budget. Cooperative deadlines do not
-make synchronous providers forcibly interruptible.
+The checkpoint requires A's correlated accepted result and settled/released
+receipt plus fresh feedback at A. Supply an instruction provider implementing
+`request(context, deadline, stop_requested)`. The context contains `task_id`,
+`checkpoint_id`, `session_id`, integer `epoch`, `map_id`, `frame` and
+`allowed_actions`. Return those six identity fields unchanged and an `action`
+of `continue_b` or `finish_at_a`. Unknown optional metadata is ignored. Missing,
+foreign, invalid or late answers lead to help without a default B submission.
+The provider is called once; it receives no Session or independent physical truth.
 
-Only a proposal consistent with that instruction can proceed, after fresh
-observation validation. Finishing the new checkpoint task at A would preserve
-A released, task verdict unassessed and overall native cleanup unknown; the
-caller still closes the connection. Continuing would preserve B's current/pending
-disposition. Unknown effects never authorize replay or a third goal.
+Instruction collection has a ten-second window and shares the original
+thirty-second after-A decision budget with the following proposal and validation.
+All work stays within the 240-second task budget; shorter `NavigationBudget`
+values also apply. The Owner must use its existing explicit 45-second caller wait,
+rather than the default 15-second entry. Both provider and proposal backend must
+cooperate with the deadline and stop callback; synchronous calls cannot be
+forcibly interrupted by the task. The caller owns provider resources and Session
+close.
 
-Implementation, installed consumption, real instruction/model qualification and
-a same-run demonstration remain to be delivered. The first implementation will
-use a caller-supplied bounded instruction provider in one specific application.
-General routes, in-motion replanning, recovery, a network instruction service and
-a generic skill framework are separate work.
+The proposal backend receives the normalized `checkpoint_instruction`. Its answer
+must echo that `checkpoint_id` and propose `visit_b` for `continue_b`, or
+`finish_at_a` for `finish_at_a`; it may instead propose `help`. The usual
+task/phase/observation identity and reason fields still apply. The bundled
+`NavigationCodexDecision` supports this schema when used directly in Python.
+Fresh Session/epoch/map, sensor health, A association and position are checked
+again before B admission or completion at A. No proposal grants execution authority.
+
+Finishing at A reports `completed_sites: ['A']`, A released, task verdict
+unassessed and native cleanup unknown. B may already have a prepared native
+context even though no B request was sent, so the caller must still close.
+Continuing preserves B's current/pending disposition; ambiguous B submission
+retains cancellation of exactly that request and never authorizes replay.
+The task instance cannot be run again.
+
+Application and installed-package checks use controlled instruction/model/native
+providers. Real Humble/Nav2 instruction consumption, model qualification and a
+same-run demonstration remain separate work. General routes, in-motion replanning,
+recovery, network instruction delivery and a generic skill framework are outside
+this application.
 
 ## Models and algorithm providers
 
