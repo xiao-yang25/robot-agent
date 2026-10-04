@@ -367,7 +367,30 @@ original deadline expiry, failed preparation and signal/forced process-group cle
 Private host outputs overlapping scene or container mounts are refused before startup.
 The existing task/decision/operation budgets and pending/unknown outcomes remain.
 
-Fresh installed actual-model qualification is pending for this candidate. Controlled
-subprocess tests do not establish service reliability, physics, remote cleanup,
-Owner loss, hardware or a hard stopping limit. Historical live-model runs above
-used the research relay and do not qualify this new public entry.
+Fresh public Agent `72908370f7c8ee3b8f8b56f63fe9fe226d18776e` and manifest Harness
+`13bc75e903f6005da3dd5d969f8242ce211d182f` were fetched into a new consumer.
+The published wheel/preparation commands built new Linux Core/Agent prefixes and
+installed that same wheel into a separate host environment. An existing qualified
+Ubuntu22.04/Humble amd64 image with Python headers was reused; the whole image and
+optional header-download branch were not requalified. macOS application checks and
+exact-candidate Ubuntu CI passed all 67 application and twelve installed combination
+cases, including the two new host/relay cases. Failed initial missing-extras and
+incorrect test-error-location attempts were retained separately.
+
+The public host model command made three actual Codex0.159.0 requests for
+`gpt-6-sol` / high: visit A, visit B and observed complete. The task took66.293s.
+Actual container inspection confirmed network none, 2 CPU/4GiB and exactly five
+expected mounts, excluding host model output or credentials. Model inputs contained
+only task context and declared map pose/time/sensor health, with no tool events.
+A settled/released before fresh B admission; final B remained accepted/pending.
+One separate same-run physical evaluation measured A/B errors0.202/0.159m under
+the unchanged0.35m predicate. The application's task verdict remained unassessed;
+native and remote model cleanup remained unknown.
+
+All three actual model CLI and three container relay children were reaped. Both
+owned host process groups exited0 without forced cleanup; the scene/container
+exited0 without OOM and the exact container was removed. The passive observer also
+exited0 and was reaped. This qualifies one normal public-entry combination, not
+model-service reliability, remote cleanup, Owner loss, hardware or a hard stopping
+limit. Historical model runs and published videos retain their own version/scope;
+this packaging increment does not claim a new recording.
