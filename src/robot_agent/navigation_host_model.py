@@ -10,7 +10,7 @@ from ._navigation_relay import PHASES, cancelled, directory, proposal_request, r
 from .navigation_decision import NavigationCodexDecision
 
 
-def serve(exchange, output, model, executable, stopped):
+def serve(exchange, output, model, executable, stopped, *, task='fixed'):
     deadline = time.monotonic() + 420
     records = []
     backend = NavigationCodexDecision(output / 'decisions', model=model, executable=executable)
@@ -32,7 +32,7 @@ def serve(exchange, output, model, executable, stopped):
                         with directory('model-requests', parent=scene) as slots, directory(phase, parent=slots) as slot:
                             data = read_json(slot, 'request.json')
                             received = True
-                            nonce, budget, context, observation = proposal_request(data, phase, model)
+                            nonce, budget, context, observation = proposal_request(data, phase, model, task=task)
                             stop = lambda: stopped.is_set() or cancelled(slot)
                             if stop():
                                 raise InterruptedError('proposal withdrawn before host decision')
@@ -69,11 +69,12 @@ def main():
     parser.add_argument('--output', type=Path, required=True, help='private host directory created by the launcher')
     parser.add_argument('--model', required=True)
     parser.add_argument('--executable', default='codex')
+    parser.add_argument('--task', choices=('fixed', 'checkpoint'), default='fixed')
     args = parser.parse_args()
     stopped = threading.Event()
     previous = {sig: signal.signal(sig, lambda *_: stopped.set()) for sig in (signal.SIGINT, signal.SIGTERM)}
     try:
-        serve(args.exchange, args.output, args.model, args.executable, stopped)
+        serve(args.exchange, args.output, args.model, args.executable, stopped, task=args.task)
     finally:
         for sig, handler in previous.items():
             signal.signal(sig, handler)

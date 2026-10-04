@@ -1,5 +1,43 @@
 # Testing and qualification
 
+## Checkpoint navigation qualification
+
+The explicit [checkpoint tutorial](../examples/navigation/README.md#run-the-checkpoint-task)
+has new installed software checks and bounded Humble/Nav2 qualification, separate
+from the original fixed A→B runs below. Recorded application code `2ac951b` uses
+the unchanged immutable Harness dependency `13bc75e` with new Linux Core/Agent
+installations and the existing qualified Ubuntu22.04/Humble amd64 image. The
+whole image and optional Python-header download branch were not rebuilt.
+Application and installed combination checks passed 86/18 on macOS; the two new
+installed host/relay cases use controlled model and native providers.
+
+Four separate new scenes each had one offline physical evaluation. Controlled
+finish-A completed in 60.55 seconds with A error0.189m and zero B requests.
+Host-model continue-B completed in109.55 seconds with A/B errors0.188/0.175m:
+three actual `gpt-6-sol` / high proposals via Codex0.159.0, including the normalized
+continue instruction, were accepted after fresh feedback. An actual Docker
+inspection confirmed no network, 2CPU/4GiB and no mounted host model output.
+Both business instructions were controlled and delivered after four seconds;
+this does not qualify human intent recognition or a general model service.
+
+Foreign-checkpoint and valid-but-late instruction cases entered needs-help after
+released A, with zero B and no extra model proposal. The late provider deliberately
+ignored its cooperative deadline and returned after10.22 seconds; the task refused
+the answer. All four exact containers were removed. A remains settled/released;
+normal final B is current/pending in its task report. Every task verdict stays
+unassessed, with native and remote cleanup unknown. Actual host model/relay children
+were reaped; owned host groups exited zero without forced cleanup.
+
+[Same-run videos](https://xiao-yang25.github.io/robot-harness/#checkpoint-demos)
+present the two normal runs at original speed with startup trimmed and captions.
+No in-motion replanning, Owner recovery, hardware or hard stop limit is qualified.
+The public example command was also run against these new installations with
+`--task checkpoint --instruction finish_at_a --instruction-delay 0`: process and
+container completion passed, with A-only completion and exact container removal.
+This separate command/cleanup check is not another physical evaluation. Hosted
+checks are recorded against the final delivered revision separately; configured
+CI alone is not a physics result.
+
 The [ALOHA](README.md#aloha-application) and [navigation](README.md#navigation-application)
 contracts define application behavior.
 A model assessment, a settled execution receipt and an independent task verdict

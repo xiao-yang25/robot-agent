@@ -6,6 +6,7 @@ import stat
 import uuid
 
 from .navigation import ACTIONS, GOAL, SITES, REFERENCE_FIELDS, finite, measurements
+from .navigation_checkpoint import CheckpointNavigationTask, IDENTITY_FIELDS
 
 LIMIT = 65536
 PHASES = tuple(ACTIONS)
@@ -57,16 +58,18 @@ def cancelled(parent):
         return False
 
 
-def proposal_request(data, phase, model):
+def proposal_request(data, phase, model, *, task='fixed'):
     """Reconstruct only this application's permitted inputs before a host call."""
     nonce, budget, inputs = data['nonce'], data['remaining_seconds'], data['inputs']
     if (not isinstance(nonce, str) or len(nonce) != 32
             or any(c not in '0123456789abcdef' for c in nonce)
             or not finite(budget) or not 0 < budget <= 30 or not isinstance(inputs, dict)):
         raise ValueError('invalid local proposal identity or budget')
+    if task not in ('fixed', 'checkpoint') or phase not in PHASES:
+        raise ValueError('unsupported host navigation task or phase')
+    goal = GOAL if task == 'fixed' else CheckpointNavigationTask.goal
     if (inputs.get('phase') != phase or inputs.get('model_requested') != model
-            or inputs.get('goal') != GOAL or inputs.get('registered_sites') != SITES
-            or inputs.get('allowed_actions') != list(ACTIONS[phase])
+            or inputs.get('goal') != goal or inputs.get('registered_sites') != SITES
             or not isinstance(inputs.get('task_id'), str) or not 0 < len(inputs['task_id']) <= 128):
         raise ValueError('local proposal does not match the declared navigation task/model')
     observation = inputs['measurement']
@@ -76,7 +79,23 @@ def proposal_request(data, phase, model):
     context_reference = {key: inputs['observation_reference'][key] for key in REFERENCE_FIELDS}
     if (type(context_reference['epoch']) is not int or context_reference != observation['reference']):
         raise ValueError('local proposal observation reference changed')
-    context = dict(task_id=inputs['task_id'], phase=phase, goal=GOAL,
-                   registered_sites=SITES, allowed_actions=list(ACTIONS[phase]),
+    allowed = list(ACTIONS[phase])
+    instruction = None
+    if task == 'checkpoint' and phase == 'after_a':
+        command = inputs.get('checkpoint_instruction')
+        if (not isinstance(command, dict) or command.get('task_id') != inputs['task_id']
+                or not isinstance(command.get('checkpoint_id'), str) or not 0 < len(command['checkpoint_id']) <= 128
+                or type(command.get('epoch')) is not int
+                or any(command.get(key) != context_reference[key] for key in ('session_id','epoch','map_id','frame'))
+                or command.get('action') not in ('continue_b', 'finish_at_a')):
+            raise ValueError('host checkpoint instruction identity or action changed')
+        instruction = {key: command[key] for key in (*IDENTITY_FIELDS, 'action')}
+        allowed = ['visit_b' if instruction['action'] == 'continue_b' else 'finish_at_a', 'help']
+    if inputs.get('allowed_actions') != allowed:
+        raise ValueError('host proposal action set changed')
+    context = dict(task_id=inputs['task_id'], phase=phase, goal=goal,
+                   registered_sites=SITES, allowed_actions=allowed,
                    observation_reference=context_reference)
+    if instruction is not None:
+        context['checkpoint_instruction'] = instruction
     return nonce, budget, context, observation
