@@ -6,8 +6,11 @@ Robot Agent is experimental. Start with [documentation](docs/README.md),
 ## Feedback and changes
 
 Use [Issues](https://github.com/xiao-yang25/robot-agent/issues) for problems,
-reproduction reports and task proposals. Include the Agent commit, pinned Harness
-revision, environment, expected/observed behavior and minimal redacted output.
+reproduction reports and task proposals. Include the Agent commit/package version,
+pinned Harness revision, selected image identity, environment, failed stage,
+expected/observed behavior and minimal redacted output. The
+[preview tutorial](examples/navigation/README.md#report-a-problem-or-return-to-a-previous-pair)
+describes returning to a previously verified pair in a fresh directory.
 Distinguish model decisions, execution failures and independent evaluation.
 Do not upload credentials, private prompts, local paths, weights or raw runs.
 

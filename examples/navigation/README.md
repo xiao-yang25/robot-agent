@@ -15,6 +15,11 @@ Run the host commands from this Agent checkout. Use the exact full Harness
 revision in [workspace.repos](../../workspace.repos); the launcher rejects a
 different or modified Harness checkout.
 
+This tutorial uses the Agent `0.1.0a1` wheel built from your selected checkout,
+and its pinned Harness source; it does not install Agent from a package index.
+Record `git rev-parse HEAD` for that checkout before preparing the pair. A changed
+Agent revision needs its own verification; existing videos retain their versions.
+
 ## Prepare the fixed sources and image
 
 Clone Harness beside Agent into a new directory, and check out the manifest's
@@ -56,7 +61,7 @@ docker run --rm --platform linux/amd64 --cpus=2 --memory=4g --entrypoint bash \
   --mount "type=bind,source=$(cd ../harness-navigation && pwd),target=/harness-source,readonly" \
   --mount "type=bind,source=$PWD/navigation-consumer,target=/consumer" \
   --mount "type=bind,source=$PWD/examples/navigation/prepare.sh,target=/prepare.sh,readonly" \
-  --mount "type=bind,source=$PWD/navigation-consumer/dist/robot_agent-0.0.0-py3-none-any.whl,target=/robot_agent-0.0.0-py3-none-any.whl,readonly" \
+  --mount "type=bind,source=$PWD/navigation-consumer/dist/robot_agent-0.1.0a1-py3-none-any.whl,target=/robot_agent-0.1.0a1-py3-none-any.whl,readonly" \
   --mount "type=bind,source=$PWD/navigation-consumer/bootstrap/pip-25.0.1-py3-none-any.whl,target=/pip-25.0.1-py3-none-any.whl,readonly" \
   robot-navigation-demo:humble /prepare.sh
 ```
@@ -112,7 +117,7 @@ navigation modules. It must not import the Linux Core binary:
 
 ```sh
 python3 -m venv navigation-host
-navigation-host/bin/python -m pip install --no-deps navigation-consumer/dist/robot_agent-0.0.0-py3-none-any.whl
+navigation-host/bin/python -m pip install --no-deps navigation-consumer/dist/robot_agent-0.1.0a1-py3-none-any.whl
 ```
 
 Install and authenticate your Codex CLI on the host using its own setup. Select an
@@ -151,6 +156,19 @@ then kills surviving owned process groups; this does not extend task/motion budg
 or prove a hard stopping limit. Proposal withdrawal also notifies the host to reap
 its local CLI child. Remote model-service termination and resource release remain
 unknown. Check both process records and `container_removed` after interruptions.
+
+## Report a problem or return to a previous pair
+
+Use the [feedback instructions](../../CONTRIBUTING.md#feedback-and-changes).
+Include the Agent commit/package version, Harness pin, selected image identity,
+host architecture/Docker environment, failed stage and minimal redacted diagnostics.
+Keep preparation failures separate from task reports and physical evaluation.
+
+To return to a previously verified pair, check out its recorded Agent commit in a
+separate clean clone. Read that commit's `workspace.repos`, select its matching
+Harness source/image, and follow its tutorial using new consumer and run
+directories. Do not overwrite installed prefixes or reuse an in-flight scene.
+A container image tag alone does not identify a verified pair.
 
 ## Limits
 
