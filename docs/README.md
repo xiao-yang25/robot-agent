@@ -82,14 +82,16 @@ model metrics alone do not establish task success or a physical stop guarantee.
 | Goal | Read |
 |---|---|
 | Try the developer preview | [Version and pairing](../README.md#developer-preview), [navigation tutorial](../examples/navigation/README.md) and [verification scope](TESTING.md#developer-preview-verification) |
-| Understand the current application | [Task contract](../README.md#task-contract) and [implementation](../src/robot_agent/handoff.py) |
+| Understand the current application | [ALOHA contract](#aloha-application) and [implementation](../src/robot_agent/handoff.py) |
 | Prepare and run ACT / ALOHA | [Skill setup](../skills/aloha/README.md) and [dependency pin](../workspace.repos) |
-| Understand model proposals | [Run](../README.md#run) and [adapter](../src/robot_agent/codex_decision.py) |
+| Understand model proposals | [Run ALOHA](#run-aloha) and [adapter](../src/robot_agent/codex_decision.py) |
 | Test or evaluate a run | [Testing and qualification](TESTING.md) |
 | Report a problem or propose a change | [Contributing](../CONTRIBUTING.md) |
 
-The README owns the task contract; the skill guide owns setup commands; the
-[fixed profile](../src/robot_agent/handoff_profile.json) owns the evaluation
+This page owns the [ALOHA](#aloha-application) and [navigation](#navigation-application)
+task contracts; the README provides the project and preview entry. The skill guide
+owns environment setup commands; the [fixed profile](../src/robot_agent/handoff_profile.json)
+owns the evaluation
 predicate. Testing documentation explains checks and their limits.
 
 New applications should document goal, initial conditions, observations, allowed
@@ -103,6 +105,78 @@ state. The application uses [MIT OR Apache-2.0](../LICENSE); see
 [contribution terms](../CONTRIBUTING.md#licensing-status). Start with the
 [developer preview](../README.md#developer-preview); release checks and actual
 external reproduction are distinct from historical qualification.
+
+## ALOHA application
+
+1. Read the initial camera/joints. The qualified reset starts with the cube on the
+   table, with empty grippers; the ACT skill includes right-arm pickup and transfer.
+   A visual backend proposes attempting transfer or requesting help.
+2. Submit the qualified 400-step transfer. Require its own correlated delivered
+   result and settled receipt before continuing.
+3. Read the new observation at sequence400 in the same epoch. The backend proposes
+   hold or help based on the new image; the application may submit a separate
+   50-step hold only after revalidating that proposal and current capability.
+4. Read sequence450 and request a final visual assessment. Report that assessment
+   separately from execution and independent task evaluation.
+
+At most one transfer, one hold and three decisions per task. No automatic reset,
+retry or recovery. Every answer binds task ID, phase, epoch and observation
+sequence. Unsupported, stale, cancelled or expired proposals cannot start an
+operation. Another task requires an operator-controlled explicit episode reset
+and a new task object. A new task while the scene requires reset is refused.
+
+The caller owns Session startup/close. The task borrows it and serializes calls;
+the model adapter has no Session or raw-action interface. The command-line caller
+creates the Session and closes it on all reported exit paths. SIGINT requests task
+cancellation; a native call already executing cannot be undone. Cleanup failure
+is retained separately, and never relabeled successful cleanup.
+
+Budget: 300 seconds including startup (90 maximum), 60 per visual decision and
+60 per operation; operation deadlines use remaining task time. Budget checks
+before/after synchronous calls do not make those calls interruptible or provide
+a hard stopping latency. No additional observation/retry loop is implemented.
+The stepped simulator pauses between operations; rereading a frame is revalidation,
+not another physical observation or proof of holding duration.
+
+`visual_assessment=observed_success` is a model's interpretation of the final
+image. `task_verdict` remains `unassessed`; an independent evaluator may assess
+the recorded physical trace afterward. Contacts/cube poses and evaluator output
+are excluded from every model input and do not authorize hold.
+
+
+### Run ALOHA
+
+Run commands from the repository root.
+
+Follow [ACT / ALOHA setup](../skills/aloha/README.md) to install the pinned skill
+and Harness dependency, and explicitly prepare model weights outside Git.
+Select an available visual model and authenticate the Codex CLI yourself.
+
+```sh
+# Run after skill setup, including its Harness PYTHONPATH.
+skills/aloha/.venv/bin/robot-agent-handoff --output /path/to/fresh-run \
+  --checkpoint /path/to/migrated-checkpoint --device mps --seed 0 \
+  --model YOUR_AVAILABLE_MODEL
+```
+
+Use `--device cpu` in the documented Linux environment. The proposal adapter
+runs an ephemeral CLI with user configuration ignored, tools disabled and a
+maximum 60-second decision window. It is a cooperating backend, not a security
+sandbox or a general robot agent framework.
+
+`report.json` records task state, decisions, receipts and cleanup. `decisions/`
+contains model inputs and outputs; `episodes/` contains the Harness trace/video.
+Raw runs may contain private prompts and local paths; review and redact before
+sharing. A successful CLI exit requires completed stages and confirmed cleanup;
+it does not establish independently verified task success.
+
+
+### Evaluate ALOHA
+
+After the Session closes, run the separate evaluator in the pinned skill environment.
+See [evaluation commands and verdicts](TESTING.md#independent-evaluation).
+Its report never changes the application report or authorizes another operation.
+
 
 ## Navigation application
 
@@ -132,8 +206,9 @@ retained request. No automatic reset or task replay.
 
 Use explicit model/executable and output paths. Default application budgets are
 240 seconds including startup, 30 per proposal, 160 per operation with the owner's native
-147000ms maximum respected; at most three proposals/two submissions. The proposal
-CLI runs with its tools disabled. Reuse the existing bounded subprocess lifecycle
+147000ms maximum respected; at most three proposals/two submissions. The model adapter
+has a five-second version-probe timeout. The proposal CLI runs with its tools disabled.
+Reuse the existing bounded subprocess lifecycle
 without changing ALOHA signatures. Keeping a separate copied CLI loop was rejected
 because it would duplicate cancellation/late-answer checks; extending the ALOHA
 prompt/schema was rejected because its measurements and task phases are different.
@@ -147,7 +222,7 @@ this ownership/proposal boundary. Live model and native simulation qualification
 are distinct from controlled tests; both require their own recorded evidence.
 
 
-The existing [ALOHA contract](../README.md#task-contract) stays unchanged.
+The existing [ALOHA contract](#aloha-application) stays unchanged.
 [NavigationCodexDecision](../src/robot_agent/navigation_decision.py) supplies the
 text prompt/schema; both proposal adapters share the private bounded CLI lifecycle.
 [The navigation CLI](../src/robot_agent/navigation_cli.py) owns connect/close and
@@ -156,3 +231,33 @@ The [host-to-container proposal relay](../examples/navigation/README.md#run-with
 is delivered for this local tutorial, not a general remote provider protocol.
 [Testing](TESTING.md#navigation-candidate-qualification)
 records the installed normal task and unresolved transport/fault scope.
+
+
+### Run navigation
+
+Build/install the exact Harness commit in [workspace.repos](../workspace.repos),
+including its optional Python bridge, and prepare its isolated simulation owner
+as described in the [owner setup](https://github.com/xiao-yang25/robot-harness/tree/13bc75e903f6005da3dd5d969f8242ce211d182f/integrations/ros2/nav2_session).
+Install this Agent application, then connect to that owner's private endpoint:
+
+```sh
+robot-agent-navigation --endpoint /path/to/navigation.sock \
+  --output /path/to/new-task --model YOUR_MODEL
+```
+
+
+The matching owner must also allow bounded caller think time. This
+30-second proposal application uses owner `--caller-wait-seconds 45`, covering
+proposal time and public RPC allowance. The in-container simulation shell also
+reads `M6_CALLER_WAIT_SECONDS=45`; setting it only on the host does not propagate
+it through the simulation launcher.
+The owner's unconfigured final-close wait is 10 seconds; a model reply can exceed
+it and leave the task needing help. This idle configuration does not increase
+native deadlines, observation TTL or physical stopping guarantees.
+
+
+For a complete scene, follow the [navigation tutorial](../examples/navigation/README.md):
+controlled proposals by default or opt-in host Codex proposals. See
+[recorded qualification](TESTING.md#public-host-model-navigation-workflow) for
+actual model runs and [controlled qualification](TESTING.md#public-controlled-navigation-workflow)
+for the separate no-model path.

@@ -1,6 +1,7 @@
 # Testing and qualification
 
-The [task contract](../README.md#task-contract) defines application behavior.
+The [ALOHA](README.md#aloha-application) and [navigation](README.md#navigation-application)
+contracts define application behavior.
 A model assessment, a settled execution receipt and an independent task verdict
 are different results.
 

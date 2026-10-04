@@ -1,7 +1,7 @@
 # Contributing
 
-Robot Agent is experimental. Start with [documentation](docs/README.md),
-[task contract](README.md#task-contract) and [skill setup](skills/aloha/README.md).
+Robot Agent is experimental. Start with the [application documentation](docs/README.md)
+and [skill setup](skills/aloha/README.md).
 
 ## Feedback and changes
 
