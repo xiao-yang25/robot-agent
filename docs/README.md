@@ -106,6 +106,35 @@ General routes, in-motion replanning,
 recovery, network instruction delivery and a generic skill framework are outside
 this application.
 
+
+### Planned in-motion business revision
+
+This design is not implemented. A new bounded application would initially visit
+A and accept at most one business instruction during A's measured motion:
+stop, or redirect to registered B. Without an instruction it would complete A.
+The delivered fixed A→B and released-A checkpoint applications remain unchanged.
+
+A caller-owned cooperative, nonblocking instruction poll would be interleaved
+with public status/observation progress. One revision would bind the task, current
+A request/operation/native goal and Session/map/epoch. Invalid, foreign, duplicate
+or late input would not change the authorized A; caller stop, provider failure,
+invalid observations or expired budgets would cancel/help instead.
+
+A valid instruction would cancel exactly A before any model wait. Redirecting
+would require a new explicit Harness profile: correlated native termination,
+sealed outlet, fresh quiet and successor readiness must yield A settled/released.
+The existing Owner exits on cancellation with unknown/pending settlement and
+cannot provide this reuse today. The model would propose B only after that
+boundary, with the bound instruction and fresh feedback; it would grant no
+authority. An ambiguous B request would never be replayed.
+
+Business stop would be reported separately from arriving at A. A redirect would
+complete B, without claiming A was visited. Native cleanup and task verdict remain
+separate; final B would still be pending. The first step is a bounded Core and
+Humble/Nav2 feasibility probe, before changing the Harness pin, task interface,
+host relay or installed tutorial. No in-motion support or new video qualification
+is claimed by this design.
+
 ## Models and algorithm providers
 
 Robot tasks may combine business LLM/VLM decisions, VLA or learned action
