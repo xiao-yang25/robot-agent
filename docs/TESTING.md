@@ -31,6 +31,21 @@ Report failures through the [feedback guidance](../CONTRIBUTING.md#feedback-and-
 
 ## Automated checks
 
+[Checkpoint application checks](../tests/test_navigation_checkpoint.py) cover both
+business instructions, missing/foreign/late answers, shared deadlines, unreleased
+A, changed feedback, cancellation, proposal/command disagreement and ambiguous B
+without replay. A controlled proposal child also checks the checkpoint schema.
+The existing application workflow discovers these alongside the fixed A→B checks.
+
+[Four installed checkpoint cases](../tests/combination/test_navigation_checkpoint_installed.py)
+consume a fresh Agent installation with the real public Session and Core: finish
+at A, continue to B, foreign checkpoint rejection and actual slow-provider deadline
+expiry. They check retained A release, exact B revocation on caller close, honest
+pending/unknown outcomes, owner process exit and socket removal. The existing
+Ubuntu combination workflow discovers them automatically. Native and instruction
+providers remain controlled; these checks do not establish real ROS/model/physics
+behavior or a hard stopping deadline.
+
 Python 3.10+. The full suite needs the `vision,evaluation` extras but no ACT,
 MuJoCo, weights or authenticated model service:
 

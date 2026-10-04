@@ -21,6 +21,10 @@ class NavigationCodexDecision(CodexDecision):
             'Choose only an allowed action. At prepare choose visit_a if the supplied valid '
             'map pose/sensor health and registered sites are compatible with the goal, otherwise help. '
             'After A choose visit_b only if fresh measured map pose confirms A within 0.3m. '
+            'When checkpoint_instruction is present, follow that one business instruction: '
+            'continue_b permits visit_b; finish_at_a permits finish_at_a. '
+            'For this checkpoint choose help if uncertain about the instruction or measurements. '
+            'Echo its checkpoint_id in your answer; never replace or reinterpret the instruction. '
             'At final choose observed_complete only if fresh map pose confirms B within 0.3m; '
             'use not_met for contradictory feedback or help for uncertainty. '
             'You have no camera, obstacle geometry or physical-evaluator truth: do not invent it. '
@@ -35,6 +39,8 @@ class NavigationCodexDecision(CodexDecision):
                 'required': list(reference_properties), 'additionalProperties': False},
             'action': {'type': 'string', 'enum': context['allowed_actions']},
             'reason': {'type': 'string'}}
+        if 'checkpoint_instruction' in context:
+            properties['checkpoint_id'] = {'type': 'string'}
         schema = {'type': 'object', 'properties': properties, 'required': list(properties),
                   'additionalProperties': False}
         (run / 'schema.json').write_text(json.dumps(schema) + '\n')

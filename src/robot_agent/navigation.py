@@ -58,12 +58,14 @@ def measurements(raw):
                               'streams': deepcopy(streams)}}
 
 
-class NavigationTask:
+class _NavigationExecution:
     """Borrow one trusted prepared owner; caller owns the connection and close.
 
     Model proposals cannot submit, rebind, settle or restore execution authority.
     A finite result is distinct from pending resource settlement and task verdict.
     """
+    goal = GOAL
+
     def __init__(self, decision_backend, *, budget=NavigationBudget(), clock=time.monotonic,
                  sleep=time.sleep, stop_requested=lambda: False, started_at=None):
         self.backend, self.budget = decision_backend, budget
@@ -76,7 +78,7 @@ class NavigationTask:
         self.phase, self.active, self.used, self.realm = 'prepare', None, False, None
         self.binding = None
         self.maximum_deadline_ms = 147000
-        self.report = {'task_id': self.task_id, 'goal': GOAL, 'status': 'running',
+        self.report = {'task_id': self.task_id, 'goal': self.goal, 'status': 'running',
                        'decisions': [], 'operations': [], 'task_verdict': 'unassessed'}
 
     def check_budget(self, deadline=None):
@@ -109,17 +111,23 @@ class NavigationTask:
         self.maximum_deadline_ms = cap['maximum_deadline_ms']
         return cap
 
-    def decide(self, session):
-        self.capabilities(session, require_available=self.phase != 'final')
+    def decide(self, session, *, deadline=None, actions=None, instruction=None, require_available=None):
+        require_available = self.phase != 'final' if require_available is None else require_available
+        self.capabilities(session, require_available=require_available)
         observation = self.observe(session)
         if self.phase != 'prepare':
             previous = SITES['A' if self.phase == 'after_a' else 'B']
             if math.dist(observation['pose'], previous[:2]) > .3:
                 raise ValueError('new map feedback does not confirm preceding visit')
-        context = {'task_id': self.task_id, 'phase': self.phase, 'goal': GOAL,
+        context = {'task_id': self.task_id, 'phase': self.phase, 'goal': self.goal,
                    'observation_reference': deepcopy(observation['reference']),
-                   'registered_sites': deepcopy(SITES), 'allowed_actions': list(ACTIONS[self.phase])}
-        deadline = min(self.deadline, self.clock() + self.budget.decision_seconds)
+                   'registered_sites': deepcopy(SITES),
+                   'allowed_actions': list(ACTIONS[self.phase] if actions is None else actions)}
+        if instruction is not None:
+            context['checkpoint_instruction'] = deepcopy(instruction)
+        deadline = min(self.deadline, self.clock() + self.budget.decision_seconds
+                       if deadline is None else deadline)
+        self.check_budget(deadline)
         answer = self.backend.decide(deepcopy(context), deepcopy(observation), deadline, self.stop_requested)
         entry = {'context': context, 'answer': answer, 'accepted': False}
         self.report['decisions'].append(entry)
@@ -128,10 +136,11 @@ class NavigationTask:
                 or answer.get('phase') != self.phase
                 or answer.get('observation_reference') != context['observation_reference']
                 or type(answer.get('observation_reference', {}).get('epoch')) is not int
-                or answer.get('action') not in ACTIONS[self.phase]
+                or answer.get('action') not in context['allowed_actions']
+                or (instruction is not None and answer.get('checkpoint_id') != instruction['checkpoint_id'])
                 or not isinstance(answer.get('reason'), str) or not 0 < len(answer['reason']) <= 2000):
             raise ValueError('proposal is unsupported or belongs to a different observation/task/phase')
-        self.capabilities(session, require_available=self.phase != 'final')
+        self.capabilities(session, require_available=require_available)
         current = self.observe(session)
         self.check_budget(deadline)
         if (current['sample_sim_seconds'] < observation['sample_sim_seconds']
@@ -213,17 +222,7 @@ class NavigationTask:
             raise ValueError('navigation task cannot be replayed')
         self.used = True
         try:
-            for phase, site in (('prepare', 'A'), ('after_a', 'B'), ('final', None)):
-                self.phase = phase
-                action, observation, deadline = self.decide(session)
-                if action == 'help':
-                    self.report.update(status='needs_help', reason='decision_backend_abstained')
-                    break
-                if site is None:
-                    self.report.update(status='completed', observation_assessment=action,
-                                       execution_cleanup='pending', requires_connection_close=True)
-                else:
-                    self.execute(session, site, observation, deadline)
+            self._run_steps(session)
         except Exception as error:
             self.report.update(status='cancelled' if isinstance(error, InterruptedError) else 'needs_help',
                                reason=f'{type(error).__name__}: {error}')
@@ -236,3 +235,19 @@ class NavigationTask:
                     self.report.update(operation_outcome='unknown', cancel_error=str(error))
             self.report['phase'] = self.phase
         return self.report
+
+
+class NavigationTask(_NavigationExecution):
+    """Fixed A→B task; borrow Session while caller owns connection and close."""
+    def _run_steps(self, session):
+        for phase, site in (('prepare', 'A'), ('after_a', 'B'), ('final', None)):
+            self.phase = phase
+            action, observation, deadline = self.decide(session)
+            if action == 'help':
+                self.report.update(status='needs_help', reason='decision_backend_abstained')
+                break
+            if site is None:
+                self.report.update(status='completed', observation_assessment=action,
+                                   execution_cleanup='pending', requires_connection_close=True)
+            else:
+                self.execute(session, site, observation, deadline)

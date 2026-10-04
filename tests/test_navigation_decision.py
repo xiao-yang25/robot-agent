@@ -27,6 +27,7 @@ output=Path(sys.argv[sys.argv.index('--output-last-message')+1])
 if '--model' in sys.argv and sys.argv[sys.argv.index('--model')+1]=='slow-fixture':time.sleep(.4)
 answer={k:inputs[k] for k in ('task_id','phase','observation_reference')}
 answer.update(action=inputs['allowed_actions'][0],reason='controlled text proposal')
+if 'checkpoint_instruction' in inputs: answer['checkpoint_id']=inputs['checkpoint_instruction']['checkpoint_id']
 output.write_text(json.dumps(answer))
 kind='command_execution' if sys.argv[sys.argv.index('--model')+1]=='tool-fixture' else 'agent_message'
 print(json.dumps({'item':{'type':kind}}))
@@ -71,6 +72,18 @@ print(json.dumps({'item':{'type':kind}}))
     def test_tool_event_is_rejected_after_actual_child_exit(self):
         with self.assertRaisesRegex(RuntimeError, 'attempted tools'):
             self.backend('tool-fixture').decide(self.context, {}, time.monotonic()+5, lambda: False)
+        self.reaped()
+
+    def test_checkpoint_command_and_echo_schema_reach_actual_proposal_child(self):
+        self.context.update(phase='after_a', allowed_actions=['finish_at_a', 'help'],
+                            checkpoint_instruction={'checkpoint_id': 'current', 'action': 'finish_at_a'})
+        answer = self.backend().decide(self.context, {'pose': [.7, -.5]}, time.monotonic()+5, lambda: False)
+        self.assertEqual(answer['checkpoint_id'], 'current')
+        self.assertEqual(answer['action'], 'finish_at_a')
+        schema = json.loads((self.root/'decisions/decision-1/schema.json').read_text())
+        self.assertIn('checkpoint_id', schema['required'])
+        inputs = json.loads((self.root/'decisions/decision-1/input.json').read_text())
+        self.assertEqual(inputs['checkpoint_instruction'], self.context['checkpoint_instruction'])
         self.reaped()
 
     def test_running_text_proposal_timeout_reaps_child(self):
