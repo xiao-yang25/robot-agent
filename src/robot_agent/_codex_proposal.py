@@ -1,5 +1,6 @@
 """Private bounded proposal subprocess; no robot execution capability."""
 import json
+import os
 import subprocess
 import tempfile
 import time
@@ -28,8 +29,9 @@ def run_proposal(executable, model, run, prompt, deadline, stop_requested, *, im
                 raise InterruptedError('decision cancelled before launch')
             if time.monotonic() >= deadline:
                 raise TimeoutError('decision expired before launch')
+            environment = dict(os.environ, ROBOT_AGENT_PROPOSAL_REMAINING_SECONDS=str(deadline-time.monotonic()))
             process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=stdout,
-                                       stderr=stderr, text=True)
+                                       stderr=stderr, text=True, env=environment)
             process.stdin.write(prompt)
             process.stdin.close()
             while process.poll() is None:

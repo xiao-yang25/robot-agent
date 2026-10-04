@@ -19,5 +19,7 @@ jobs:
         run: |
           robot-agent-handoff --help
           robot-agent-navigation --help
+          robot-agent-navigation-host-proposal --version
+          python -m robot_agent.navigation_host_model --help
           robot-agent-evaluate-handoff --help
           python -m robot_agent.prepare_aloha --help

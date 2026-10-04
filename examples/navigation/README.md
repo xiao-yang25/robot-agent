@@ -1,8 +1,9 @@
-# Run the controlled navigation business application
+# Run the navigation business application
 
 This tutorial starts a real Humble/Gazebo A→B scene, the installed Harness owner,
 and the installed public Agent CLI. Its three executable proposals are explicitly
-controlled: **no model service, robot hardware or automatic recovery** is used.
+controlled by default: **no model service, robot hardware or automatic recovery**
+is used. An explicit host model mode is described below.
 The Agent still checks fresh observations, proposal identity and deadlines, and
 retains final pending settlement and unknown native cleanup.
 
@@ -103,12 +104,59 @@ separately tested. Confirm `container_removed`; reconcile the recorded container
 identity if cleanup failed. Keep a required image and useful build/log directories;
 remove only resources belonging to failed or superseded runs.
 
-## Real models and limits
+## Run with a host model
 
-The controlled executable is a tutorial fixture, not Codex or another model.
-The application supports its existing [text proposal backend](../../docs/README.md#navigation-application),
-but this network-disabled workflow does not yet deliver the host-to-container real
-model path. That path and a fresh-install actual-model run remain separate M6c
-delivery work. No credential directory is mounted. General routes, obstacles,
-owner failure/restart, complete native cleanup, hard stop, physical hardware and
-broad model reliability are outside this tutorial.
+Use the same wheel and Linux prefixes above. Install that wheel into a separate
+host Python environment; the host worker needs only the package's standard-library
+navigation modules. It must not import the Linux Core binary:
+
+```sh
+python3 -m venv navigation-host
+navigation-host/bin/python -m pip install --no-deps navigation-consumer/dist/robot_agent-0.0.0-py3-none-any.whl
+```
+
+Install and authenticate your Codex CLI on the host using its own setup. Select an
+explicit model that your service supports. This opt-in mode makes at most three
+model requests, each within the original 30-second proposal budget:
+
+```sh
+navigation-host/bin/python examples/navigation/run.py --provider host-codex \
+  --model YOUR_MODEL --executable codex --host-output runs/navigation-model-01-host \
+  --harness-source ../harness-navigation --python-prefix navigation-consumer/install \
+  --agent-prefix navigation-consumer/agent-install --image robot-navigation-demo:humble \
+  --output runs/navigation-model-01
+```
+
+The host owns the model CLI, its network and credentials. The simulation stays
+network-disabled. A local relay exchanges only this task's three phase proposals;
+the host reconstructs task context and the declared map pose/time/sensor health,
+then calls the existing text backend with tools disabled. Neither the model nor
+the relay receives a robot interface. The Agent revalidates each reply and fresh
+observation before any admission. There is no retry or fallback provider.
+
+Choose new, separate scene and host directories. Private host output must also be
+outside both installed prefixes and Harness's simulation directory; overlapping
+paths are refused before startup. Host logs, prompts, answers and actual model/CLI
+version stay in `--host-output`, which is never mounted into the container.
+The scene's `agent/decisions` records the relay processes; the host's `decisions`
+records actual model processes. `model-server.json` records phase exchange and
+`processes.json` records owned worker/launcher reaping. Treat these as private
+operator records rather than website assets.
+
+The supervisor owns the host worker and the existing Harness launcher. Interrupts
+notify the launcher, which retains Docker cleanup ownership. The generated
+read-only client script survives through that cleanup. Teardown permits 110 seconds
+for the launcher's bounded create/cleanup paths and 6 seconds for the model worker,
+then kills surviving owned process groups; this does not extend task/motion budgets
+or prove a hard stopping limit. Proposal withdrawal also notifies the host to reap
+its local CLI child. Remote model-service termination and resource release remain
+unknown. Check both process records and `container_removed` after interruptions.
+
+## Limits
+
+The controlled executable is a tutorial fixture. Host model mode uses the existing
+[text backend](../../docs/README.md#navigation-application); configured code and
+controlled tests alone do not qualify a real model. See [recorded qualification](../../docs/TESTING.md#public-host-model-navigation-workflow)
+for the actual tested combination. General routes, obstacles, owner failure/restart,
+complete native cleanup, hard stop, hardware and broad model reliability remain
+outside this tutorial. Navigation still has no installed physical evaluator.

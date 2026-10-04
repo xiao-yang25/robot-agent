@@ -59,7 +59,10 @@ owner and socket must be cleaned up. The additional
 [controlled tutorial case](../tests/combination/test_navigation_demo_installed.py)
 uses the installed tutorial proposal executable through the public CLI, requiring
 three accepted decisions, A settled/released, B accepted/pending and reaped children.
-Discovery includes ten combination cases; these controlled tests do not run
+Two [host/relay composition cases](../tests/combination/test_navigation_host_installed.py)
+use installed packages and actual local processes: normal decisions retain B
+pending, while a host tool event crosses the relay as an error with zero admissions.
+Discovery includes twelve combination cases; these controlled tests do not run
 physics or a remote model service.
 
 Agent changes use the Harness revision in [workspace.repos](../workspace.repos).
@@ -313,8 +316,8 @@ That reproduction used research-only launcher selection, controlled proposal
 and passive-observer tools. The new [controlled business tutorial](../examples/navigation/README.md)
 provides public preparation, launch and report inspection using the existing
 Harness supervisor and installed Agent CLI. The fixed new installation and
-controlled native run are qualified below; the host-to-container real-model path
-remains pending. Navigation has no installed physical evaluator;
+controlled native run are qualified below; the subsequent host model workflow
+has its own qualification section. Navigation has no installed physical evaluator;
 `robot-agent-evaluate-handoff` applies only to ALOHA. CLI completion and an owner's
 process-completion verification file cannot prove physical task success.
 
@@ -352,4 +355,19 @@ completed publicly but its research evaluation failed to import a helper; it was
 retained as incomplete, rather than reevaluated as pass. The final run is separate.
 No live model, hardware, general reliability or full native cleanup is qualified.
 Published videos retain their own recorded versions; no new video is claimed
-for this packaging increment. The public real-model path remains M6c delivery work.
+for this packaging increment. The later public host model workflow has separate qualification below.
+
+## Public host model navigation workflow
+
+The opt-in [tutorial mode](../examples/navigation/README.md#run-with-a-host-model)
+keeps model credentials and execution on the host. It supervises one model worker
+and Harness launcher; Harness owns Docker cleanup. New actual-process tests cover
+three phase exchanges, filtered inputs, file/nonce rejection, proposal withdrawal,
+original deadline expiry, failed preparation and signal/forced process-group cleanup.
+Private host outputs overlapping scene or container mounts are refused before startup.
+The existing task/decision/operation budgets and pending/unknown outcomes remain.
+
+Fresh installed actual-model qualification is pending for this candidate. Controlled
+subprocess tests do not establish service reliability, physics, remote cleanup,
+Owner loss, hardware or a hard stopping limit. Historical live-model runs above
+used the research relay and do not qualify this new public entry.

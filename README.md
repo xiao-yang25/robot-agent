@@ -155,8 +155,7 @@ The owner's unconfigured final-close wait is 10 seconds; a model reply can excee
 it and leave the task needing help. This idle configuration does not increase
 native deadlines, observation TTL or physical stopping guarantees.
 
-For a complete controlled-proposal scene and installed business application, use
-the [navigation tutorial](examples/navigation/README.md). The connection recipe
-above still assumes a prepared same-container owner and working proposal
-executable. A public real-model scene connection and fresh-model qualification
-remain pending; see [delivery scope](docs/TESTING.md#m6c-delivery-audit).
+For a complete scene with the installed business application, use the
+[navigation tutorial](examples/navigation/README.md): controlled proposals by
+default, or explicit Codex proposals on the host with no credentials in the
+network-disabled scene. See [qualification and limits](docs/TESTING.md#public-host-model-navigation-workflow).

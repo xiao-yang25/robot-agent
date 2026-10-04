@@ -11,7 +11,7 @@ Core belongs to Harness; the dependency runs from Agent to Harness.
 | [CodexDecision](../src/robot_agent/codex_decision.py) | Structured visual proposals used by that application | Task-specific cooperating model backend; not a general planner, memory system or execution authority |
 | [ACT worker and preparation](../skills/aloha/README.md) | Bundled candidate worker, pinned environment and explicit weight preparation | ALOHA-specific policy input/output; pinned Harness private candidate transport, not a stable skill plugin API |
 | `robot-agent-evaluate-handoff` and [fixed profile](../src/robot_agent/handoff_profile.json) | Installed offline evaluation of the declared recorded task | Task-specific predicate; evaluation does not drive decisions or authorize execution |
-| `robot-agent-navigation` and [controlled scene tutorial](../examples/navigation/README.md) | Installed bounded A→B application and explicit controlled proposals in the isolated Nav2 scene | Same-container owner; real-model scene connection and fresh-model qualification remain pending |
+| `robot-agent-navigation` and [scene tutorial](../examples/navigation/README.md) | Installed bounded A→B application; controlled or host model proposals in the isolated Nav2 scene | Same-container owner; bounded local process cleanup, remote cleanup unknown |
 | [Combination CI](../.github/workflows/combination.yml) | Reproducible installed Agent/Harness boundary checks | Explicit no-physics providers; not a model/robot task qualification |
 
 These delivered artifacts are useful applications, policies and verification
