@@ -88,7 +88,7 @@ skills/aloha/.venv/bin/robot-agent-handoff --output /absolute/new-run \
 The default worker comes from the installed Agent package. `--worker-script` is
 an optional trusted-local override, not a remote plugin input. The same environment
 must contain the model and renderer dependencies for the child host/worker.
-See the [application contract and evidence limits](../../README.md#task-contract).
+See the [application contract and evidence limits](../../docs/README.md#aloha-application).
 Reports and recordings are private local evidence; do not commit them or weights.
 
 Credits: ACT/ALOHA model and migration from
@@ -117,7 +117,7 @@ trace and retain its new output. The CLI refuses an existing report before
 loading evidence. Exit0 means the fixed finite physical predicate passed, exit1
 means it failed, and exit2 means unknown or command/output error. Keep this
 verdict separate from the application/visual assessment; see
-[evaluation contract](../../README.md#evaluate-the-recorded-task-independently).
+[evaluation contract](../../docs/TESTING.md#independent-evaluation).
 
 ## Linux consumer path
 
