@@ -328,7 +328,9 @@ those diagnostics, trusted-client launcher and bounded B startup ordering in
 results retain their original versions and scope.
 GetState preparation-timeout cause, Owner loss/restart, full native cleanup,
 hard stop, hardware and general reliability remain unqualified. Application
-license/contribution terms and a versioned preview remain pending separately.
+licensing is now specified in the [project declaration](../LICENSE) and
+[contribution terms](../CONTRIBUTING.md#licensing-status); a versioned preview
+remains pending separately.
 
 ## Public controlled navigation workflow
 

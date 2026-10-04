@@ -29,7 +29,14 @@ Maintainers coordinate it; self-review does not replace it.
 
 ## Licensing status
 
-The repository has no adopted license or settled patch contribution terms yet.
-Resolve those terms before submitting patches or adopting the code. Reports and
-discussion are welcome meanwhile. Third-party code, models and assets retain
-their own terms; this guide is not a license grant.
+Except for third-party material with its own notices, Robot Agent is licensed
+under [MIT](LICENSE-MIT) OR [Apache-2.0](LICENSE-APACHE), at your option; see the
+[project declaration](LICENSE).
+
+By intentionally submitting a contribution for inclusion in this project, you
+agree to license it under the same `MIT OR Apache-2.0` terms, without additional
+terms. You retain your copyright; no copyright assignment or separate CLA is
+required. You must have the right to provide the contribution under these terms.
+Identify third-party material and preserve its original notices; discuss material
+with different terms before inclusion. Model weights, dependencies and simulator
+assets retain their own terms; this grant does not replace them.
