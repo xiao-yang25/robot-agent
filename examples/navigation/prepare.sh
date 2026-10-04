@@ -19,4 +19,4 @@ cmake --build /consumer/build --target _core --parallel 2
 cmake --install /consumer/build
 ctest --test-dir /consumer/build -R '^python_session$' --output-on-failure --no-tests=error
 PYTHONPATH=/pip-25.0.1-py3-none-any.whl python3 -m pip install --no-index --no-deps \
-  --target /consumer/agent-install /robot_agent-0.0.0-py3-none-any.whl
+  --target /consumer/agent-install /robot_agent-0.1.0a1-py3-none-any.whl

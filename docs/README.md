@@ -81,6 +81,7 @@ model metrics alone do not establish task success or a physical stop guarantee.
 
 | Goal | Read |
 |---|---|
+| Try the developer preview | [Version and pairing](../README.md#developer-preview), [navigation tutorial](../examples/navigation/README.md) and [verification scope](TESTING.md#developer-preview-verification) |
 | Understand the current application | [Task contract](../README.md#task-contract) and [implementation](../src/robot_agent/handoff.py) |
 | Prepare and run ACT / ALOHA | [Skill setup](../skills/aloha/README.md) and [dependency pin](../workspace.repos) |
 | Understand model proposals | [Run](../README.md#run) and [adapter](../src/robot_agent/codex_decision.py) |
@@ -99,8 +100,9 @@ experiments, checkpoints and private configuration outside this repository.
 [Existing-agent MCP integration](https://github.com/xiao-yang25/robot-harness/tree/master/integrations/mcp)
 is another Harness consumer path. It does not replace this application's task
 state. The application uses [MIT OR Apache-2.0](../LICENSE); see
-[contribution terms](../CONTRIBUTING.md#licensing-status). A versioned preview
-and actual external reproduction remain pending.
+[contribution terms](../CONTRIBUTING.md#licensing-status). Start with the
+[developer preview](../README.md#developer-preview); release checks and actual
+external reproduction are distinct from historical qualification.
 
 ## Navigation application
 

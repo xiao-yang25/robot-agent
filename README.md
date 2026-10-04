@@ -2,7 +2,7 @@
 
 Observation-driven task applications for
 [Robot Harness](https://github.com/xiao-yang25/robot-harness).
-Experimental: no versioned release or physical-robot qualification yet.
+Experimental developer preview; no stable API or physical-robot qualification.
 
 The first application attempts an ALOHA cube transfer followed by one simulated
 second of holding. A visual backend chooses bounded skills; ACT produces joint
@@ -14,6 +14,27 @@ path, rather than this application's task controller.
 
 [Documentation](docs/README.md) · [Skill setup](skills/aloha/README.md) ·
 [Testing and limits](docs/TESTING.md) · [Contributing](CONTRIBUTING.md)
+
+## Developer preview
+
+Package version: **`0.1.0a1`**. Start with the
+[controlled navigation tutorial](examples/navigation/README.md): three proposals
+and two registered destinations in Ubuntu22.04 / ROS2 Humble / Gazebo. The default
+mode needs Docker and host Python3.10+, with no model service or weights.
+Apple Silicon uses Linux amd64 emulation. Host Codex proposals are an opt-in mode;
+ACT / ALOHA keeps its separate [skill preparation](skills/aloha/README.md).
+
+Use one recorded Agent commit and the exact Harness dependency in
+[workspace.repos](workspace.repos). Build the wheel from that checkout; this is
+not a package-index installation. The pair is experimental, with no cross-version
+API/ABI compatibility promise. A package version alone does not establish a
+published GitHub release or qualify new models or platforms.
+
+A completed navigation sequence retains `task_verdict=unassessed`, final B
+settlement pending and native cleanup unknown. Inspect process/container cleanup
+separately. There is no installed navigation physical evaluator. See
+[checks and known limits](docs/TESTING.md#developer-preview-verification) and
+[feedback instructions](CONTRIBUTING.md#feedback-and-changes).
 
 ## Task contract
 

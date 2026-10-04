@@ -4,6 +4,30 @@ The [task contract](../README.md#task-contract) defines application behavior.
 A model assessment, a settled execution receipt and an independent task verdict
 are different results.
 
+## Developer preview verification
+
+The `0.1.0a1` package pairs with the immutable Harness dependency in
+[workspace.repos](../workspace.repos). Its default entry is the
+[controlled navigation tutorial](../examples/navigation/README.md), with separate
+optional host-model and ACT / ALOHA preparation. Record the Agent commit, package
+version, Harness revision and selected image identity when reproducing it.
+
+Before a GitHub prerelease, check the source distribution and its built wheel,
+license files, installed entry points and applicable application/combination CI.
+Then reproduce the public controlled tutorial in fresh Linux build/install and
+run directories. Check the three correlated proposals, A settled/released before
+B, final B accepted/pending, the unassessed task verdict, unknown native cleanup,
+and actual proposal/container reaping. Process completion is separate from
+physical task success; navigation has no installed physical evaluator.
+
+The historical qualifications below retain their exact versions and environments;
+a version or documentation change does not rerun those experiments. CI uses
+controlled providers and does not replace actual ROS/Gazebo reproduction. The
+preview makes no cross-version API/ABI promise. Known limits include Owner
+loss/restart, hard stop deadlines, full native cleanup, general routes/obstacles,
+physical hardware and broad model reliability. Isaac/RTX qualification is separate.
+Report failures through the [feedback guidance](../CONTRIBUTING.md#feedback-and-changes).
+
 ## Automated checks
 
 Python 3.10+. The full suite needs the `vision,evaluation` extras but no ACT,
@@ -329,8 +353,9 @@ results retain their original versions and scope.
 GetState preparation-timeout cause, Owner loss/restart, full native cleanup,
 hard stop, hardware and general reliability remain unqualified. Application
 licensing is now specified in the [project declaration](../LICENSE) and
-[contribution terms](../CONTRIBUTING.md#licensing-status); a versioned preview
-remains pending separately.
+[contribution terms](../CONTRIBUTING.md#licensing-status); the
+[preview verification](#developer-preview-verification) remains separate from
+these historical experiments.
 
 ## Public controlled navigation workflow
 
