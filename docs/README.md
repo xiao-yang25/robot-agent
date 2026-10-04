@@ -26,6 +26,35 @@ The navigation application preserves `HandoffTask` behavior; the manifest pins
 the paired Harness implementation for both applications. This is bounded reuse,
 not a generic skill-plugin framework or a physical-robot qualification.
 
+### Adapt an existing application
+
+Start with the [ALOHA setup](../skills/aloha/README.md) or the
+[navigation tutorial](../examples/navigation/README.md) and the pinned
+[Harness dependency](../workspace.repos). Both applications are runnable starting
+points; their task classes are experimental Python interfaces.
+
+| Change | Current extension point | What must remain qualified |
+|---|---|---|
+| Model or proposal logic | Explicit CLI model selection, or a caller-supplied `decision_backend` in `HandoffTask` / `NavigationTask` | Return the application's allowed proposal with its original task/phase/observation identity; keep the model separate from Session calls. A new model needs its own task evaluation |
+| Shorter task/decision/operation budgets | `Budget` / `NavigationBudget` when constructing the task in Python | Stay within the existing bounds; shorter budgets do not make synchronous calls interruptible or guarantee a hard stop |
+| New navigation sites, map or visit order | Requires a new application/owner adaptation; no general site configuration is exposed by the installed owner | Match task coordinates, map feedback, native contexts and closure obligations before claiming support |
+| Different robot, camera, policy or skill duration | Check the affected task/backend contracts and adapt them where semantics change | Requalify observation/action semantics, normal behavior and relevant failures; keep third-party model/asset terms separate |
+
+For an application-owned proposal backend, implement
+`decide(context, observation, deadline, stop_requested)` and pass it to the task
+constructor. The bundled CLIs select their declared backends; there is no general
+CLI plugin loader. ALOHA supplies camera/joints, while navigation supplies map
+pose/time/sensor health. Preserve each application's measurement whitelist and
+proposal schema instead of treating them as interchangeable inputs.
+
+The caller owns startup or connection and close; the task borrows the Session.
+Keep ambiguous requests, pending settlement, cleanup and independent task verdicts
+in their existing separate report fields. Verify an adaptation against the
+[application and installed-combination checks](TESTING.md#automated-checks), then
+record model/physics evidence for the changed behavior. Fixture checks alone do
+not qualify it. A different goal or sequence should define its own task contract;
+editing constants in these fixed applications is not a supported configuration API.
+
 ## Models and algorithm providers
 
 Robot tasks may combine business LLM/VLM decisions, VLA or learned action
@@ -120,6 +149,7 @@ The existing [ALOHA contract](../README.md#task-contract) stays unchanged.
 text prompt/schema; both proposal adapters share the private bounded CLI lifecycle.
 [The navigation CLI](../src/robot_agent/navigation_cli.py) owns connect/close and
 keeps close intent, pending settlement and unknown native cleanup in its report.
-The research host-to-container proposal relay is experiment setup, not a supported
-remote provider protocol. [Testing](TESTING.md#navigation-candidate-qualification)
+The [host-to-container proposal relay](../examples/navigation/README.md#run-with-a-host-model)
+is delivered for this local tutorial, not a general remote provider protocol.
+[Testing](TESTING.md#navigation-candidate-qualification)
 records the installed normal task and unresolved transport/fault scope.
