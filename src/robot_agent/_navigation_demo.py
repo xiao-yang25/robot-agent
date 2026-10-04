@@ -27,7 +27,51 @@ def finish(process, seconds):
     return {'pid': process.pid, 'returncode': process.returncode, 'reaped': True, 'group_forced': forced}
 
 
-def run_host(command, *, output, host_output, model, executable, mounted_roots=()):
+def checkpoint_client(configuration, *, provider='controlled', model='controlled-checkpoint-no-model'):
+    from .navigation_checkpoint_demo import TutorialInstruction
+    instruction, delay = configuration['instruction'], configuration['delay']
+    TutorialInstruction(instruction, delay, '.')
+    return ('from robot_agent.navigation_checkpoint_demo import main\n'
+            f'raise SystemExit(main(instruction={instruction!r}, delay={delay!r}, '
+            f'provider={provider!r}, model={model!r}))\n')
+
+
+def run_controlled_checkpoint(command, configuration):
+    stopped = 0
+    def stop(signum, _frame):
+        nonlocal stopped
+        stopped = signum
+    previous = {sig: signal.signal(sig, stop) for sig in (signal.SIGINT, signal.SIGTERM)}
+    process = None
+    result = 1
+    try:
+        with tempfile.TemporaryDirectory(prefix='robot-agent-checkpoint-client-') as temporary:
+            client = Path(temporary)/'client.py'
+            client.write_text(checkpoint_client(configuration))
+            command = list(command)
+            command[command.index('--client-script')+1] = str(client)
+            try:
+                if stopped:
+                    return 128+stopped
+                process = subprocess.Popen(command, start_new_session=True)
+                while process.poll() is None and not stopped:
+                    time.sleep(.05)
+                if stopped and process.poll() is None:
+                    process.send_signal(stopped)
+                record = finish(process, 110)
+                result = 128+stopped if stopped else record['returncode']
+                if record['group_forced']:
+                    result = result or 1
+            finally:
+                if process is not None and process.poll() is None:
+                    finish(process, 110)
+    finally:
+        for sig, handler in previous.items():
+            signal.signal(sig, handler)
+    return result
+
+
+def run_host(command, *, output, host_output, model, executable, mounted_roots=(), checkpoint=None):
     output, host_output = Path(output).resolve(), Path(host_output).resolve()
     if output.exists() or host_output.is_relative_to(output) or output.is_relative_to(host_output):
         raise ValueError('use new, separate scene and private host output directories')
@@ -50,13 +94,17 @@ def run_host(command, *, output, host_output, model, executable, mounted_roots=(
     try:
         with (host_output / 'model-server.log').open('w') as log:
             client = Path(temporary.name) / 'client.py'
-            client.write_text('from robot_agent.navigation_demo_client import main\n'
-                              f'main(provider="host-codex", model={model!r})\n')
+            client.write_text(checkpoint_client(checkpoint, provider='host-codex', model=model)
+                if checkpoint is not None else 'from robot_agent.navigation_demo_client import main\n'
+                f'main(provider="host-codex", model={model!r})\n')
             command = list(command)
             command[command.index('--client-script') + 1] = str(client)
-            host = subprocess.Popen([sys.executable, '-m', 'robot_agent.navigation_host_model',
+            host_command = [sys.executable, '-m', 'robot_agent.navigation_host_model',
                 '--exchange', str(output), '--output', str(host_output), '--model', model,
-                '--executable', executable], stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+                '--executable', executable]
+            if checkpoint is not None:
+                host_command.extend(['--task', 'checkpoint'])
+            host = subprocess.Popen(host_command, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
             ready_until = time.monotonic() + 6
             while not (host_output/'ready.json').exists():
                 if stopped or host.poll() is not None or time.monotonic() >= ready_until:

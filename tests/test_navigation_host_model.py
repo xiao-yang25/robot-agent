@@ -13,6 +13,7 @@ import uuid
 from robot_agent._navigation_demo import finish, run_host
 from robot_agent._navigation_relay import directory, proposal_request, read_json, write_json
 from robot_agent.navigation import ACTIONS, GOAL, SITES
+from robot_agent.navigation_checkpoint import CheckpointNavigationTask
 
 
 def inputs(phase='prepare', model='fixture'):
@@ -55,12 +56,12 @@ print(json.dumps({'item':{'type':'agent_message'}}))
             time.sleep(.01)
         self.assertTrue(path.exists(), f'missing {path}')
 
-    def server(self, model='fixture'):
+    def server(self, model='fixture', task='fixed'):
         log = (self.host/'server.log').open('w')
         self.addCleanup(log.close)
         process = subprocess.Popen([sys.executable, '-m', 'robot_agent.navigation_host_model',
             '--exchange', str(self.scene), '--output', str(self.host), '--model', model,
-            '--executable', str(self.executable)], stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+            '--executable', str(self.executable), '--task', task], stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
         self.addCleanup(lambda: finish(process, 1))
         self.wait_file(self.host/'ready.json', process)
         return process
@@ -103,6 +104,48 @@ print(json.dumps({'item':{'type':'agent_message'}}))
                     read_json(fd,name)
         with self.assertRaises(OSError), directory(self.scene/'link'):
             pass
+
+    def test_checkpoint_host_requires_explicit_task_and_preserves_only_bound_instruction(self):
+        value = inputs('after_a')
+        value.update(goal=CheckpointNavigationTask.goal, allowed_actions=['finish_at_a','help'])
+        command = {key: value['observation_reference'][key] for key in ('session_id','epoch','map_id','frame')}
+        command.update(task_id='task', checkpoint_id='current-checkpoint', action='finish_at_a', optional_metadata='ignored')
+        value['checkpoint_instruction'] = command
+        record = dict(nonce='a'*32, remaining_seconds=4, inputs=value)
+        _, _, context, observation = proposal_request(record,'after_a','fixture',task='checkpoint')
+        self.assertEqual(context['checkpoint_instruction']['action'],'finish_at_a')
+        self.assertNotIn('optional_metadata', context['checkpoint_instruction'])
+        with self.assertRaises(ValueError): proposal_request(record,'after_a','fixture')
+        for key, wrong in (('epoch',True),('session_id','foreign'),('task_id','other'),('frame','odom'),('action','visit_b')):
+            with self.subTest(key=key):
+                command[key], original = wrong, command[key]
+                with self.assertRaises(ValueError): proposal_request(record,'after_a','fixture',task='checkpoint')
+                command[key] = original
+        value['allowed_actions'] = ['visit_b','help']
+        with self.assertRaises(ValueError): proposal_request(record,'after_a','fixture',task='checkpoint')
+
+    def test_checkpoint_host_process_keeps_model_instruction_and_stops_after_two_phases(self):
+        source=self.executable.read_text().replace("out.write_text(json.dumps(answer))", "if 'checkpoint_instruction' in record: answer.update(action=record['allowed_actions'][0],checkpoint_id=record['checkpoint_instruction']['checkpoint_id'])\nout.write_text(json.dumps(answer))")
+        self.executable.write_text(source)
+        process=self.server(task='checkpoint')
+        for phase in ('prepare','after_a'):
+            slot=self.scene/'model-requests'/phase;slot.mkdir(parents=True)
+            value=inputs(phase);value['goal']=CheckpointNavigationTask.goal
+            if phase == 'after_a':
+                value['allowed_actions']=['finish_at_a','help']
+                command={key:value['observation_reference'][key] for key in ('session_id','epoch','map_id','frame')}
+                command.update(task_id='task',checkpoint_id='current',action='finish_at_a')
+                value['checkpoint_instruction']=command
+            with directory(slot) as fd: write_json(fd,'request.json',dict(nonce='b'*32,remaining_seconds=3,inputs=value))
+            self.wait_file(slot/'response.json',process)
+            response=json.loads((slot/'response.json').read_text())
+            self.assertNotIn('error', response)
+        self.assertEqual(response['answer']['checkpoint_id'],'current')
+        self.assertEqual(response['answer']['action'],'finish_at_a')
+        process.terminate();self.assertEqual(process.wait(timeout=5),0)
+        records=json.loads((self.host/'model-server.json').read_text())
+        self.assertEqual([row['phase'] for row in records['requests']],['prepare','after_a'])
+        self.assertTrue(records['stop_observed'])
 
     def test_three_host_decisions_have_private_inputs_and_reaped_actual_children(self):
         process=self.server()

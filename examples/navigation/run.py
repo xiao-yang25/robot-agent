@@ -21,7 +21,23 @@ def main():
     parser.add_argument('--model', help='required explicit host model for host-codex')
     parser.add_argument('--executable', default='codex', help='host-only model CLI')
     parser.add_argument('--host-output', type=Path, help='new private host directory, never mounted in the scene')
+    parser.add_argument('--task', choices=('fixed', 'checkpoint'), default='fixed')
+    parser.add_argument('--instruction', choices=('continue_b', 'finish_at_a'))
+    parser.add_argument('--instruction-delay', type=float, default=None, help='checkpoint tutorial wait in [0, 9] seconds')
     args = parser.parse_args()
+    checkpoint = None
+    if args.task == 'checkpoint':
+        from robot_agent.navigation_checkpoint_demo import TutorialInstruction
+        if args.instruction is None:
+            parser.error('checkpoint requires an explicit --instruction')
+        delay = 4 if args.instruction_delay is None else args.instruction_delay
+        try:
+            TutorialInstruction(args.instruction, delay, args.output)
+        except ValueError as error:
+            parser.error(str(error))
+        checkpoint = dict(instruction=args.instruction, delay=delay)
+    elif args.instruction is not None or args.instruction_delay is not None:
+        parser.error('instruction options require --task checkpoint')
     harness = args.harness_source.expanduser().resolve(strict=True)
     prefix = args.agent_prefix.expanduser().resolve(strict=True)
     python_prefix = args.python_prefix.expanduser().resolve(strict=True)
@@ -33,6 +49,8 @@ def main():
     client = prefix / 'robot_agent/navigation_demo_client.py'
     if not client.is_file() or not (prefix / 'bin/robot-agent-navigation-controlled').is_file():
         parser.error('Agent prefix lacks the installed tutorial; prepare a new Linux installation')
+    if checkpoint is not None and not (prefix/'robot_agent/navigation_checkpoint_demo.py').is_file():
+        parser.error('prepare a new Agent installation including the checkpoint tutorial')
     command = [sys.executable, str(harness / 'integrations/ros2/simulation/simulate.py'),
         'session', '--image', args.image, '--python-prefix', str(python_prefix),
         '--client-script', str(client), '--client-prefix', str(prefix), '--caller-wait-seconds', '45',
@@ -45,9 +63,14 @@ def main():
         from robot_agent._navigation_demo import run_host
         return run_host(command, output=args.output.expanduser().resolve(),
             host_output=args.host_output.expanduser().resolve(), model=args.model, executable=args.executable,
-            mounted_roots=(prefix, python_prefix, harness / 'integrations/ros2/simulation'))
+            mounted_roots=(prefix, python_prefix, harness / 'integrations/ros2/simulation'), checkpoint=checkpoint)
     if args.model is not None or args.host_output is not None or args.executable != 'codex':
         parser.error('model/host-output/executable options require --provider host-codex')
+    if checkpoint is not None:
+        # Keep this exact trusted bind file alive until Harness finishes its cleanup.
+        # Use the existing supervisor for signal forwarding and process-group reaping.
+        from robot_agent._navigation_demo import run_controlled_checkpoint
+        return run_controlled_checkpoint(command, checkpoint)
     # Default selector remains replaced by Harness, preserving its signal path.
     os.execv(sys.executable, command)
 
