@@ -55,6 +55,35 @@ record model/physics evidence for the changed behavior. Fixture checks alone do
 not qualify it. A different goal or sequence should define its own task contract;
 editing constants in these fixed applications is not a supported configuration API.
 
+### Next application candidate: checkpoint navigation
+
+The next bounded business task is to visit A, then accept one caller instruction
+to continue to B or finish that task at A. This is a design candidate; the current
+`NavigationTask`, CLI and developer preview still require A→B. Returning `help`
+at A remains needs-help, rather than completion of that original goal.
+
+The candidate checkpoint requires A's correlated result and settled/released
+receipt plus fresh feedback at A. A caller instruction must match the task,
+checkpoint and fixed session/map/epoch. It is consumed once; missing, invalid or
+late instructions lead to help without a default B submission. Instruction
+collection takes at most ten seconds and shares the original thirty-second
+decision budget with the following proposal. The owner uses the existing explicit
+45-second caller wait; its default 15-second wait is not this candidate's entry.
+All work remains within the 240-second task budget. Cooperative deadlines do not
+make synchronous providers forcibly interruptible.
+
+Only a proposal consistent with that instruction can proceed, after fresh
+observation validation. Finishing the new checkpoint task at A would preserve
+A released, task verdict unassessed and overall native cleanup unknown; the
+caller still closes the connection. Continuing would preserve B's current/pending
+disposition. Unknown effects never authorize replay or a third goal.
+
+Implementation, installed consumption, real instruction/model qualification and
+a same-run demonstration remain to be delivered. The first implementation will
+use a caller-supplied bounded instruction provider in one specific application.
+General routes, in-motion replanning, recovery, a network instruction service and
+a generic skill framework are separate work.
+
 ## Models and algorithm providers
 
 Robot tasks may combine business LLM/VLM decisions, VLA or learned action
