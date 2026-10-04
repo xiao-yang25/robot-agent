@@ -59,7 +59,10 @@ owner and socket must be cleaned up. The additional
 [controlled tutorial case](../tests/combination/test_navigation_demo_installed.py)
 uses the installed tutorial proposal executable through the public CLI, requiring
 three accepted decisions, A settled/released, B accepted/pending and reaped children.
-Discovery includes ten combination cases; these controlled tests do not run
+Two [host/relay composition cases](../tests/combination/test_navigation_host_installed.py)
+use installed packages and actual local processes: normal decisions retain B
+pending, while a host tool event crosses the relay as an error with zero admissions.
+Discovery includes twelve combination cases; these controlled tests do not run
 physics or a remote model service.
 
 Agent changes use the Harness revision in [workspace.repos](../workspace.repos).
@@ -313,8 +316,8 @@ That reproduction used research-only launcher selection, controlled proposal
 and passive-observer tools. The new [controlled business tutorial](../examples/navigation/README.md)
 provides public preparation, launch and report inspection using the existing
 Harness supervisor and installed Agent CLI. The fixed new installation and
-controlled native run are qualified below; the host-to-container real-model path
-remains pending. Navigation has no installed physical evaluator;
+controlled native run are qualified below; the subsequent host model workflow
+has its own qualification section. Navigation has no installed physical evaluator;
 `robot-agent-evaluate-handoff` applies only to ALOHA. CLI completion and an owner's
 process-completion verification file cannot prove physical task success.
 
@@ -352,4 +355,42 @@ completed publicly but its research evaluation failed to import a helper; it was
 retained as incomplete, rather than reevaluated as pass. The final run is separate.
 No live model, hardware, general reliability or full native cleanup is qualified.
 Published videos retain their own recorded versions; no new video is claimed
-for this packaging increment. The public real-model path remains M6c delivery work.
+for this packaging increment. The later public host model workflow has separate qualification below.
+
+## Public host model navigation workflow
+
+The opt-in [tutorial mode](../examples/navigation/README.md#run-with-a-host-model)
+keeps model credentials and execution on the host. It supervises one model worker
+and Harness launcher; Harness owns Docker cleanup. New actual-process tests cover
+three phase exchanges, filtered inputs, file/nonce rejection, proposal withdrawal,
+original deadline expiry, failed preparation and signal/forced process-group cleanup.
+Private host outputs overlapping scene or container mounts are refused before startup.
+The existing task/decision/operation budgets and pending/unknown outcomes remain.
+
+Fresh public Agent `72908370f7c8ee3b8f8b56f63fe9fe226d18776e` and manifest Harness
+`13bc75e903f6005da3dd5d969f8242ce211d182f` were fetched into a new consumer.
+The published wheel/preparation commands built new Linux Core/Agent prefixes and
+installed that same wheel into a separate host environment. An existing qualified
+Ubuntu22.04/Humble amd64 image with Python headers was reused; the whole image and
+optional header-download branch were not requalified. macOS application checks and
+exact-candidate Ubuntu CI passed all 67 application and twelve installed combination
+cases, including the two new host/relay cases. Failed initial missing-extras and
+incorrect test-error-location attempts were retained separately.
+
+The public host model command made three actual Codex0.159.0 requests for
+`gpt-6-sol` / high: visit A, visit B and observed complete. The task took66.293s.
+Actual container inspection confirmed network none, 2 CPU/4GiB and exactly five
+expected mounts, excluding host model output or credentials. Model inputs contained
+only task context and declared map pose/time/sensor health, with no tool events.
+A settled/released before fresh B admission; final B remained accepted/pending.
+One separate same-run physical evaluation measured A/B errors0.202/0.159m under
+the unchanged0.35m predicate. The application's task verdict remained unassessed;
+native and remote model cleanup remained unknown.
+
+All three actual model CLI and three container relay children were reaped. Both
+owned host process groups exited0 without forced cleanup; the scene/container
+exited0 without OOM and the exact container was removed. The passive observer also
+exited0 and was reaped. This qualifies one normal public-entry combination, not
+model-service reliability, remote cleanup, Owner loss, hardware or a hard stopping
+limit. Historical model runs and published videos retain their own version/scope;
+this packaging increment does not claim a new recording.
