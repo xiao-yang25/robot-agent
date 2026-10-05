@@ -120,6 +120,9 @@ class _NavigationExecution:
     def proposal_context(self):
         return {}
 
+    def instruction_answer_matches(self, answer, instruction):
+        return answer.get(self.instruction_id) == instruction[self.instruction_id]
+
     def decide(self, session, *, deadline=None, actions=None, instruction=None, require_available=None):
         require_available = self.phase != 'final' if require_available is None else require_available
         self.capabilities(session, require_available=require_available)
@@ -148,7 +151,7 @@ class _NavigationExecution:
                 or answer.get('observation_reference') != context['observation_reference']
                 or type(answer.get('observation_reference', {}).get('epoch')) is not int
                 or answer.get('action') not in context['allowed_actions']
-                or (instruction is not None and answer.get(self.instruction_id) != instruction[self.instruction_id])
+                or (instruction is not None and not self.instruction_answer_matches(answer, instruction))
                 or not isinstance(answer.get('reason'), str) or not 0 < len(answer['reason']) <= 2000):
             raise ValueError('proposal is unsupported or belongs to a different observation/task/phase')
         self.capabilities(session, require_available=require_available)

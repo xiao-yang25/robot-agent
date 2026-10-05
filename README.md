@@ -41,6 +41,10 @@ Model decisions stay separate from execution authority and independent evaluatio
 See [adaptation boundaries](docs/README.md#adapt-an-existing-application) for changing
 models or extending an application.
 
+Current development also exposes an experimental
+[single-backup Python task](docs/README.md#one-backup-after-confirmed-failure);
+its model/physics demonstration is pending.
+
 <a id="evaluate-the-recorded-task-independently"></a>
 <a id="installed-combination-ci"></a>
 <a id="acceptance-and-delivery"></a>
