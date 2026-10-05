@@ -31,13 +31,13 @@ def finite(value):
     return type(value) in (int, float) and math.isfinite(value)
 
 
-def measurements(raw):
+def measurements(raw, *, expected_map_id=MAP):
     """Expose only the public map measurement whitelist, never simulator truth."""
     ref = raw.get('reference', {})
     if (raw.get('valid') is not True or type(raw.get('epoch')) is not int or raw['epoch'] < 0
-            or raw.get('map_id') != MAP or raw.get('frame') != 'map'
+            or raw.get('map_id') != expected_map_id or raw.get('frame') != 'map'
             or not isinstance(ref, dict) or type(ref.get('epoch')) is not int
-            or ref['epoch'] != raw['epoch'] or ref.get('map_id') != MAP or ref.get('frame') != 'map'
+            or ref['epoch'] != raw['epoch'] or ref.get('map_id') != expected_map_id or ref.get('frame') != 'map'
             or any(not isinstance(ref.get(k), str) or not 0 < len(ref[k]) <= 128
                    for k in ('session_id', 'observation_id'))):
         raise ValueError('invalid navigation observation identity')
@@ -66,6 +66,7 @@ class _NavigationExecution:
     """
     goal = GOAL
     profile = PROFILE
+    expected_map_id = MAP
     instruction_field = "checkpoint_instruction"
     instruction_id = "checkpoint_id"
 
@@ -92,7 +93,7 @@ class _NavigationExecution:
 
     def observe(self, session):
         self.check_budget()
-        observation = measurements(session.observe())
+        observation = measurements(session.observe(), expected_map_id=self.expected_map_id)
         self.check_budget()
         realm = tuple(observation['reference'][key] for key in ('session_id', 'epoch', 'map_id', 'frame'))
         if self.realm is not None and realm != self.realm:
@@ -105,7 +106,7 @@ class _NavigationExecution:
         cap = session.capabilities()
         self.check_budget()
         if (cap.get('skill') != 'navigation.visit_site' or cap.get('profile') != self.profile
-                or cap.get('map_id') != MAP or cap.get('frame') != 'map'
+                or cap.get('map_id') != self.expected_map_id or cap.get('frame') != 'map'
                 or not isinstance(cap.get('sites'), list) or any(site not in cap['sites'] for site in SITES)
                 or type(cap.get('maximum_deadline_ms')) is not int
                 or not 0 < cap['maximum_deadline_ms'] <= 147000
