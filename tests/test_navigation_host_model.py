@@ -14,6 +14,7 @@ from robot_agent._navigation_demo import finish, run_host
 from robot_agent._navigation_relay import directory, proposal_request, read_json, write_json
 from robot_agent.navigation import ACTIONS, GOAL, SITES
 from robot_agent.navigation_checkpoint import CheckpointNavigationTask
+from robot_agent.navigation_revision import RevisionNavigationTask
 
 
 def inputs(phase='prepare', model='fixture'):
@@ -146,6 +147,40 @@ print(json.dumps({'item':{'type':'agent_message'}}))
         records=json.loads((self.host/'model-server.json').read_text())
         self.assertEqual([row['phase'] for row in records['requests']],['prepare','after_a'])
         self.assertTrue(records['stop_observed'])
+
+    def test_revision_host_whitelists_bound_instruction_and_explicit_completion_target(self):
+        value = inputs()
+        value.update(phase='after_revision', goal=RevisionNavigationTask.goal, allowed_actions=['visit_b','help'])
+        command = dict(task_id='task',revision_id='revision',request_id='task-prepare',operation_id=1,
+                       goal_id='a'*32,session_id='session',epoch=0,map_id='turtlebot3-world-v1',frame='map',
+                       action='redirect_b', optional_metadata='ignored')
+        value['revision_instruction'] = command
+        record = dict(nonce='a'*32, remaining_seconds=4, inputs=value)
+        _,_,context,_ = proposal_request(record,'after_revision','fixture',task='revision')
+        self.assertNotIn('optional_metadata', context['revision_instruction'])
+        for key, wrong in (('epoch',True),('operation_id',True),('action','stop'),('goal_id','bad'),('session_id','other')):
+            with self.subTest(key=key):
+                old = command[key]; command[key] = wrong
+                with self.assertRaises(ValueError): proposal_request(record,'after_revision','fixture',task='revision')
+                command[key] = old
+        value = inputs('final'); value.update(goal=RevisionNavigationTask.goal, completion_site='A')
+        record['inputs'] = value
+        self.assertEqual(proposal_request(record,'final','fixture',task='revision')[2]['completion_site'], 'A')
+        value['completion_site'] = 'C'
+        with self.assertRaises(ValueError): proposal_request(record,'final','fixture',task='revision')
+
+    def test_revision_host_serves_direct_final_without_waiting_for_redirect_phase(self):
+        process = self.server(task='revision')
+        for phase in ('prepare','final'):
+            slot = self.scene/'model-requests'/phase; slot.mkdir(parents=True)
+            value = inputs(phase); value['goal'] = RevisionNavigationTask.goal
+            if phase == 'final': value['completion_site'] = 'A'
+            with directory(slot) as fd: write_json(fd,'request.json',dict(nonce='c'*32,remaining_seconds=3,inputs=value))
+            self.wait_file(slot/'response.json',process)
+            self.assertNotIn('error',json.loads((slot/'response.json').read_text()))
+        process.terminate(); self.assertEqual(process.wait(timeout=5),0)
+        records = json.loads((self.host/'model-server.json').read_text())['requests']
+        self.assertEqual([r['phase'] for r in records],['prepare','final'])
 
     def test_three_host_decisions_have_private_inputs_and_reaped_actual_children(self):
         process=self.server()

@@ -65,6 +65,9 @@ class _NavigationExecution:
     A finite result is distinct from pending resource settlement and task verdict.
     """
     goal = GOAL
+    profile = PROFILE
+    instruction_field = "checkpoint_instruction"
+    instruction_id = "checkpoint_id"
 
     def __init__(self, decision_backend, *, budget=NavigationBudget(), clock=time.monotonic,
                  sleep=time.sleep, stop_requested=lambda: False, started_at=None):
@@ -101,7 +104,7 @@ class _NavigationExecution:
         self.check_budget()
         cap = session.capabilities()
         self.check_budget()
-        if (cap.get('skill') != 'navigation.visit_site' or cap.get('profile') != PROFILE
+        if (cap.get('skill') != 'navigation.visit_site' or cap.get('profile') != self.profile
                 or cap.get('map_id') != MAP or cap.get('frame') != 'map'
                 or not isinstance(cap.get('sites'), list) or any(site not in cap['sites'] for site in SITES)
                 or type(cap.get('maximum_deadline_ms')) is not int
@@ -111,12 +114,19 @@ class _NavigationExecution:
         self.maximum_deadline_ms = cap['maximum_deadline_ms']
         return cap
 
+    def preceding_site(self):
+        return None if self.phase == 'prepare' else ('A' if self.phase == 'after_a' else 'B')
+
+    def proposal_context(self):
+        return {}
+
     def decide(self, session, *, deadline=None, actions=None, instruction=None, require_available=None):
         require_available = self.phase != 'final' if require_available is None else require_available
         self.capabilities(session, require_available=require_available)
         observation = self.observe(session)
-        if self.phase != 'prepare':
-            previous = SITES['A' if self.phase == 'after_a' else 'B']
+        site = self.preceding_site()
+        if site is not None:
+            previous = SITES[site]
             if math.dist(observation['pose'], previous[:2]) > .3:
                 raise ValueError('new map feedback does not confirm preceding visit')
         context = {'task_id': self.task_id, 'phase': self.phase, 'goal': self.goal,
@@ -124,7 +134,8 @@ class _NavigationExecution:
                    'registered_sites': deepcopy(SITES),
                    'allowed_actions': list(ACTIONS[self.phase] if actions is None else actions)}
         if instruction is not None:
-            context['checkpoint_instruction'] = deepcopy(instruction)
+            context[self.instruction_field] = deepcopy(instruction)
+        context.update(self.proposal_context())
         deadline = min(self.deadline, self.clock() + self.budget.decision_seconds
                        if deadline is None else deadline)
         self.check_budget(deadline)
@@ -137,7 +148,7 @@ class _NavigationExecution:
                 or answer.get('observation_reference') != context['observation_reference']
                 or type(answer.get('observation_reference', {}).get('epoch')) is not int
                 or answer.get('action') not in context['allowed_actions']
-                or (instruction is not None and answer.get('checkpoint_id') != instruction['checkpoint_id'])
+                or (instruction is not None and answer.get(self.instruction_id) != instruction[self.instruction_id])
                 or not isinstance(answer.get('reason'), str) or not 0 < len(answer['reason']) <= 2000):
             raise ValueError('proposal is unsupported or belongs to a different observation/task/phase')
         self.capabilities(session, require_available=require_available)
@@ -149,7 +160,7 @@ class _NavigationExecution:
         entry.update(accepted=True, revalidated_observation=deepcopy(current))
         return answer['action'], current, deadline
 
-    def validate_record(self, record, request, site, operation_id, reference):
+    def associated_receipt(self, record, request, site, operation_id, reference):
         if (record.get('request_id') != request or record.get('site') != site
                 or record.get('skill') != 'navigation.visit_site'
                 or type(record.get('operation_id')) is not int or record['operation_id'] != operation_id
@@ -166,6 +177,10 @@ class _NavigationExecution:
                 or (self.binding is not None and binding != self.binding)):
             raise ValueError('navigation authority binding changed')
         self.binding = deepcopy(binding)
+        return receipt
+
+    def validate_record(self, record, request, site, operation_id, reference):
+        receipt = self.associated_receipt(record, request, site, operation_id, reference)
         if receipt.get('authority_disposition') == 'revoked' or receipt.get('native_outcome') in ('failed', 'cancelled'):
             raise ValueError('navigation operation failed or revoked')
         payload = record.get('result')
@@ -186,13 +201,14 @@ class _NavigationExecution:
             raise ValueError('unexpected final-context settlement')
         return True
 
-    def execute(self, session, site, observation, decision_deadline):
+    def start_operation(self, session, site, observation, decision_deadline):
         self.check_budget(decision_deadline)
         request = f'{self.task_id}-{self.phase}'
         deadline = min(self.deadline, self.clock() + self.budget.operation_seconds)
         remaining_ms = min(self.maximum_deadline_ms, int((deadline - self.clock()) * 1000))
         if remaining_ms < 1:
             raise TimeoutError('no navigation operation budget remains')
+        deadline = min(deadline, self.clock() + remaining_ms/1000)
         self.active = request  # Reserve before send, including ambiguous submission.
         record = session.submit(request, site=site, expected_observation=observation['reference'],
                                 deadline_ms=remaining_ms)
@@ -204,6 +220,11 @@ class _NavigationExecution:
         operation_id = record.get('operation_id')
         if type(operation_id) is not int or operation_id < 1:
             raise ValueError('navigation admission identity missing')
+        return record, request, operation_id, deadline
+
+    def execute(self, session, site, observation, decision_deadline):
+        record, request, operation_id, deadline = self.start_operation(
+            session, site, observation, decision_deadline)
         while True:
             self.check_budget(deadline)
             done = self.validate_record(record, request, site, operation_id, observation['reference'])

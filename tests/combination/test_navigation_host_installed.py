@@ -13,7 +13,7 @@ from robot_agent._navigation_demo import finish
 
 
 class InstalledNavigationHostTests(unittest.TestCase):
-    def run_case(self, model, tool_error=False, checkpoint=None):
+    def run_case(self, model, tool_error=False, checkpoint=None, revision=None):
         prefix = Path(os.environ['COMBINATION_AGENT_PREFIX']).resolve()
         self.assertTrue(Path(robot_agent.navigation_host_model.__file__).resolve().is_relative_to(prefix))
         self.assertTrue((prefix/'bin/robot-agent-navigation-host-proposal').is_file())
@@ -39,13 +39,15 @@ class InstalledNavigationHostTests(unittest.TestCase):
                     host_command = [sys.executable, '-m', 'robot_agent.navigation_host_model',
                         '--exchange', str(scene), '--output', str(private), '--model', model,
                         '--executable', str(executable)]
-                    if checkpoint is not None:
+                    if revision is not None:
+                        host_command.extend(['--task','revision'])
+                    elif checkpoint is not None:
                         host_command.extend(['--task','checkpoint'])
                     host = subprocess.Popen(host_command, stdout=host_log, stderr=subprocess.STDOUT,
                         start_new_session=True)
                     processes.append(host)
                     owner = subprocess.Popen([sys.executable, str(Path(__file__).with_name('navigation_owner.py')),
-                        str(endpoint), str(audit)], stdout=owner_log, stderr=subprocess.STDOUT,
+                        str(endpoint), str(audit), *(['--revision'] if revision is not None else [])], stdout=owner_log, stderr=subprocess.STDOUT,
                         start_new_session=True)
                     processes.append(owner)
                     until = time.monotonic()+5
@@ -55,11 +57,13 @@ class InstalledNavigationHostTests(unittest.TestCase):
                     client_command = [sys.executable, '-m', 'robot_agent.navigation_cli',
                         '--endpoint', str(endpoint), '--output', str(scene/'agent'),
                         '--model', model, '--executable', str(relay)]
-                    if checkpoint is not None:
-                        code=('from pathlib import Path;from robot_agent.navigation_checkpoint_demo import run;'
+                    if checkpoint is not None or revision is not None:
+                        module = 'navigation_revision_demo' if revision is not None else 'navigation_checkpoint_demo'
+                        instruction = revision if revision is not None else checkpoint
+                        code=(f'from pathlib import Path;from robot_agent.{module} import run;'
                             'from robot_agent.navigation_decision import NavigationCodexDecision;'
                             f'backend=NavigationCodexDecision(Path({str(scene / "agent-proposals")!r}),model={model!r},executable={str(relay)!r});'
-                            f'raise SystemExit(run({str(endpoint)!r},{str(scene / "agent")!r},instruction={checkpoint!r},delay=0,backend=backend))')
+                            f'raise SystemExit(run({str(endpoint)!r},{str(scene / "agent")!r},instruction={instruction!r},delay=0,backend=backend))')
                         client_command=[sys.executable,'-c',code]
                     result = subprocess.run(client_command,
                         stdout=agent_log, stderr=subprocess.STDOUT, timeout=15)
@@ -81,27 +85,36 @@ class InstalledNavigationHostTests(unittest.TestCase):
                         self.assertEqual(facts['records'], [])
                         self.assertEqual(facts['stops'], [])
                     else:
-                        self.assertEqual(report['status'], 'completed')
+                        self.assertEqual(report['status'], 'stopped_by_instruction' if revision == 'stop' else 'completed')
                         if checkpoint is not None:
                             self.assertTrue(report['checkpoint']['accepted'])
                             self.assertEqual(report['checkpoint']['instruction']['action'],checkpoint)
                             self.assertEqual(report['decisions'][1]['answer']['checkpoint_id'],report['checkpoint']['instruction']['checkpoint_id'])
-                        finish_a = checkpoint == 'finish_at_a'
+                        if revision is not None:
+                            self.assertEqual(report['completed_sites'], [] if revision == 'stop' else ['A'] if revision == 'none' else ['B'])
+                            self.assertEqual(report['revision']['accepted'], revision != 'none')
+                            if revision == 'redirect_b':
+                                self.assertEqual(report['decisions'][1]['answer']['revision_id'],report['revision']['instruction']['revision_id'])
+                        finish_a = checkpoint == 'finish_at_a' or revision in ('none','stop')
+                        actions = ['visit_a'] if revision == 'stop' else ['visit_a','observed_complete'] if revision == 'none' else ['visit_a','finish_at_a'] if checkpoint == 'finish_at_a' else ['visit_a','visit_b','observed_complete']
                         self.assertEqual([r['answer']['action'] for r in report['decisions']],
-                                         ['visit_a', 'finish_at_a'] if finish_a else ['visit_a', 'visit_b', 'observed_complete'])
+                                         actions)
                         self.assertEqual(facts['records'][0]['receipt']['settlement'], 'settled')
                         if finish_a:
                             self.assertEqual(len(facts['records']),1)
-                            self.assertFalse(facts['stops'])
-                            self.assertEqual(report['completed_sites'],['A'])
+                            if revision == 'stop':
+                                self.assertEqual(facts['stops'],[report['operations'][0]['request_id']])
+                            else:
+                                self.assertFalse(facts['stops'])
+                                self.assertEqual(report['completed_sites'],['A'])
                         else:
                             self.assertEqual(facts['records'][1]['receipt']['settlement'], 'pending')
                     host.terminate()
                     self.assertEqual(host.wait(timeout=5), 0)
                     self.assertTrue(json.loads((private/'model-server.json').read_text())['stop_observed'])
-                    for base in (scene/('agent-proposals' if checkpoint is not None else 'agent/decisions'), private/'decisions'):
+                    for base in (scene/('agent-proposals' if checkpoint is not None or revision is not None else 'agent/decisions'), private/'decisions'):
                         paths = list(base.glob('*/process.json'))
-                        self.assertEqual(len(paths), 1 if tool_error else 2 if checkpoint == 'finish_at_a' else 3)
+                        self.assertEqual(len(paths), 1 if tool_error else len(report['decisions']))
                         for path in paths:
                             child = json.loads(path.read_text())
                             self.assertTrue(child['reaped'])
@@ -109,6 +122,15 @@ class InstalledNavigationHostTests(unittest.TestCase):
                 finally:
                     for process in reversed(processes):
                         finish(process, 1)
+
+    def test_installed_revision_host_relay_completes_a_without_redirect_proposal(self):
+        self.run_case('controlled-tutorial-no-model', revision='none')
+
+    def test_installed_revision_host_relay_stops_without_a_second_model_call(self):
+        self.run_case('controlled-tutorial-no-model', revision='stop')
+
+    def test_installed_revision_host_relay_echoes_bound_revision_before_b(self):
+        self.run_case('controlled-tutorial-no-model', revision='redirect_b')
 
     def test_installed_host_relay_completes_and_preserves_pending_settlement(self):
         self.run_case('controlled-tutorial-no-model')

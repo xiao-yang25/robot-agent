@@ -107,33 +107,53 @@ recovery, network instruction delivery and a generic skill framework are outside
 this application.
 
 
-### Planned in-motion business revision
+### In-motion business revision
 
-This design is not implemented. A new bounded application would initially visit
-A and accept at most one business instruction during A's measured motion:
-stop, or redirect to registered B. Without an instruction it would complete A.
-The delivered fixed A→B and released-A checkpoint applications remain unchanged.
+`RevisionNavigationTask` is a concrete, opt-in application: initially visit A,
+accept at most one **stop** or **redirect_b** during measured A motion, and
+otherwise complete only A. Use Harness profile
+`scoped-two-context-nav2-revision-v1` from the immutable dependency in
+[workspace.repos](../workspace.repos). Fixed A→B and released-A checkpoint tasks
+keep their existing profiles and behavior.
 
-A caller-owned cooperative, nonblocking instruction poll would be interleaved
-with public status/observation progress. One revision would bind the task, current
-A request/operation/native goal and Session/map/epoch. Invalid, foreign, duplicate
-or late input would not change the authorized A; caller stop, provider failure,
-invalid observations or expired budgets would cancel/help instead.
+The caller lends Session and a cooperative provider implementing
+`poll(context, deadline, stop_requested)`, returning `None` or one instruction.
+The caller owns provider resources and Session close. After associated A native
+acceptance/current authority/pending outcome, public map measurements must span
+at least 0.5 simulation seconds and exceed 0.1m displacement to open one window.
+Its deadline is at most ten seconds, clipped to A's original operation/task
+budget. The context binds task/revision, A request/operation/native goal, and
+Session/map/epoch/frame. Instructions echo those fields and choose `stop` or
+`redirect_b`; optional metadata is discarded. Invalid/foreign/expired input is
+ignored, without refreshing the window or cancelling A. A terminal race closes
+it. Global stop, provider failure, bad feedback or expired execution budgets
+cancel/help with no B.
 
-A valid instruction would cancel exactly A before any model wait. Redirecting
-would require a new explicit Harness profile: correlated native termination,
-sealed outlet, fresh quiet and successor readiness must yield A settled/released.
-The existing Owner exits on cancellation with unknown/pending settlement and
-cannot provide this reuse today. The model would propose B only after that
-boundary, with the bound instruction and fresh feedback; it would grant no
-authority. An ambiguous B request would never be replayed.
+A valid instruction cancels exact A **before any model wait**. The application
+waits at most fifteen seconds, clipped to A's remaining budget, for the public
+correlated terminal/output receipt, explicit unexpired fact and settled/released authority. Only Harness
+can establish the native/outlet/quiet/successor readiness boundary. Cancel ACK
+or an Agent pose cannot grant reuse. `stop` returns `stopped_by_instruction` with
+no completed site and no second model call; unconfirmed release returns
+`needs_help`. Actual cancelled/succeeded race outcomes remain in the report.
 
-Business stop would be reported separately from arriving at A. A redirect would
-complete B, without claiming A was visited. Native cleanup and task verdict remain
-separate; final B would still be pending. The first step is a bounded Core and
-Humble/Nav2 feasibility probe, before changing the Harness pin, task interface,
-host relay or installed tutorial. No in-motion support or new video qualification
-is claimed by this design.
+Redirect uses one `after_revision` proposal (`visit_b`/`help`), bound to the
+normalized instruction, `revision_id` and fresh public measurements. It does not
+require arrival at A. After the proposal the Agent rechecks A release, identity,
+health and a stable pose, then reserves/submits B once with the fresh reference.
+An ambiguous request retains its ID and is never replayed. Completion reports
+`completed_sites=[A]` without instruction, or `[B]` after redirect. Final model
+assessment uses that `completion_site`; task verdict stays unassessed and native
+cleanup unknown. Final B remains current/pending.
+
+The 240s task / 30s decision / 160s operation budgets (public maximum 147000ms)
+and 45s caller wait are unchanged. Polling targets 100ms cooperatively; provider
+and Session calls have no hard preemption guarantee. No background model thread,
+arbitrary target, recovery, Owner restart or hard-stop qualification is added.
+See the [explicit tutorial](../examples/navigation/README.md#run-the-in-motion-revision-task)
+and [verification scope](TESTING.md#in-motion-revision-software-checks).
+New real Humble/Nav2/model runs and matching videos remain the next qualification
+step; installed synthetic native checks do not establish those results.
 
 ## Models and algorithm providers
 
@@ -317,7 +337,7 @@ records the installed normal task and unresolved transport/fault scope.
 
 Build/install the exact Harness commit in [workspace.repos](../workspace.repos),
 including its optional Python bridge, and prepare its isolated simulation owner
-as described in the [owner setup](https://github.com/xiao-yang25/robot-harness/tree/13bc75e903f6005da3dd5d969f8242ce211d182f/integrations/ros2/nav2_session).
+as described in the [owner setup](https://github.com/xiao-yang25/robot-harness/tree/7279cd12ae48d01384e081757c54c38b7858557b/integrations/ros2/nav2_session).
 Install this Agent application, then connect to that owner's private endpoint:
 
 ```sh

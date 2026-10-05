@@ -220,3 +220,36 @@ controlled tests alone do not qualify a real model. See [recorded qualification]
 for the actual tested combination. General routes, obstacles, owner failure/restart,
 complete native cleanup, hard stop, hardware and broad model reliability remain
 outside this tutorial. Navigation still has no installed physical evaluator.
+
+## Run the in-motion revision task
+
+This experimental entry uses the new installed pair and explicitly selects
+`scoped-two-context-nav2-revision-v1`. It starts toward A, then polls one local
+controlled business slot during measured motion. Choose `none`, `stop` or
+`redirect_b`; the default fixed task remains unchanged. Rebuild the installations
+above after selecting this Agent checkout. Software/installed checks exist;
+new real Humble/Nav2/model/video qualification is still pending.
+
+```sh
+python3 examples/navigation/run.py \
+  --harness-source ../harness-navigation \
+  --python-prefix "$PWD/navigation-consumer/install" \
+  --agent-prefix "$PWD/navigation-consumer/agent-install" \
+  --image robot-navigation-demo:humble \
+  --task revision --instruction redirect_b --instruction-delay 0 \
+  --output "$PWD/navigation-revision-run-01"
+```
+
+Use a new output path for each run. Delay is 0–9 seconds after the window opens;
+the caller-owned poll returns immediately between checks. `none` finishes only A;
+`stop` requires A release and reports `stopped_by_instruction`, not arrival;
+`redirect_b` waits for A release before its B proposal. Cancellation ACK is never
+permission to send B. Global interruption or unconfirmed release sends no B.
+
+For the opt-in host model transport add `--provider host-codex`, an explicit
+`--model`, and a separate new `--host-output` outside every container mount, as
+above. The container still has no credentials/network: its owned proposal process
+uses the local relay. A-only uses prepare/final, stop only prepare, and redirect
+prepare/after_revision/final. Controlled subprocess tests verify these paths;
+they do not establish an authenticated model run. Final B remains pending and
+all task reports retain unassessed verdict/unknown native cleanup.

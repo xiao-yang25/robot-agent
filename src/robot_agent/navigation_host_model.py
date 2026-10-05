@@ -1,6 +1,7 @@
 """Host-only model worker for one public isolated navigation demonstration."""
 import argparse
 import json
+import os
 from pathlib import Path
 import signal
 import threading
@@ -23,12 +24,26 @@ def serve(exchange, output, model, executable, stopped, *, task='fixed'):
                 raise TimeoutError('scene output was not created within the host budget')
             time.sleep(.02)
         with directory(exchange) as scene:
-            for phase in PHASES:
+            stages = [('prepare',), ('after_revision', 'final'), ('final',)] if task == 'revision' else [(p,) for p in PHASES]
+            for choices in stages:
                 while not stopped.is_set():
                     if time.monotonic() >= deadline:
                         raise TimeoutError('host navigation model budget elapsed')
                     received = False
+                    phase = choices[0]
                     try:
+                        # Revision may complete A without an after_revision proposal.
+                        # Select one published slot; model calls remain serial and once.
+                        with directory('model-requests', parent=scene) as slots:
+                            for candidate in choices:
+                                try:
+                                    os.stat(candidate, dir_fd=slots, follow_symlinks=False)
+                                    phase = candidate
+                                    break
+                                except FileNotFoundError:
+                                    continue
+                            else:
+                                raise FileNotFoundError('no proposal slot yet')
                         with directory('model-requests', parent=scene) as slots, directory(phase, parent=slots) as slot:
                             data = read_json(slot, 'request.json')
                             received = True
@@ -53,6 +68,8 @@ def serve(exchange, output, model, executable, stopped, *, task='fixed'):
                         time.sleep(.02)
                 if stopped.is_set():
                     return records
+                if phase == 'final':
+                    break
             while not stopped.is_set() and time.monotonic() < deadline:
                 time.sleep(.02)
             if not stopped.is_set():
@@ -69,7 +86,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True, help='private host directory created by the launcher')
     parser.add_argument('--model', required=True)
     parser.add_argument('--executable', default='codex')
-    parser.add_argument('--task', choices=('fixed', 'checkpoint'), default='fixed')
+    parser.add_argument('--task', choices=('fixed', 'checkpoint', 'revision'), default='fixed')
     args = parser.parse_args()
     stopped = threading.Event()
     previous = {sig: signal.signal(sig, lambda *_: stopped.set()) for sig in (signal.SIGINT, signal.SIGTERM)}

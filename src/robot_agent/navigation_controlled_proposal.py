@@ -9,7 +9,7 @@ def main():
         print('controlled-navigation-tutorial-v1 (no model)')
         return 0
     inputs = json.loads(sys.stdin.read().splitlines()[-1])
-    action = {'prepare': 'visit_a', 'after_a': 'visit_b', 'final': 'observed_complete'}[inputs['phase']]
+    action = {'prepare': 'visit_a', 'after_a': 'visit_b', 'after_revision': 'visit_b', 'final': 'observed_complete'}[inputs['phase']]
     instruction = inputs.get('checkpoint_instruction')
     if instruction is not None:
         action = {'continue_b':'visit_b','finish_at_a':'finish_at_a'}[instruction['action']]
@@ -19,6 +19,11 @@ def main():
     answer.update(action=action, reason='controlled tutorial proposal; no model or independent task assessment')
     if instruction is not None:
         answer['checkpoint_id'] = instruction['checkpoint_id']
+    if 'revision_instruction' in inputs:
+        command = inputs['revision_instruction']
+        if command['action'] != 'redirect_b':
+            raise ValueError('controlled revision requires redirect_b')
+        answer['revision_id'] = command['revision_id']
     output = Path(sys.argv[sys.argv.index('--output-last-message') + 1])
     output.write_text(json.dumps(answer, allow_nan=False) + '\n')
     print(json.dumps({'item': {'type': 'agent_message'}}))

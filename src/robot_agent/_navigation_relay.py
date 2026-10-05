@@ -7,9 +7,11 @@ import uuid
 
 from .navigation import ACTIONS, GOAL, SITES, REFERENCE_FIELDS, finite, measurements
 from .navigation_checkpoint import CheckpointNavigationTask, IDENTITY_FIELDS
+from .navigation_revision import RevisionNavigationTask, IDENTITY_FIELDS as REVISION_FIELDS
 
 LIMIT = 65536
 PHASES = tuple(ACTIONS)
+REVISION_PHASES = ("prepare", "after_revision", "final")
 
 
 @contextmanager
@@ -65,9 +67,10 @@ def proposal_request(data, phase, model, *, task='fixed'):
             or any(c not in '0123456789abcdef' for c in nonce)
             or not finite(budget) or not 0 < budget <= 30 or not isinstance(inputs, dict)):
         raise ValueError('invalid local proposal identity or budget')
-    if task not in ('fixed', 'checkpoint') or phase not in PHASES:
+    phases = REVISION_PHASES if task == 'revision' else PHASES
+    if task not in ('fixed', 'checkpoint', 'revision') or phase not in phases:
         raise ValueError('unsupported host navigation task or phase')
-    goal = GOAL if task == 'fixed' else CheckpointNavigationTask.goal
+    goal = RevisionNavigationTask.goal if task == 'revision' else (GOAL if task == 'fixed' else CheckpointNavigationTask.goal)
     if (inputs.get('phase') != phase or inputs.get('model_requested') != model
             or inputs.get('goal') != goal or inputs.get('registered_sites') != SITES
             or not isinstance(inputs.get('task_id'), str) or not 0 < len(inputs['task_id']) <= 128):
@@ -79,7 +82,7 @@ def proposal_request(data, phase, model, *, task='fixed'):
     context_reference = {key: inputs['observation_reference'][key] for key in REFERENCE_FIELDS}
     if (type(context_reference['epoch']) is not int or context_reference != observation['reference']):
         raise ValueError('local proposal observation reference changed')
-    allowed = list(ACTIONS[phase])
+    allowed = ["visit_b", "help"] if phase == "after_revision" else list(ACTIONS[phase])
     instruction = None
     if task == 'checkpoint' and phase == 'after_a':
         command = inputs.get('checkpoint_instruction')
@@ -91,11 +94,27 @@ def proposal_request(data, phase, model, *, task='fixed'):
             raise ValueError('host checkpoint instruction identity or action changed')
         instruction = {key: command[key] for key in (*IDENTITY_FIELDS, 'action')}
         allowed = ['visit_b' if instruction['action'] == 'continue_b' else 'finish_at_a', 'help']
+    if task == 'revision' and phase == 'after_revision':
+        command = inputs.get('revision_instruction')
+        if (not isinstance(command, dict) or command.get('task_id') != inputs['task_id']
+                or type(command.get('epoch')) is not int or type(command.get('operation_id')) is not int
+                or command['operation_id'] < 1 or command.get('action') != 'redirect_b'
+                or any(command.get(key) != context_reference[key] for key in ('session_id','epoch','map_id','frame'))
+                or any(not isinstance(command.get(key), str) or not 0 < len(command[key]) <= 128
+                       for key in ('revision_id','request_id'))
+                or not isinstance(command.get('goal_id'), str) or len(command['goal_id']) != 32
+                or any(c not in '0123456789abcdef' for c in command['goal_id'])):
+            raise ValueError('host revision instruction identity or action changed')
+        instruction = {key: command[key] for key in (*REVISION_FIELDS, 'action')}
+    if task == 'revision' and phase == 'final' and inputs.get('completion_site') not in SITES:
+        raise ValueError('host revision final target missing')
     if inputs.get('allowed_actions') != allowed:
         raise ValueError('host proposal action set changed')
     context = dict(task_id=inputs['task_id'], phase=phase, goal=goal,
                    registered_sites=SITES, allowed_actions=allowed,
                    observation_reference=context_reference)
     if instruction is not None:
-        context['checkpoint_instruction'] = instruction
+        context['revision_instruction' if task == 'revision' else 'checkpoint_instruction'] = instruction
+    if task == 'revision' and phase == 'final':
+        context['completion_site'] = inputs['completion_site']
     return nonce, budget, context, observation

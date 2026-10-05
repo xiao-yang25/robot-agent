@@ -25,7 +25,11 @@ class NavigationCodexDecision(CodexDecision):
             'continue_b permits visit_b; finish_at_a permits finish_at_a. '
             'For this checkpoint choose help if uncertain about the instruction or measurements. '
             'Echo its checkpoint_id in your answer; never replace or reinterpret the instruction. '
-            'At final choose observed_complete only if fresh map pose confirms B within 0.3m; '
+            'At after_revision follow revision_instruction: only redirect_b permits visit_b. '
+            'A has been cancelled and released; do not require arrival at A. Echo revision_id. '
+            'At final for the revision task use completion_site (A or B) as the measured target. '
+            'For the fixed task or checkpoint without completion_site use B. '
+            'At final choose observed_complete only if fresh map pose confirms that final target within 0.3m; '
             'use not_met for contradictory feedback or help for uncertainty. '
             'You have no camera, obstacle geometry or physical-evaluator truth: do not invent it. '
             'An observation assessment does not prove task success, robot stop or resource settlement. '
@@ -41,6 +45,8 @@ class NavigationCodexDecision(CodexDecision):
             'reason': {'type': 'string'}}
         if 'checkpoint_instruction' in context:
             properties['checkpoint_id'] = {'type': 'string'}
+        if 'revision_instruction' in context:
+            properties['revision_id'] = {'type': 'string'}
         schema = {'type': 'object', 'properties': properties, 'required': list(properties),
                   'additionalProperties': False}
         (run / 'schema.json').write_text(json.dumps(schema) + '\n')
