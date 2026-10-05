@@ -227,8 +227,9 @@ This experimental entry uses the new installed pair and explicitly selects
 `scoped-two-context-nav2-revision-v1`. It starts toward A, then polls one local
 controlled business slot during measured motion. Choose `none`, `stop` or
 `redirect_b`; the default fixed task remains unchanged. Rebuild the installations
-above after selecting this Agent checkout. Software/installed checks exist;
-new real Humble/Nav2/model/video qualification is still pending.
+above after selecting this Agent checkout. See the bounded
+[fixed-pair qualification](../../docs/TESTING.md#in-motion-revision-qualification)
+and [same-run recordings](https://xiao-yang25.github.io/robot-harness/#revision-demos).
 
 ```sh
 python3 examples/navigation/run.py \
@@ -250,6 +251,7 @@ For the opt-in host model transport add `--provider host-codex`, an explicit
 `--model`, and a separate new `--host-output` outside every container mount, as
 above. The container still has no credentials/network: its owned proposal process
 uses the local relay. A-only uses prepare/final, stop only prepare, and redirect
-prepare/after_revision/final. Controlled subprocess tests verify these paths;
-they do not establish an authenticated model run. Final B remains pending and
-all task reports retain unassessed verdict/unknown native cleanup.
+prepare/after_revision/final. Controlled subprocess tests cover these paths;
+a separate real host-model redirect run is qualified for the versions and
+environment in Testing. Final B remains pending and all task reports retain
+unassessed verdict/unknown native cleanup.
