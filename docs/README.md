@@ -12,7 +12,7 @@ Core belongs to Harness; the dependency runs from Agent to Harness.
 | [ACT worker and preparation](../skills/aloha/README.md) | Bundled candidate worker, pinned environment and explicit weight preparation | ALOHA-specific policy input/output; pinned Harness private candidate transport, not a stable skill plugin API |
 | `robot-agent-evaluate-handoff` and [fixed profile](../src/robot_agent/handoff_profile.json) | Installed offline evaluation of the declared recorded task | Task-specific predicate; evaluation does not drive decisions or authorize execution |
 | `robot-agent-navigation` and [scene tutorial](../examples/navigation/README.md) | Installed bounded A→B application; controlled or host model proposals in the isolated Nav2 scene | Same-container owner; bounded local process cleanup, remote cleanup unknown |
-| [RecoveryNavigationTask](../src/robot_agent/navigation_recovery.py) | Experimental Python task and explicit CLI mode: A, or one pre-authorized backup B after confirmed failed-A release | Prepared-owner software and bounded real model checks; public recovery scene command remains pending |
+| [RecoveryNavigationTask](../src/robot_agent/navigation_recovery.py) | Experimental Python task and explicit CLI mode: A, or one pre-authorized backup B after confirmed failed-A release | Prepared-owner and actual-model checks; explicit public scene tutorial |
 | [Combination CI](../.github/workflows/combination.yml) | Reproducible installed Agent/Harness boundary checks | Explicit no-physics providers; not a model/robot task qualification |
 
 These delivered artifacts are useful applications, policies and verification
@@ -216,9 +216,11 @@ This entry has [application/installed checks](TESTING.md#single-backup-software-
 Controlled paired Humble/Nav2 scenes cover A-only success, one backup, help,
 missing successor readiness, failed backup, foreign proposal and global stop.
 A new bounded actual-model/host-relay pair is recorded in Testing; its scene
-preparation remains research-specific. A public recovery simulation command,
-tutorial reproduction and homepage video publication remain pending. Earlier
-videos do not establish the new task/model combination.
+preparation in those original runs remains research-specific. The
+[public scene tutorial](../examples/navigation/README.md#run-the-single-failure-recovery-task)
+now selects the fixed normal/occupied-A scene and failure profile explicitly.
+[Homepage recordings](https://xiao-yang25.github.io/robot-harness/#recovery-demos)
+retain their original pairing and do not record those subsequent public commands.
 
 ## Models and algorithm providers
 

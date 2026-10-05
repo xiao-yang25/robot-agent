@@ -1,9 +1,9 @@
 # Run the navigation business application
 
-This tutorial starts a real Humble/Gazebo A→B scene, the installed Harness owner,
-and the installed public Agent CLI. Its three executable proposals are explicitly
-controlled by default: **no model service, robot hardware or automatic recovery**
-is used. An explicit host model mode is described below.
+This tutorial starts a real Humble/Gazebo scene, the installed Harness owner,
+and the installed public Agent CLI. The default task visits A then B with
+controlled executable proposals. Checkpoint, revision and single-failure recovery
+are explicit task choices; an optional host model mode is described below.
 The Agent still checks fresh observations, proposal identity and deadlines, and
 retains final pending settlement and unknown native cleanup.
 
@@ -287,3 +287,57 @@ task verdict are not inferred from a model answer.
 cover this increment. The real-model scene used research-specific static-map
 preparation; a public recovery scene/tutorial and homepage recordings remain a
 separate delivery.
+
+
+## Run the single-failure recovery task
+
+After preparing the fixed sources and new installations above, select this task
+and scene explicitly. Normal A succeeds and the task finishes without B:
+
+```sh
+python3 examples/navigation/run.py --harness-source ../harness-navigation \
+  --python-prefix navigation-consumer/install --agent-prefix navigation-consumer/agent-install \
+  --image robot-navigation-demo:humble --task recovery --scene normal \
+  --output runs/recovery-normal-01
+```
+
+The occupied-A test map makes A's planner fail. The task may propose one B only
+after failed/no-output/settled/released A and fresh public feedback:
+
+```sh
+python3 examples/navigation/run.py --harness-source ../harness-navigation \
+  --python-prefix navigation-consumer/install --agent-prefix navigation-consumer/agent-install \
+  --image robot-navigation-demo:humble --task recovery --scene occupied-a \
+  --output runs/recovery-backup-01
+```
+
+Both commands use controlled proposals. For an actual model, prepare the separate
+host installation from the host-model section and add:
+
+```sh
+--provider host-codex --model YOUR_EXPLICIT_MODEL --host-output /absolute/new-private-host-output
+```
+
+Keep credentials/private working directories/raw model logs outside all container
+mounts; proposal answers use the shared exchange. The host relay and trusted
+client receive the selected map identity. The selector forwards the failure
+profile to Harness and keeps its exact temporary trusted-client bind until the
+owned launcher completes cleanup. The installed client replaces itself with the
+existing public Agent CLI. `occupied-a` is rejected for other tasks, and recovery
+refuses instruction/delay options; there is no dependency override.
+
+Build the current image and a new Linux installation. Old images may lack failure
+leaves/current drive interfaces. Occupied A modifies a static planner map; it
+adds no physical obstacle. Harness checks actual occupied A/free B/start before
+opening the public endpoint. `navigation-scene.json` records the scene/map ID;
+`scene_map_consumed` in `caller.jsonl` records the actual map sample. Normal uses
+`turtlebot3-world-v1`; occupied A uses `turtlebot3-occupied-a-probe-v1`.
+
+`agent/report.json` shows either A alone or failed A followed by B alone in
+`completed_sites`. B failure/help/unknown submission does not cause another
+attempt. Final B settlement stays pending, task verdict unassessed and native
+cleanup unknown; `run.json` success is process completion only. See the
+[qualification and versions](../../docs/TESTING.md#public-recovery-scene-tutorial)
+and [original model-run videos](https://xiao-yang25.github.io/robot-harness/#recovery-demos).
+The videos used their recorded original pairing/private map preparation, rather
+than these subsequent public commands.
