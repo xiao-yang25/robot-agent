@@ -207,7 +207,8 @@ The installed CLI explicitly selects this task with `--task recovery`;
 default fixed task. The host relay also requires explicit recovery mode and the
 same map. It reconstructs the failure identity and public measurements, then
 serves prepare/final for A success or prepare/after_failure/final for one backup.
-Credentials and model outputs remain on the host outside every container mount.
+Credentials and the private host working directory/raw logs remain outside
+every container mount; the proposal answer crosses the shared relay exchange.
 The [prepared-owner entry](../examples/navigation/README.md#connect-the-single-backup-task-to-a-prepared-owner)
 does not create a recovery scene.
 
