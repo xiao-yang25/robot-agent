@@ -21,11 +21,11 @@ def main():
     parser.add_argument('--model', help='required explicit host model for host-codex')
     parser.add_argument('--executable', default='codex', help='host-only model CLI')
     parser.add_argument('--host-output', type=Path, help='new private host directory, never mounted in the scene')
-    parser.add_argument('--task', choices=('fixed', 'checkpoint'), default='fixed')
-    parser.add_argument('--instruction', choices=('continue_b', 'finish_at_a'))
-    parser.add_argument('--instruction-delay', type=float, default=None, help='checkpoint tutorial wait in [0, 9] seconds')
+    parser.add_argument('--task', choices=('fixed', 'checkpoint', 'revision'), default='fixed')
+    parser.add_argument('--instruction', choices=('continue_b', 'finish_at_a', 'none', 'stop', 'redirect_b'))
+    parser.add_argument('--instruction-delay', type=float, default=None, help='business tutorial delay in [0, 9] seconds')
     args = parser.parse_args()
-    checkpoint = None
+    checkpoint = revision = None
     if args.task == 'checkpoint':
         from robot_agent.navigation_checkpoint_demo import TutorialInstruction
         if args.instruction is None:
@@ -36,8 +36,18 @@ def main():
         except ValueError as error:
             parser.error(str(error))
         checkpoint = dict(instruction=args.instruction, delay=delay)
+    elif args.task == 'revision':
+        from robot_agent.navigation_revision_demo import TutorialPoll
+        if args.instruction is None:
+            parser.error('revision requires explicit --instruction none/stop/redirect_b')
+        delay = 0 if args.instruction_delay is None else args.instruction_delay
+        try:
+            TutorialPoll(args.instruction, delay, args.output)
+        except ValueError as error:
+            parser.error(str(error))
+        revision = dict(instruction=args.instruction, delay=delay)
     elif args.instruction is not None or args.instruction_delay is not None:
-        parser.error('instruction options require --task checkpoint')
+        parser.error('instruction options require --task checkpoint or revision')
     harness = args.harness_source.expanduser().resolve(strict=True)
     prefix = args.agent_prefix.expanduser().resolve(strict=True)
     python_prefix = args.python_prefix.expanduser().resolve(strict=True)
@@ -55,6 +65,11 @@ def main():
         'session', '--image', args.image, '--python-prefix', str(python_prefix),
         '--client-script', str(client), '--client-prefix', str(prefix), '--caller-wait-seconds', '45',
         '--output', str(args.output.expanduser().resolve())]
+    if revision is not None:
+        if not (prefix/'robot_agent/navigation_revision_demo.py').is_file():
+            parser.error('prepare a new Agent installation including the revision tutorial')
+        from robot_agent.navigation_revision import PROFILE
+        command.extend(['--profile', PROFILE])
     if args.provider == 'host-codex':
         if not args.model or not args.model.strip() or len(args.model) > 128 or args.host_output is None:
             parser.error('host-codex requires an explicit model and separate new --host-output')
@@ -63,14 +78,15 @@ def main():
         from robot_agent._navigation_demo import run_host
         return run_host(command, output=args.output.expanduser().resolve(),
             host_output=args.host_output.expanduser().resolve(), model=args.model, executable=args.executable,
-            mounted_roots=(prefix, python_prefix, harness / 'integrations/ros2/simulation'), checkpoint=checkpoint)
+            mounted_roots=(prefix, python_prefix, harness / 'integrations/ros2/simulation'), checkpoint=checkpoint, revision=revision)
     if args.model is not None or args.host_output is not None or args.executable != 'codex':
         parser.error('model/host-output/executable options require --provider host-codex')
-    if checkpoint is not None:
+    if checkpoint is not None or revision is not None:
         # Keep this exact trusted bind file alive until Harness finishes its cleanup.
         # Use the existing supervisor for signal forwarding and process-group reaping.
         from robot_agent._navigation_demo import run_controlled_checkpoint
-        return run_controlled_checkpoint(command, checkpoint)
+        return run_controlled_checkpoint(command, checkpoint if checkpoint is not None else revision,
+                                         revision=revision is not None)
     # Default selector remains replaced by Harness, preserving its signal path.
     os.execv(sys.executable, command)
 

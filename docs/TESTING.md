@@ -1,5 +1,35 @@
 # Testing and qualification
 
+## In-motion revision software checks
+
+The opt-in `RevisionNavigationTask` consumes Harness `7279cd1` from
+[workspace.repos](../workspace.repos); the published `v0.1.0a1` tag and its older
+pin remain immutable. Application checks cover one motion window, no instruction,
+stop/redirect, foreign/expired inputs, native completion races, original budget
+clipping, provider/observation/global-stop failures, post-model release/pose loss,
+ambiguous B, missing expiry facts and default-profile rejection. Existing task
+tests remain enabled.
+
+New installed combinations use the actual public Unix Session and compiled Core,
+with a CI-only owner injecting synthetic motion/native facts. They check A-only,
+actual Core cancelled/no_output→released, succeeded/authority_revoked→released,
+unconfirmed release→zero B, public caller close, and host/relay phase paths with
+controlled subprocess proposals. Existing fixed/checkpoint/ALOHA checks also run
+against the new pin. Both existing Ubuntu workflows automatically discover these
+cases; no duplicate job or physics/model qualification is introduced.
+
+The same new wheel is installed outside the source tree on macOS and Ubuntu22.04
+amd64 using the retained Humble image. Local macOS application tests passed
+106 cases. Both platforms exercised 26 installed cases; an incorrect old
+failed-proposal process count was corrected and the affected seven host cases
+passed. The final missing-expiry guard then passed 15 boundary cases and twelve
+affected installed cases in new wheel installations on each platform. Original
+failed logs are retained. Existing CI runs the complete final collections.
+This batch does not claim new ROS/physics, authenticated model, physical-stop
+timing or video qualification. Those require new bounded runs and one independent evaluator per
+run; older checkpoint videos retain their recorded scope.
+
+
 ## Checkpoint navigation qualification
 
 The explicit [checkpoint tutorial](../examples/navigation/README.md#run-the-checkpoint-task)

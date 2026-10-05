@@ -33,7 +33,7 @@ Docker Desktop emulation. The default path needs no model service or weights.
 
 | Application | Task | Setup and contract |
 |---|---|---|
-| Navigation | Visit registered A then B using fresh map feedback | [Tutorial](examples/navigation/README.md) · [Contract](docs/README.md#navigation-application) |
+| Navigation | Fixed A→B, or opt-in checkpoint / in-motion instructions | [Tutorial](examples/navigation/README.md) · [Contract](docs/README.md#navigation-application) |
 | ALOHA / ACT | Transfer a cube, then hold for one simulated second using visual proposals | [Skill setup](skills/aloha/README.md) · [Contract](docs/README.md#aloha-application) |
 
 Both applications use Harness's public Session and shared execution coordinator.
@@ -47,7 +47,7 @@ models or extending an application.
 ## Results and limits
 
 Model assessments, execution receipts and independent task verdicts are distinct.
-Navigation releases A before B; final B remains accepted/pending, with
+Before requesting B, navigation releases A; final B remains accepted/pending, with
 `task_verdict=unassessed` and native cleanup unknown. Inspect local process/container
 cleanup separately. Navigation has no installed physical evaluator;
 [ALOHA evaluation](docs/TESTING.md#independent-evaluation) uses its own fixed predicate.

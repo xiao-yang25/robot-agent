@@ -36,7 +36,16 @@ def checkpoint_client(configuration, *, provider='controlled', model='controlled
             f'provider={provider!r}, model={model!r}))\n')
 
 
-def run_controlled_checkpoint(command, configuration):
+def revision_client(configuration, *, provider='controlled', model='controlled-revision-no-model'):
+    from .navigation_revision_demo import TutorialPoll
+    instruction, delay = configuration['instruction'], configuration['delay']
+    TutorialPoll(instruction, delay, '.')
+    return ('from robot_agent.navigation_revision_demo import main\n'
+            f'raise SystemExit(main(instruction={instruction!r}, delay={delay!r}, '
+            f'provider={provider!r}, model={model!r}))\n')
+
+
+def run_controlled_checkpoint(command, configuration, *, revision=False):
     stopped = 0
     def stop(signum, _frame):
         nonlocal stopped
@@ -47,7 +56,7 @@ def run_controlled_checkpoint(command, configuration):
     try:
         with tempfile.TemporaryDirectory(prefix='robot-agent-checkpoint-client-') as temporary:
             client = Path(temporary)/'client.py'
-            client.write_text(checkpoint_client(configuration))
+            client.write_text(revision_client(configuration) if revision else checkpoint_client(configuration))
             command = list(command)
             command[command.index('--client-script')+1] = str(client)
             try:
@@ -71,7 +80,9 @@ def run_controlled_checkpoint(command, configuration):
     return result
 
 
-def run_host(command, *, output, host_output, model, executable, mounted_roots=(), checkpoint=None):
+def run_host(command, *, output, host_output, model, executable, mounted_roots=(), checkpoint=None, revision=None):
+    if checkpoint is not None and revision is not None:
+        raise ValueError("select one navigation business task")
     output, host_output = Path(output).resolve(), Path(host_output).resolve()
     if output.exists() or host_output.is_relative_to(output) or output.is_relative_to(host_output):
         raise ValueError('use new, separate scene and private host output directories')
@@ -94,7 +105,8 @@ def run_host(command, *, output, host_output, model, executable, mounted_roots=(
     try:
         with (host_output / 'model-server.log').open('w') as log:
             client = Path(temporary.name) / 'client.py'
-            client.write_text(checkpoint_client(checkpoint, provider='host-codex', model=model)
+            client.write_text(revision_client(revision, provider='host-codex', model=model)
+                if revision is not None else checkpoint_client(checkpoint, provider='host-codex', model=model)
                 if checkpoint is not None else 'from robot_agent.navigation_demo_client import main\n'
                 f'main(provider="host-codex", model={model!r})\n')
             command = list(command)
@@ -102,7 +114,9 @@ def run_host(command, *, output, host_output, model, executable, mounted_roots=(
             host_command = [sys.executable, '-m', 'robot_agent.navigation_host_model',
                 '--exchange', str(output), '--output', str(host_output), '--model', model,
                 '--executable', executable]
-            if checkpoint is not None:
+            if revision is not None:
+                host_command.extend(['--task', 'revision'])
+            elif checkpoint is not None:
                 host_command.extend(['--task', 'checkpoint'])
             host = subprocess.Popen(host_command, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
             ready_until = time.monotonic() + 6

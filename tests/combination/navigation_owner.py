@@ -24,7 +24,9 @@ def main():
     endpoint, audit_path = map(Path, sys.argv[1:3])
     hold_b = sys.argv[3:] == ['--hold-b']
     wait_proposal = sys.argv[3:] == ['--wait-proposal']
-    if sys.argv[3:] and not (hold_b or wait_proposal):
+    revision = sys.argv[3:] in (['--revision'], ['--revision-race'], ['--revision-missing-close'])
+    revision_mode = sys.argv[3] if revision else None
+    if sys.argv[3:] and not (hold_b or wait_proposal or revision):
         raise ValueError('unsupported fixture mode')
     prefix = Path(os.environ['COMBINATION_HARNESS_PREFIX']).resolve()
     for module in (_core, sys.modules[ExecutionCoordinator.__module__],
@@ -38,19 +40,20 @@ def main():
                       settlement_scope='native-outlet-quiet-and-next-context')
     listener, channel = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM), None
     execution = ExecutionCoordinator(gate, clock)
-    pose, stops = [0., 0.], []
+    pose, stops, events = [0., 0.], [], []
+    visit_started = cancel_started = None
     stage = 'A'
     scope_id = uuid.uuid4().hex
 
     def observation():
         return dict(valid=True, epoch=0, map_id='turtlebot3-world-v1', frame='map',
-                    pose=list(pose), sample_sim_seconds=1.,
+                    pose=list(pose), sample_sim_seconds=1.+time.monotonic() if revision else 1.,
                     sensor_health=dict(localization=True, clock_age=0.,
                                        streams=[[1., 0., 0.], [1., 0., 0.]]),
                     contacts=['synthetic truth must not reach decisions'])
 
     requests = NavigationRequests(execution, sites=SITES,
-        profile='scoped-two-context-nav2-shim-v1', map_id='turtlebot3-world-v1',
+        profile='scoped-two-context-nav2-revision-v1' if revision else 'scoped-two-context-nav2-shim-v1', map_id='turtlebot3-world-v1',
         observation=observation, ready=lambda: True,
         context=lambda: dict(stage=stage, scope_id=scope_id, generation=1),
         request_stop=lambda record: stops.append(record['request_id']))
@@ -83,6 +86,10 @@ def main():
                     temporary.write_text(json.dumps(execution.snapshot(record)))
                     temporary.replace(ready)
                     continue
+                if revision and record['site'] == 'A':
+                    visit_started = time.monotonic()
+                    events.append('A_native_accepted')
+                    continue
                 accepted(execution.native(record, 'succeeded', goal_id))
                 execution.dispose_result(record, dict(goal_id=goal_id, stage=record['site']), lambda: {})
                 pose[:] = SITES[record['site']][:2]
@@ -91,9 +98,36 @@ def main():
                     execution.release(record)
                     stage = 'B'
                     scope_id = uuid.uuid4().hex
+            if revision and record is not None and record.get('goal_id') and record['site'] == 'A':
+                elapsed = time.monotonic()-visit_started
+                if record['request_id'] in stops:
+                    if cancel_started is None:
+                        cancel_started = time.monotonic()
+                        events.append('A_cancel')
+                    if revision_mode != '--revision-missing-close' and time.monotonic()-cancel_started >= .2:
+                        outcome = 'succeeded' if revision_mode == '--revision-race' else 'cancelled'
+                        accepted(execution.native(record, outcome, record['goal_id']))
+                        candidate = None if outcome == 'cancelled' else dict(goal_id=record['goal_id'], stage='A')
+                        execution.dispose_result(record, candidate, lambda: {})
+                        execution.settle(record)
+                        execution.release(record)
+                        events.append('A_released')
+                        stage, scope_id = 'B', uuid.uuid4().hex
+                elif elapsed >= 2:
+                    accepted(execution.native(record, 'succeeded', record['goal_id']))
+                    execution.dispose_result(record, dict(goal_id=record['goal_id'], stage='A'), lambda: {})
+                    pose[:] = SITES['A'][:2]
+                    execution.settle(record)
+                    execution.release(record)
+                    events.append('A_released')
+                    stage, scope_id = 'B', uuid.uuid4().hex
+                else:
+                    pose[:] = [-.8+.3*elapsed, -.5]
             for message in channel.pump():
                 try:
                     result = requests.command(message)
+                    if revision and message['command'] == 'submit' and message.get('site') == 'B':
+                        events.append('B_submit')
                     reply = dict(rpc=message['rpc'], result=result)
                 except (ValueError, KeyError) as error:
                     reply = dict(rpc=message['rpc'], error=str(error))
@@ -109,7 +143,7 @@ def main():
     finally:
         requests.close()
         audit_path.write_text(json.dumps(dict(records=[requests.status(key) for key in execution.records],
-                                             stops=stops), indent=2)+'\n')
+                                             stops=stops, events=events), indent=2)+'\n')
         if channel is not None:
             channel.close()
         listener.close()

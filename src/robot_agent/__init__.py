@@ -5,4 +5,6 @@ from .handoff import HandoffTask
 from .navigation import NavigationTask
 from .navigation_checkpoint import CheckpointNavigationTask
 
-__all__ = ['HandoffTask', 'NavigationTask', 'CheckpointNavigationTask']
+from .navigation_revision import RevisionNavigationTask
+
+__all__ = ['HandoffTask', 'NavigationTask', 'CheckpointNavigationTask', 'RevisionNavigationTask']
