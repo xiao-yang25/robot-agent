@@ -1,5 +1,60 @@
 # Testing and qualification
 
+## In-motion revision qualification
+
+The installed Agent `1891459` / immutable Harness `7279cd1` pair has bounded
+Ubuntu22.04/Humble/Nav2/Gazebo qualification for the explicit revision profile.
+Installed Python packages were compared directly to those source revisions;
+the fresh Core/Agent installations from the software batch and retained amd64
+image were reused. This is not a complete image rebuild or a broad reliability
+result. Each of the first seven completed, zero-delay scenes had one offline
+physical evaluation:
+
+| Input / scene | Observed result |
+|---|---|
+| No instruction | Only A completed; independent A error0.204m |
+| Stop during A motion | Exact A cancelled, no output, settled/released in about5.745s; `stopped_by_instruction`, no completed site or B request |
+| Controlled redirect | A released in about5.018s before the B proposal/admission; only B completed, error0.232m |
+| Actual B lifecycle pause | Fresh B state2 refused reuse; A cancelled/pending/revoked, needs-help, zero B or after-revision proposal |
+| Foreign revision identity | One invalid instruction ignored; original A completed, error0.218m, zero B |
+| Global stop racing redirect | Task cancelled; A remained pending/revoked, zero B or later proposal |
+| Host-model redirect | Three actual proposals, explicitly requested `gpt-6-sol` / high via Codex0.159.0; A released in about4.994s before after-revision, only B completed, error0.236m |
+
+Business inputs remain controlled. The installed application receives only public
+Session feedback; the model receives the normalized instruction and declared map
+measurements. Passive Gazebo truth is evaluated separately and never drives a
+decision. The reuse boundary checks correlated native/child/BT/outlet closure,
+fresh odometry quiet and all six fresh B readiness replies. Gazebo snapshots
+corroborate selected motion/arrival positions, not continuous independent quiet.
+Cancel ACK alone never permits B. Timings above are individual observations,
+not hard stop limits.
+
+One earlier model scene failed in RViz startup before any Agent/model request;
+its original logs remain incomplete. The unchanged second scene passed; the
+graphics failure's root cause remains unknown. The exact scene containers and
+owned model/relay children were removed/reaped. Host groups exited zero without
+forced cleanup; the actual container had no network, 2CPU/4GiB and no private
+host model output mount. Reports retain unassessed task verdicts and unknown
+native/remote cleanup; normal final B remains current/pending.
+
+Two additional, separately evaluated stop/model-redirect scenes delivered the
+instruction four seconds after the window opened. They retained the original
+budgets and thresholds: stop released
+A in about5.050s with zero B; model redirect released A in about5.683s, then
+completed only B with independent error0.228m. Both scenes retain their own raw
+logs and raw recordings; the earlier zero-delay recordings remain intact.
+The delayed model scene's RViz view was empty despite its completed task, so
+that video was rejected for presentation. This additional graphics issue remains
+unresolved. The published redirect clip comes from the earlier zero-delay run;
+the stop clip uses the delayed run. No clips splice different scenes.
+
+The public `--task revision --instruction stop --instruction-delay 0` command was
+also exercised against the same installations. Its caller/scene completion and
+exact container removal passed; this separate entry check is not another
+physical evaluation. [Same-run stop and redirect videos](https://xiao-yang25.github.io/robot-harness/#revision-demos)
+present the two normal branches. Neither Owner restart, arbitrary routes, human
+intent recognition, hardware nor a general model service is qualified.
+
 ## In-motion revision software checks
 
 The opt-in `RevisionNavigationTask` consumes Harness `7279cd1` from
@@ -25,9 +80,9 @@ failed-proposal process count was corrected and the affected seven host cases
 passed. The final missing-expiry guard then passed 15 boundary cases and twelve
 affected installed cases in new wheel installations on each platform. Original
 failed logs are retained. Existing CI runs the complete final collections.
-This batch does not claim new ROS/physics, authenticated model, physical-stop
-timing or video qualification. Those require new bounded runs and one independent evaluator per
-run; older checkpoint videos retain their recorded scope.
+These software checks do not establish ROS/physics, authenticated model or
+physical-stop timing. The separate fixed-pair qualification above supplies its
+own bounded evidence; older checkpoint videos retain their recorded scope.
 
 
 ## Checkpoint navigation qualification

@@ -151,9 +151,11 @@ and 45s caller wait are unchanged. Polling targets 100ms cooperatively; provider
 and Session calls have no hard preemption guarantee. No background model thread,
 arbitrary target, recovery, Owner restart or hard-stop qualification is added.
 See the [explicit tutorial](../examples/navigation/README.md#run-the-in-motion-revision-task)
-and [verification scope](TESTING.md#in-motion-revision-software-checks).
-New real Humble/Nav2/model runs and matching videos remain the next qualification
-step; installed synthetic native checks do not establish those results.
+and [fixed-pair qualification](TESTING.md#in-motion-revision-qualification).
+New bounded Humble/Nav2 runs include stop, redirect, no instruction, selected
+invalid/failure cases and an actual host-model redirect; matching videos retain
+that limited scope. Installed synthetic native checks alone do not establish
+those results.
 
 ## Models and algorithm providers
 
