@@ -168,7 +168,11 @@ application that strictly requires A. Default tasks, CLI and preview stay unchan
 
 Use the immutable [Harness dependency](../workspace.repos) and an explicitly
 prepared `scoped-two-context-nav2-failure-recovery-v1` Owner. The existing site
-coordinates and `turtlebot3-world-v1` map identity remain fixed. The task borrows
+coordinates remain fixed. `expected_map_id` defaults to `turtlebot3-world-v1`;
+the caller may explicitly bind a prepared scene's other map identity. Capability,
+measurement and reference must all match it, and Session/map/epoch must remain
+unchanged throughout the task. This does not qualify arbitrary maps, register
+new sites or verify map content. The task borrows
 the public Session and a backend implementing
 `decide(context, observation, deadline, stop_requested)`; the caller owns
 backend resources and connection close.
@@ -199,9 +203,10 @@ hard preemption. Final B retains pending settlement, task verdict unassessed
 and native cleanup unknown.
 
 This Python entry has [application/installed checks](TESTING.md#single-backup-software-checks).
-A fresh paired Humble scene, actual model/host relay, public simulation command
-and same-run video still need separate qualification; earlier videos do not
-establish recovery support.
+Controlled paired Humble/Nav2 scenes cover A-only success, one backup, help,
+missing successor readiness, failed backup, foreign proposal and global stop.
+Actual model/host relay, a public recovery simulation command and same-run video
+still need separate qualification; earlier videos do not establish those results.
 
 ## Models and algorithm providers
 

@@ -90,6 +90,37 @@ class RecoveryTests(unittest.TestCase):
         self.assertEqual(len(self.session.submissions), 1)
         self.assertNotIn('recovery', report)
 
+    def test_explicit_map_binding_requires_capability_and_observation_match(self):
+        expected = 'turtlebot3-occupied-a-probe-v1'
+        for mismatch in ('none', 'capability', 'observation', 'reference', 'changes_after_proposal'):
+            with self.subTest(mismatch=mismatch):
+                self.setUp()
+                session = self.session
+                cap, observe = session.capabilities, session.observe
+                def capability():
+                    return {**cap(), 'map_id': expected if mismatch != 'capability' else 'other-map'}
+                def observation():
+                    row = observe()
+                    row['map_id'] = expected if mismatch != 'observation' else 'other-map'
+                    row['reference']['map_id'] = expected if mismatch != 'reference' else 'other-map'
+                    return row
+                session.capabilities, session.observe = capability, observation
+                def changed(context, answer):
+                    if context['phase'] == 'after_failure' and mismatch == 'changes_after_proposal':
+                        session.capabilities = lambda: {**capability(), 'map_id': 'other-map'}
+                report = self.task(Proposal(changed), expected_map_id=expected).run(session)
+                self.assertEqual(report['status'], 'completed' if mismatch == 'none' else 'needs_help', report)
+                self.assertEqual(len(session.submissions), 2 if mismatch == 'none' else
+                                 1 if mismatch == 'changes_after_proposal' else 0)
+                if mismatch == 'none':
+                    self.assertTrue(all(c['context']['observation_reference']['map_id'] == expected
+                                        for c in report['decisions']))
+
+    def test_invalid_map_identity_is_rejected_before_task_creation(self):
+        for value in (None, '', ' map', 'map ', 'map\nchanged', 'a'*129):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                self.task(expected_map_id=value)
+
     def test_only_released_failure_allows_one_fresh_b_and_b_stays_pending(self):
         def require_release(context, answer):
             if context['phase'] == 'after_failure':

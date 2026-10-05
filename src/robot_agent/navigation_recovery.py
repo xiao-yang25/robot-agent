@@ -3,7 +3,7 @@ from copy import deepcopy
 import math
 import uuid
 
-from .navigation import ACTIONS, SITES, _NavigationExecution
+from .navigation import ACTIONS, MAP, SITES, _NavigationExecution
 
 PROFILE = 'scoped-two-context-nav2-failure-recovery-v1'
 FAILURE_FIELDS = ('recovery_id', 'request_id', 'operation_id', 'goal_id')
@@ -27,7 +27,12 @@ class RecoveryNavigationTask(_NavigationExecution):
     instruction_field = 'failure_context'
     instruction_id = 'recovery_id'
 
-    def __init__(self, decision_backend, **kwargs):
+    def __init__(self, decision_backend, *, expected_map_id=MAP, **kwargs):
+        if (not isinstance(expected_map_id, str) or not 0 < len(expected_map_id) <= 128
+                or expected_map_id.strip() != expected_map_id
+                or any(ord(char) < 32 or ord(char) == 127 for char in expected_map_id)):
+            raise ValueError('expected map identity must be a bounded nonempty identifier')
+        self.expected_map_id = expected_map_id
         super().__init__(decision_backend, **kwargs)
         self.a = self.a_admission = self.a_goal = None
         self.completed_site = None

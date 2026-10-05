@@ -4,8 +4,8 @@
 
 The opt-in `RecoveryNavigationTask` consumes Harness `9278fea` from
 [workspace.repos](../workspace.repos). The preview tag and its older dependency
-stay immutable. This batch adds the Python task and text-proposal schema; it does
-not add a public recovery simulation command or claim a new model/physics pair.
+stay immutable. The initial software batch added the Python task and text-proposal
+schema without a public recovery simulation command or new model/physics pair.
 
 Application checks cover A-only success, pending versus confirmed failed-A
 no-output release, one fresh backup, help, backup failure without another
@@ -30,6 +30,25 @@ image passed all 31 combinations and the 15 recovery application cases offline.
 The first container invocation used the wrong default scene entry; the next
 precheck unnecessarily requested unavailable Pillow for these no-image checks.
 Both preparation failures remain recorded; no test assertion was relaxed.
+
+The map-binding increment keeps that default dependency and scene identity.
+Its explicit `expected_map_id` checks reject capability/measurement/reference
+mismatches and a map change after the failure proposal. All 124 macOS application
+checks and 31 installed combinations pass; the offline Humble image passes 31
+installed combinations and 17 recovery application checks. These software
+results do not by themselves establish arbitrary-map or physical qualification.
+
+Seven controlled operator scenes then exercised the installed task and public
+Session with the fixed Harness in Ubuntu22.04/Humble/Nav2 1.1.20. A-only success
+finished 0.205m from A; accepted/failed A was actually closed and released before
+one B, which finished 0.228m from B. Released-A help, actual paused successor
+readiness, foreign failure proposal and global stop all issued zero B. A separate
+static map with both goals occupied and explicitly zero planner tolerance produced
+native B failure without another recovery. Static occupancy does not prove a real
+physical obstruction or general unreachability. Each scene had one evaluation;
+initial evaluation/startup/fault-preparation failures remain separate incomplete
+records. This qualifies controlled proposals in those scenes, not an actual model,
+host relay, public recovery command, video, hardware or a hard stopping limit.
 Full Ubuntu application checks and exact-candidate hosted results are separate
 delivery checks. A new paired task/model/video must be recorded separately.
 
