@@ -27,7 +27,13 @@ class NavigationCodexDecision(CodexDecision):
             'Echo its checkpoint_id in your answer; never replace or reinterpret the instruction. '
             'At after_revision follow revision_instruction: only redirect_b permits visit_b. '
             'A has been cancelled and released; do not require arrival at A. Echo revision_id. '
-            'At final for the revision task use completion_site (A or B) as the measured target. '
+            'At after_failure, failure_context describes an accepted native failure of A '
+            'whose resources the Owner confirmed released. This does not prove physical unreachability. '
+            'Choose visit_b only if the business goal permits the registered backup and '
+            'fresh map feedback is valid, otherwise help. Do not require arrival at failed A. '
+            'Echo failure_context recovery_id, request_id, operation_id and goal_id exactly. '
+            'Never retry A or recover again after B. '
+            'At final when completion_site is supplied use that site (A or B) as the measured target. '
             'For the fixed task or checkpoint without completion_site use B. '
             'At final choose observed_complete only if fresh map pose confirms that final target within 0.3m; '
             'use not_met for contradictory feedback or help for uncertainty. '
@@ -47,6 +53,9 @@ class NavigationCodexDecision(CodexDecision):
             properties['checkpoint_id'] = {'type': 'string'}
         if 'revision_instruction' in context:
             properties['revision_id'] = {'type': 'string'}
+        if 'failure_context' in context:
+            for key in ('recovery_id', 'request_id', 'operation_id', 'goal_id'):
+                properties[key] = {'type': 'integer' if key == 'operation_id' else 'string'}
         schema = {'type': 'object', 'properties': properties, 'required': list(properties),
                   'additionalProperties': False}
         (run / 'schema.json').write_text(json.dumps(schema) + '\n')

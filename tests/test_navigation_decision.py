@@ -28,6 +28,8 @@ if '--model' in sys.argv and sys.argv[sys.argv.index('--model')+1]=='slow-fixtur
 answer={k:inputs[k] for k in ('task_id','phase','observation_reference')}
 answer.update(action=inputs['allowed_actions'][0],reason='controlled text proposal')
 if 'checkpoint_instruction' in inputs: answer['checkpoint_id']=inputs['checkpoint_instruction']['checkpoint_id']
+if 'failure_context' in inputs:
+ for key in ('recovery_id','request_id','operation_id','goal_id'): answer[key]=inputs['failure_context'][key]
 output.write_text(json.dumps(answer))
 kind='command_execution' if sys.argv[sys.argv.index('--model')+1]=='tool-fixture' else 'agent_message'
 print(json.dumps({'item':{'type':kind}}))
@@ -89,6 +91,20 @@ print(json.dumps({'item':{'type':kind}}))
     def test_running_text_proposal_timeout_reaps_child(self):
         with self.assertRaises(TimeoutError):
             self.backend('slow-fixture').decide(self.context, {}, time.monotonic()+.2, lambda: False)
+        self.reaped()
+
+    def test_failure_context_and_identity_schema_reach_actual_child(self):
+        failure = dict(recovery_id='recovery', request_id='a', operation_id=1, goal_id='a'*32,
+                       native_outcome='failed', observation_reference=self.context['observation_reference'])
+        self.context.update(phase='after_failure', allowed_actions=['visit_b','help'], failure_context=failure)
+        answer = self.backend().decide(self.context, {'pose': [-2., -.5]}, time.monotonic()+5, lambda: False)
+        for key in ('recovery_id','request_id','operation_id','goal_id'):
+            self.assertEqual(answer[key], failure[key])
+        schema=json.loads((self.root/'decisions/decision-1/schema.json').read_text())
+        self.assertEqual(schema['properties']['operation_id']['type'],'integer')
+        self.assertTrue(all(key in schema['required'] for key in failure if key not in ('native_outcome','observation_reference')))
+        inputs=json.loads((self.root/'decisions/decision-1/input.json').read_text())
+        self.assertEqual(inputs['failure_context'],failure)
         self.reaped()
 
 

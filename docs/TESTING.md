@@ -1,5 +1,38 @@
 # Testing and qualification
 
+## Single-backup software checks
+
+The opt-in `RecoveryNavigationTask` consumes Harness `9278fea` from
+[workspace.repos](../workspace.repos). The preview tag and its older dependency
+stay immutable. This batch adds the Python task and text-proposal schema; it does
+not add a public recovery simulation command or claim a new model/physics pair.
+
+Application checks cover A-only success, pending versus confirmed failed-A
+no-output release, one fresh backup, help, backup failure without another
+recovery, foreign failure/proposal identity, changed scope/goal/original deadline,
+missing/cancelled/expired facts, failed-outcome regression, ambiguous submission,
+input/readiness loss, global stop and unrefreshed budgets. A real controlled
+proposal child exercises the failure context/schema and is reaped. Other
+navigation and ALOHA tests remain enabled.
+
+Installed checks use the actual public Unix Session and newly compiled Core,
+with a CI-only Owner providing synthetic measurements/native closure. They verify
+real Core failed/no-output/pending versus settled/released, one B after release,
+help/foreign identity with no B, A-only success, exact B cancellation after
+backup failure and caller connection/process teardown. These checks do not prove
+ROS closure, physical arrival or a hard stop. Both Ubuntu workflows already
+discover these cases; no duplicate job is needed.
+
+Local macOS application checks passed 122 cases, including 15 new recovery
+cases; the fresh wheel/Core installation passed all 31 combination cases.
+The same wheel and a fresh Core install in the retained Ubuntu22.04/Humble amd64
+image passed all 31 combinations and the 15 recovery application cases offline.
+The first container invocation used the wrong default scene entry; the next
+precheck unnecessarily requested unavailable Pillow for these no-image checks.
+Both preparation failures remain recorded; no test assertion was relaxed.
+Full Ubuntu application checks and exact-candidate hosted results are separate
+delivery checks. A new paired task/model/video must be recorded separately.
+
 ## In-motion revision qualification
 
 The installed Agent `1891459` / immutable Harness `7279cd1` pair has bounded
@@ -57,8 +90,9 @@ intent recognition, hardware nor a general model service is qualified.
 
 ## In-motion revision software checks
 
-The opt-in `RevisionNavigationTask` consumes Harness `7279cd1` from
-[workspace.repos](../workspace.repos); the published `v0.1.0a1` tag and its older
+The original software increment for `RevisionNavigationTask` consumed Harness
+`7279cd1`; the current dependency is recorded in
+[workspace.repos](../workspace.repos). The published `v0.1.0a1` tag and its older
 pin remain immutable. Application checks cover one motion window, no instruction,
 stop/redirect, foreign/expired inputs, native completion races, original budget
 clipping, provider/observation/global-stop failures, post-model release/pose loss,

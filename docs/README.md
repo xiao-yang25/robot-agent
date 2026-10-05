@@ -12,6 +12,7 @@ Core belongs to Harness; the dependency runs from Agent to Harness.
 | [ACT worker and preparation](../skills/aloha/README.md) | Bundled candidate worker, pinned environment and explicit weight preparation | ALOHA-specific policy input/output; pinned Harness private candidate transport, not a stable skill plugin API |
 | `robot-agent-evaluate-handoff` and [fixed profile](../src/robot_agent/handoff_profile.json) | Installed offline evaluation of the declared recorded task | Task-specific predicate; evaluation does not drive decisions or authorize execution |
 | `robot-agent-navigation` and [scene tutorial](../examples/navigation/README.md) | Installed bounded A→B application; controlled or host model proposals in the isolated Nav2 scene | Same-container owner; bounded local process cleanup, remote cleanup unknown |
+| [RecoveryNavigationTask](../src/robot_agent/navigation_recovery.py) | Experimental Python task: A, or one pre-authorized backup B after confirmed failed-A release | Installed software checks; paired physics/model tutorial remains unqualified |
 | [Combination CI](../.github/workflows/combination.yml) | Reproducible installed Agent/Harness boundary checks | Explicit no-physics providers; not a model/robot task qualification |
 
 These delivered artifacts are useful applications, policies and verification
@@ -156,6 +157,51 @@ New bounded Humble/Nav2 runs include stop, redirect, no instruction, selected
 invalid/failure cases and an actual host-model redirect; matching videos retain
 that limited scope. Installed synthetic native checks alone do not establish
 those results.
+
+### One backup after confirmed failure
+
+[RecoveryNavigationTask](../src/robot_agent/navigation_recovery.py) defines a
+business goal that permits registered B as one backup: visit A; if its navigation
+explicitly fails and Harness releases it, ask once whether to visit B or seek
+help. A success finishes only A. This task must not substitute for a different
+application that strictly requires A. Default tasks, CLI and preview stay unchanged.
+
+Use the immutable [Harness dependency](../workspace.repos) and an explicitly
+prepared `scoped-two-context-nav2-failure-recovery-v1` Owner. The existing site
+coordinates and `turtlebot3-world-v1` map identity remain fixed. The task borrows
+the public Session and a backend implementing
+`decide(context, observation, deadline, stop_requested)`; the caller owns
+backend resources and connection close.
+
+Only accepted, correlated native `failed` A with no result, explicit no-output
+disposition, settled/released receipt, unchanged admission/scope/goal/deadline
+and no observed cancellation/expiry selects `after_failure`. Pending closure
+continues within A's original operation budget; revoked, cancelled, ambiguous,
+unconfirmed or regressed facts require help. The Agent trusts the declared
+Owner's release assertion, including its native/quiet/successor obligations;
+it does not inspect ROS closure or label the site physically unreachable.
+
+One proposal receives fresh whitelisted map measurements and `failure_context`:
+recovery ID, A request/operation/goal, original observation reference and native
+failed outcome. Return `visit_b` or `help`, echo `recovery_id`, `request_id`,
+integer `operation_id` and `goal_id`, and preserve the usual task/phase/proposal
+observation fields. Unknown optional metadata grants no authority. After the
+proposal, recheck A release, current capability, Session/map/epoch, input health
+and stable fresh pose before issuing one B with the new Owner-issued reference.
+Arrival at failed A is not required.
+
+Failed A never counts as a visit. Completion names only A or only B; final
+observation assessment uses that site's measurements. B failure, unknown
+submission or later help never triggers another recovery, A retry, third site
+or reset. The original 240s task, 30s proposals and 160s operations clipped to
+the public 147000ms maximum remain unchanged. Calls remain cooperative without
+hard preemption. Final B retains pending settlement, task verdict unassessed
+and native cleanup unknown.
+
+This Python entry has [application/installed checks](TESTING.md#single-backup-software-checks).
+A fresh paired Humble scene, actual model/host relay, public simulation command
+and same-run video still need separate qualification; earlier videos do not
+establish recovery support.
 
 ## Models and algorithm providers
 
@@ -339,7 +385,7 @@ records the installed normal task and unresolved transport/fault scope.
 
 Build/install the exact Harness commit in [workspace.repos](../workspace.repos),
 including its optional Python bridge, and prepare its isolated simulation owner
-as described in the [owner setup](https://github.com/xiao-yang25/robot-harness/tree/7279cd12ae48d01384e081757c54c38b7858557b/integrations/ros2/nav2_session).
+as described in the [owner setup](https://github.com/xiao-yang25/robot-harness/tree/9278fea6249e61c1533defd4b39ea3d776f1a2ae/integrations/ros2/nav2_session).
 Install this Agent application, then connect to that owner's private endpoint:
 
 ```sh
