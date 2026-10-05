@@ -13,7 +13,7 @@ from robot_agent._navigation_demo import finish
 
 
 class InstalledNavigationHostTests(unittest.TestCase):
-    def run_case(self, model, tool_error=False, checkpoint=None, revision=None):
+    def run_case(self, model, tool_error=False, checkpoint=None, revision=None, recovery=None):
         prefix = Path(os.environ['COMBINATION_AGENT_PREFIX']).resolve()
         self.assertTrue(Path(robot_agent.navigation_host_model.__file__).resolve().is_relative_to(prefix))
         self.assertTrue((prefix/'bin/robot-agent-navigation-host-proposal').is_file())
@@ -39,7 +39,9 @@ class InstalledNavigationHostTests(unittest.TestCase):
                     host_command = [sys.executable, '-m', 'robot_agent.navigation_host_model',
                         '--exchange', str(scene), '--output', str(private), '--model', model,
                         '--executable', str(executable)]
-                    if revision is not None:
+                    if recovery is not None:
+                        host_command.extend(['--task','recovery'])
+                    elif revision is not None:
                         host_command.extend(['--task','revision'])
                     elif checkpoint is not None:
                         host_command.extend(['--task','checkpoint'])
@@ -47,7 +49,7 @@ class InstalledNavigationHostTests(unittest.TestCase):
                         start_new_session=True)
                     processes.append(host)
                     owner = subprocess.Popen([sys.executable, str(Path(__file__).with_name('navigation_owner.py')),
-                        str(endpoint), str(audit), *(['--revision'] if revision is not None else [])], stdout=owner_log, stderr=subprocess.STDOUT,
+                        str(endpoint), str(audit), *(['--failure-normal' if recovery=='normal' else '--failure'] if recovery is not None else ['--revision'] if revision is not None else [])], stdout=owner_log, stderr=subprocess.STDOUT,
                         start_new_session=True)
                     processes.append(owner)
                     until = time.monotonic()+5
@@ -57,6 +59,8 @@ class InstalledNavigationHostTests(unittest.TestCase):
                     client_command = [sys.executable, '-m', 'robot_agent.navigation_cli',
                         '--endpoint', str(endpoint), '--output', str(scene/'agent'),
                         '--model', model, '--executable', str(relay)]
+                    if recovery is not None:
+                        client_command.extend(['--task','recovery'])
                     if checkpoint is not None or revision is not None:
                         module = 'navigation_revision_demo' if revision is not None else 'navigation_checkpoint_demo'
                         instruction = revision if revision is not None else checkpoint
@@ -95,8 +99,19 @@ class InstalledNavigationHostTests(unittest.TestCase):
                             self.assertEqual(report['revision']['accepted'], revision != 'none')
                             if revision == 'redirect_b':
                                 self.assertEqual(report['decisions'][1]['answer']['revision_id'],report['revision']['instruction']['revision_id'])
-                        finish_a = checkpoint == 'finish_at_a' or revision in ('none','stop')
+                        if recovery is not None:
+                            self.assertEqual(report['completed_sites'],['A'] if recovery=='normal' else ['B'])
+                            if recovery=='failure':
+                                a = report['operations'][0]
+                                self.assertEqual(a['receipt']['native_outcome'],'failed')
+                                self.assertEqual(a['receipt']['output_non_delivery_reason'],'no_output')
+                                self.assertEqual(report['decisions'][1]['answer']['goal_id'],a['goal_id'])
+                                self.assertIn('A_released',facts['events'])
+                            else:
+                                self.assertNotIn('recovery',report)
+                        finish_a = checkpoint == 'finish_at_a' or revision in ('none','stop') or recovery=='normal'
                         actions = ['visit_a'] if revision == 'stop' else ['visit_a','observed_complete'] if revision == 'none' else ['visit_a','finish_at_a'] if checkpoint == 'finish_at_a' else ['visit_a','visit_b','observed_complete']
+                        if recovery == 'normal': actions = ['visit_a','observed_complete']
                         self.assertEqual([r['answer']['action'] for r in report['decisions']],
                                          actions)
                         self.assertEqual(facts['records'][0]['receipt']['settlement'], 'settled')
@@ -125,6 +140,12 @@ class InstalledNavigationHostTests(unittest.TestCase):
 
     def test_installed_revision_host_relay_completes_a_without_redirect_proposal(self):
         self.run_case('controlled-tutorial-no-model', revision='none')
+
+    def test_installed_recovery_cli_host_relay_completes_only_normal_a(self):
+        self.run_case('controlled-tutorial-no-model',recovery='normal')
+
+    def test_installed_recovery_cli_host_relay_echoes_failed_a_then_one_b(self):
+        self.run_case('controlled-tutorial-no-model',recovery='failure')
 
     def test_installed_revision_host_relay_stops_without_a_second_model_call(self):
         self.run_case('controlled-tutorial-no-model', revision='stop')

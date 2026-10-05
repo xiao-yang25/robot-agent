@@ -5,13 +5,15 @@ import os
 import stat
 import uuid
 
-from .navigation import ACTIONS, GOAL, SITES, REFERENCE_FIELDS, finite, measurements
+from .navigation import ACTIONS, GOAL, MAP, SITES, REFERENCE_FIELDS, finite, measurements
 from .navigation_checkpoint import CheckpointNavigationTask, IDENTITY_FIELDS
 from .navigation_revision import RevisionNavigationTask, IDENTITY_FIELDS as REVISION_FIELDS
+from .navigation_recovery import RecoveryNavigationTask, FAILURE_FIELDS, native_id, validate_map_id
 
 LIMIT = 65536
 PHASES = tuple(ACTIONS)
 REVISION_PHASES = ("prepare", "after_revision", "final")
+RECOVERY_PHASES = ("prepare", "after_failure", "final")
 
 
 @contextmanager
@@ -60,17 +62,20 @@ def cancelled(parent):
         return False
 
 
-def proposal_request(data, phase, model, *, task='fixed'):
+def proposal_request(data, phase, model, *, task='fixed', expected_map_id=MAP):
     """Reconstruct only this application's permitted inputs before a host call."""
     nonce, budget, inputs = data['nonce'], data['remaining_seconds'], data['inputs']
     if (not isinstance(nonce, str) or len(nonce) != 32
             or any(c not in '0123456789abcdef' for c in nonce)
             or not finite(budget) or not 0 < budget <= 30 or not isinstance(inputs, dict)):
         raise ValueError('invalid local proposal identity or budget')
-    phases = REVISION_PHASES if task == 'revision' else PHASES
-    if task not in ('fixed', 'checkpoint', 'revision') or phase not in phases:
+    phases = RECOVERY_PHASES if task == 'recovery' else REVISION_PHASES if task == 'revision' else PHASES
+    if task not in ('fixed', 'checkpoint', 'revision', 'recovery') or phase not in phases:
         raise ValueError('unsupported host navigation task or phase')
-    goal = RevisionNavigationTask.goal if task == 'revision' else (GOAL if task == 'fixed' else CheckpointNavigationTask.goal)
+    if task != 'recovery' and expected_map_id != MAP:
+        raise ValueError('explicit maps require the recovery task')
+    validate_map_id(expected_map_id)
+    goal = RecoveryNavigationTask.goal if task == 'recovery' else RevisionNavigationTask.goal if task == 'revision' else (GOAL if task == 'fixed' else CheckpointNavigationTask.goal)
     if (inputs.get('phase') != phase or inputs.get('model_requested') != model
             or inputs.get('goal') != goal or inputs.get('registered_sites') != SITES
             or not isinstance(inputs.get('task_id'), str) or not 0 < len(inputs['task_id']) <= 128):
@@ -78,11 +83,12 @@ def proposal_request(data, phase, model, *, task='fixed'):
     observation = inputs['measurement']
     reference = observation['reference']
     observation = measurements({**observation, 'valid': True, 'epoch': reference['epoch'],
-                               'map_id': reference['map_id'], 'frame': reference['frame']})
+                               'map_id': reference['map_id'], 'frame': reference['frame']},
+                               expected_map_id=expected_map_id)
     context_reference = {key: inputs['observation_reference'][key] for key in REFERENCE_FIELDS}
     if (type(context_reference['epoch']) is not int or context_reference != observation['reference']):
         raise ValueError('local proposal observation reference changed')
-    allowed = ["visit_b", "help"] if phase == "after_revision" else list(ACTIONS[phase])
+    allowed = ["visit_b", "help"] if phase in ("after_revision", "after_failure") else list(ACTIONS[phase])
     instruction = None
     if task == 'checkpoint' and phase == 'after_a':
         command = inputs.get('checkpoint_instruction')
@@ -106,7 +112,23 @@ def proposal_request(data, phase, model, *, task='fixed'):
                 or any(c not in '0123456789abcdef' for c in command['goal_id'])):
             raise ValueError('host revision instruction identity or action changed')
         instruction = {key: command[key] for key in (*REVISION_FIELDS, 'action')}
-    if task == 'revision' and phase == 'final' and inputs.get('completion_site') not in SITES:
+    if task == 'recovery' and phase == 'after_failure':
+        command = inputs.get('failure_context')
+        if not isinstance(command, dict):
+            raise ValueError('host recovery failure context missing')
+        old_ref = command.get('observation_reference')
+        if (not native_id(command.get('recovery_id')) or not native_id(command.get('goal_id'))
+                or command.get('request_id') != inputs['task_id']+'-prepare'
+                or type(command.get('operation_id')) is not int or command['operation_id'] < 1
+                or command.get('native_outcome') != 'failed' or not isinstance(old_ref, dict)
+                or type(old_ref.get('epoch')) is not int
+                or any(old_ref.get(key) != context_reference[key] for key in ('session_id','epoch','map_id','frame'))
+                or not isinstance(old_ref.get('observation_id'), str) or not 0 < len(old_ref['observation_id']) <= 128):
+            raise ValueError('host recovery failure identity or outcome changed')
+        instruction = {key: command[key] for key in FAILURE_FIELDS}
+        instruction.update(native_outcome='failed',
+            observation_reference={key: old_ref[key] for key in REFERENCE_FIELDS})
+    if task in ('revision','recovery') and phase == 'final' and inputs.get('completion_site') not in SITES:
         raise ValueError('host revision final target missing')
     if inputs.get('allowed_actions') != allowed:
         raise ValueError('host proposal action set changed')
@@ -114,7 +136,8 @@ def proposal_request(data, phase, model, *, task='fixed'):
                    registered_sites=SITES, allowed_actions=allowed,
                    observation_reference=context_reference)
     if instruction is not None:
-        context['revision_instruction' if task == 'revision' else 'checkpoint_instruction'] = instruction
-    if task == 'revision' and phase == 'final':
+        key = 'failure_context' if task == 'recovery' else 'revision_instruction' if task == 'revision' else 'checkpoint_instruction'
+        context[key] = instruction
+    if task in ('revision','recovery') and phase == 'final':
         context['completion_site'] = inputs['completion_site']
     return nonce, budget, context, observation

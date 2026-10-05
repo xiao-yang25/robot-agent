@@ -8,7 +8,7 @@ import threading
 import time
 import uuid
 
-from ._navigation_relay import PHASES, REVISION_PHASES, cancelled, directory, read_json, write_json
+from ._navigation_relay import PHASES, REVISION_PHASES, RECOVERY_PHASES, cancelled, directory, read_json, write_json
 from .navigation import finite
 
 
@@ -23,7 +23,7 @@ def main(*, exchange=Path("/output")):
     deadline = started + budget
     inputs = json.loads(sys.stdin.read().splitlines()[-1])
     phase = inputs['phase']
-    if phase not in (*PHASES, *REVISION_PHASES):
+    if phase not in (*PHASES, *REVISION_PHASES, *RECOVERY_PHASES):
         raise ValueError('unsupported navigation phase')
     answer_path = Path(sys.argv[sys.argv.index('--output-last-message') + 1])
     stopped = threading.Event()

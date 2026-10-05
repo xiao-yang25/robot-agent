@@ -15,6 +15,7 @@ from robot_agent._navigation_relay import directory, proposal_request, read_json
 from robot_agent.navigation import ACTIONS, GOAL, SITES
 from robot_agent.navigation_checkpoint import CheckpointNavigationTask
 from robot_agent.navigation_revision import RevisionNavigationTask
+from robot_agent.navigation_recovery import RecoveryNavigationTask
 
 
 def inputs(phase='prepare', model='fixture'):
@@ -169,6 +170,43 @@ print(json.dumps({'item':{'type':'agent_message'}}))
         value['completion_site'] = 'C'
         with self.assertRaises(ValueError): proposal_request(record,'final','fixture',task='revision')
 
+    def test_recovery_host_binds_explicit_map_and_whitelists_failed_operation(self):
+        from copy import deepcopy
+        expected = 'turtlebot3-occupied-a-probe-v1'
+        value = inputs()
+        value.update(phase='after_failure',goal=RecoveryNavigationTask.goal,allowed_actions=['visit_b','help'])
+        value['observation_reference']['map_id'] = expected
+        value['measurement']['reference']['map_id'] = expected
+        command = dict(recovery_id='c'*32,request_id='task-prepare',operation_id=1,goal_id='a'*32,
+            native_outcome='failed',observation_reference={**value['observation_reference'],'observation_id':'original-A'},
+            optional_metadata='ignored')
+        value['failure_context'] = command
+        record = dict(nonce='b'*32,remaining_seconds=4,inputs=value)
+        _,_,context,observation = proposal_request(record,'after_failure','fixture',task='recovery',expected_map_id=expected)
+        self.assertEqual(context['failure_context']['observation_reference']['observation_id'],'original-A')
+        self.assertNotIn('optional_metadata',context['failure_context'])
+        self.assertEqual(observation['reference']['map_id'],expected)
+        with self.assertRaises(ValueError): proposal_request(record,'after_failure','fixture',task='recovery')
+        with self.assertRaises(ValueError): proposal_request(record,'after_failure','fixture',expected_map_id=expected)
+        for change in ('operation','request','goal','outcome','old_epoch','old_map','allowed'):
+            changed = deepcopy(record); command = changed['inputs']['failure_context']
+            if change == 'operation': command['operation_id'] = True
+            elif change == 'request': command['request_id'] = 'another-task-prepare'
+            elif change == 'goal': command['goal_id'] = 'bad'
+            elif change == 'outcome': command['native_outcome'] = 'cancelled'
+            elif change == 'old_epoch': command['observation_reference']['epoch'] = True
+            elif change == 'old_map': command['observation_reference']['map_id'] = 'different-map'
+            else: changed['inputs']['allowed_actions'] = ['visit_a','help']
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                proposal_request(changed,'after_failure','fixture',task='recovery',expected_map_id=expected)
+        for site in ('A','B','C'):
+            final = inputs('final'); final.update(goal=RecoveryNavigationTask.goal,completion_site=site)
+            record['inputs'] = final
+            if site == 'C':
+                with self.assertRaises(ValueError): proposal_request(record,'final','fixture',task='recovery')
+            else:
+                self.assertEqual(proposal_request(record,'final','fixture',task='recovery')[2]['completion_site'],site)
+
     def test_revision_host_serves_direct_final_without_waiting_for_redirect_phase(self):
         process = self.server(task='revision')
         for phase in ('prepare','final'):
@@ -301,6 +339,48 @@ print(json.dumps({'item':{'type':'agent_message'}}))
                     run_host([], output=self.root/'new-scene', host_output=private,
                              model='fixture', executable='unused', mounted_roots=(mount,))
             self.assertEqual(list(mount.iterdir()), [])
+
+    def test_recovery_host_wrapper_forwards_task_map_and_installed_client_selection(self):
+        self.host.rmdir(); self.scene.rmdir()
+        data = inputs()
+        data['goal'] = RecoveryNavigationTask.goal
+        data['observation_reference']['map_id'] = 'prepared-recovery-map'
+        record = dict(nonce='a'*32,remaining_seconds=3,inputs=data)
+        launch = self.root/'recovery-launcher.py'
+        launch.write_text('import json,sys,time\nfrom pathlib import Path\n'
+            'import robot_agent.navigation_demo_client as client\n'
+            'out=Path(sys.argv[sys.argv.index("--output")+1]);out.mkdir()\n'
+            'selected=[];client.main=lambda **kwargs:selected.append(kwargs)\n'
+            'source=Path(sys.argv[sys.argv.index("--client-script")+1]).read_text()\n'
+            'exec(compile(source,"generated-client","exec"))\n'
+            '(out/"selected.json").write_text(json.dumps(selected))\n'
+            'slot=out/"model-requests"/"prepare";slot.mkdir(parents=True)\n'
+            f'(slot/"request.json").write_text(json.dumps({record!r}))\n'
+            'until=time.monotonic()+5\n'
+            'while not (slot/"response.json").exists() and time.monotonic()<until:time.sleep(.01)\n'
+            'assert json.loads((slot/"response.json").read_text())["answer"]["action"]=="visit_a"\n')
+        code = run_host([sys.executable,str(launch),'--client-script','placeholder','--output',str(self.scene)],
+            output=self.scene,host_output=self.host,model='fixture',executable=str(self.executable),
+            recovery={'expected_map_id':'prepared-recovery-map'})
+        self.assertEqual(code,0)
+        self.assertEqual(json.loads((self.scene/'selected.json').read_text()),[
+            dict(provider='host-codex',model='fixture',task='recovery',expected_map_id='prepared-recovery-map')])
+        forwarded = json.loads((self.host/'decisions/decision-1/input.json').read_text())
+        self.assertEqual(forwarded['goal'],RecoveryNavigationTask.goal)
+        self.assertEqual(forwarded['measurement']['reference']['map_id'],'prepared-recovery-map')
+        for name,row in json.loads((self.host/'processes.json').read_text()).items():
+            if name in ('launcher','host_model'):
+                self.assertTrue(row['reaped']); self.assertFalse(row['group_forced'])
+                with self.assertRaises(ProcessLookupError):os.killpg(row['pid'],0)
+
+    def test_recovery_configuration_rejects_conflicting_task_or_invalid_map_before_resources(self):
+        self.host.rmdir(); self.scene.rmdir()
+        for options in ({'recovery':{'expected_map_id':''}},
+                        {'recovery':{'expected_map_id':'map'},'revision':{}},
+                        {'recovery':{'expected_map_id':'map'},'checkpoint':{}}):
+            with self.subTest(options=options), self.assertRaises(ValueError):
+                run_host([],output=self.scene,host_output=self.host,model='unused',executable='unused',**options)
+        self.assertFalse(self.host.exists()); self.assertFalse(self.scene.exists())
 
     def test_forced_shutdown_reaps_only_the_owned_process_group(self):
         ready=self.root/'ready'
