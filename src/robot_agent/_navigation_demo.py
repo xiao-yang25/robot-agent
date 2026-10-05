@@ -80,9 +80,12 @@ def run_controlled_checkpoint(command, configuration, *, revision=False):
     return result
 
 
-def run_host(command, *, output, host_output, model, executable, mounted_roots=(), checkpoint=None, revision=None):
-    if checkpoint is not None and revision is not None:
+def run_host(command, *, output, host_output, model, executable, mounted_roots=(), checkpoint=None, revision=None, recovery=None):
+    if sum(value is not None for value in (checkpoint,revision,recovery)) > 1:
         raise ValueError("select one navigation business task")
+    if recovery is not None:
+        from .navigation_recovery import validate_map_id
+        validate_map_id(recovery['expected_map_id'])
     output, host_output = Path(output).resolve(), Path(host_output).resolve()
     if output.exists() or host_output.is_relative_to(output) or output.is_relative_to(host_output):
         raise ValueError('use new, separate scene and private host output directories')
@@ -108,13 +111,17 @@ def run_host(command, *, output, host_output, model, executable, mounted_roots=(
             client.write_text(revision_client(revision, provider='host-codex', model=model)
                 if revision is not None else checkpoint_client(checkpoint, provider='host-codex', model=model)
                 if checkpoint is not None else 'from robot_agent.navigation_demo_client import main\n'
+                f'main(provider="host-codex", model={model!r}, task="recovery", expected_map_id={recovery["expected_map_id"]!r})\n'
+                if recovery is not None else 'from robot_agent.navigation_demo_client import main\n'
                 f'main(provider="host-codex", model={model!r})\n')
             command = list(command)
             command[command.index('--client-script') + 1] = str(client)
             host_command = [sys.executable, '-m', 'robot_agent.navigation_host_model',
                 '--exchange', str(output), '--output', str(host_output), '--model', model,
                 '--executable', executable]
-            if revision is not None:
+            if recovery is not None:
+                host_command.extend(['--task','recovery','--expected-map-id',recovery['expected_map_id']])
+            elif revision is not None:
                 host_command.extend(['--task', 'revision'])
             elif checkpoint is not None:
                 host_command.extend(['--task', 'checkpoint'])

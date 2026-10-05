@@ -9,9 +9,15 @@ import time
 
 from ._navigation_relay import PHASES, cancelled, directory, proposal_request, read_json, write_json
 from .navigation_decision import NavigationCodexDecision
+from .navigation import MAP
+from .navigation_recovery import validate_map_id
 
 
-def serve(exchange, output, model, executable, stopped, *, task='fixed'):
+def serve(exchange, output, model, executable, stopped, *, task='fixed', expected_map_id=MAP):
+    if task == 'recovery':
+        validate_map_id(expected_map_id)
+    elif task not in ('fixed','checkpoint','revision') or expected_map_id != MAP:
+        raise ValueError('unsupported task/map configuration')
     deadline = time.monotonic() + 420
     records = []
     backend = NavigationCodexDecision(output / 'decisions', model=model, executable=executable)
@@ -24,7 +30,8 @@ def serve(exchange, output, model, executable, stopped, *, task='fixed'):
                 raise TimeoutError('scene output was not created within the host budget')
             time.sleep(.02)
         with directory(exchange) as scene:
-            stages = [('prepare',), ('after_revision', 'final'), ('final',)] if task == 'revision' else [(p,) for p in PHASES]
+            middle = 'after_failure' if task == 'recovery' else 'after_revision'
+            stages = [('prepare',), (middle, 'final'), ('final',)] if task in ('revision','recovery') else [(p,) for p in PHASES]
             for choices in stages:
                 while not stopped.is_set():
                     if time.monotonic() >= deadline:
@@ -47,7 +54,8 @@ def serve(exchange, output, model, executable, stopped, *, task='fixed'):
                         with directory('model-requests', parent=scene) as slots, directory(phase, parent=slots) as slot:
                             data = read_json(slot, 'request.json')
                             received = True
-                            nonce, budget, context, observation = proposal_request(data, phase, model, task=task)
+                            nonce, budget, context, observation = proposal_request(data, phase, model,
+                                task=task, expected_map_id=expected_map_id)
                             stop = lambda: stopped.is_set() or cancelled(slot)
                             if stop():
                                 raise InterruptedError('proposal withdrawn before host decision')
@@ -86,12 +94,14 @@ def main():
     parser.add_argument('--output', type=Path, required=True, help='private host directory created by the launcher')
     parser.add_argument('--model', required=True)
     parser.add_argument('--executable', default='codex')
-    parser.add_argument('--task', choices=('fixed', 'checkpoint', 'revision'), default='fixed')
+    parser.add_argument('--task', choices=('fixed', 'checkpoint', 'revision', 'recovery'), default='fixed')
+    parser.add_argument('--expected-map-id', default=MAP)
     args = parser.parse_args()
     stopped = threading.Event()
     previous = {sig: signal.signal(sig, lambda *_: stopped.set()) for sig in (signal.SIGINT, signal.SIGTERM)}
     try:
-        serve(args.exchange, args.output, args.model, args.executable, stopped, task=args.task)
+        serve(args.exchange, args.output, args.model, args.executable, stopped, task=args.task,
+              expected_map_id=args.expected_map_id)
     finally:
         for sig, handler in previous.items():
             signal.signal(sig, handler)

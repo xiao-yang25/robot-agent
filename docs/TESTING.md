@@ -52,6 +52,50 @@ host relay, public recovery command, video, hardware or a hard stopping limit.
 Full Ubuntu application checks and exact-candidate hosted results are separate
 delivery checks. A new paired task/model/video must be recorded separately.
 
+The model transport increment adds explicit installed CLI recovery mode and a
+host worker bound to that task/map. Whitelist checks reject foreign task/failure
+request/operation/goal/outcome and reference identity; optional metadata is
+ignored. The prepared-owner wrapper forwards task/map/client selection and reaps
+its actual host/launcher groups. New installed host/relay/CLI/Core cases cover
+normal A-only and failed-A release before one B, with controlled proposals.
+Local macOS application checks passed 127 cases; all 33 installed combinations
+passed on macOS and Ubuntu22.04 amd64. The offline image also passed all 18
+host/relay application cases. Full Ubuntu application results belong to the
+exact candidate in the existing Actions workflow.
+
+The same new wheel was installed into separate host and Linux prefixes and
+compared directly with current runtime sources. Two new real Humble/Nav2 runs
+used the fixed Harness `9278fea`, the existing qualified amd64 recording image,
+and actual host `gpt-6-sol`/high proposals through Codex0.159.0. Normal A-only used
+two decisions and finished 0.209m from A. A static occupied-A map produced an
+associated accepted native failure; the installed Owner actually closed its
+native work, established successor readiness and released A before the third
+stage sequence selected one B. Backup completed 0.230m from B using three
+proposals overall. No A arrival was required to propose the backup.
+
+Each run had one physical evaluation and bounded proposal-association checks;
+Gazebo truth never reached Agent/model inputs. The host model/launcher groups
+and local proposal children exited and were reaped without forced group cleanup.
+Container relay children retain their own reaped records; Linux PIDs are not
+interpreted as host PIDs. Exact scene containers were removed with no OOM. The
+normal run's live mounts/network/resource inspection confirmed 2CPU/4GiB,
+network none, and no private host output mount. The first attempt never started
+its scene because a nested mount could not create a path inside a read-only
+bind; its failure remains recorded and was not evaluated or relabelled.
+
+Both successful runs retain same-run raw recordings and original-speed exports,
+with startup/teardown trimmed and approximate event captions. Full decoding and
+selected frame checks passed. These artifacts are prepared for a later public
+presentation batch, not already published recovery videos. The normal path uses
+the existing map; the backup's static occupancy fixture does not establish a
+physical obstacle or general unreachability. Scene map preparation remains
+research-specific; the actual task run does not qualify a public recovery scene
+command. Its installed public CLI is covered by the controlled combination
+checks. Public scene/tutorial reproduction and homepage publication remain
+pending. Task verdict stays unassessed, native/remote cleanup unknown and final
+B settlement pending. Hardware, Owner restart, general recovery, broad model
+reliability and a hard stopping limit are outside this increment.
+
 ## In-motion revision qualification
 
 The installed Agent `1891459` / immutable Harness `7279cd1` pair has bounded

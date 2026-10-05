@@ -12,7 +12,7 @@ Core belongs to Harness; the dependency runs from Agent to Harness.
 | [ACT worker and preparation](../skills/aloha/README.md) | Bundled candidate worker, pinned environment and explicit weight preparation | ALOHA-specific policy input/output; pinned Harness private candidate transport, not a stable skill plugin API |
 | `robot-agent-evaluate-handoff` and [fixed profile](../src/robot_agent/handoff_profile.json) | Installed offline evaluation of the declared recorded task | Task-specific predicate; evaluation does not drive decisions or authorize execution |
 | `robot-agent-navigation` and [scene tutorial](../examples/navigation/README.md) | Installed bounded A→B application; controlled or host model proposals in the isolated Nav2 scene | Same-container owner; bounded local process cleanup, remote cleanup unknown |
-| [RecoveryNavigationTask](../src/robot_agent/navigation_recovery.py) | Experimental Python task: A, or one pre-authorized backup B after confirmed failed-A release | Installed software checks; paired physics/model tutorial remains unqualified |
+| [RecoveryNavigationTask](../src/robot_agent/navigation_recovery.py) | Experimental Python task and explicit CLI mode: A, or one pre-authorized backup B after confirmed failed-A release | Prepared-owner software and bounded real model checks; public recovery scene command remains pending |
 | [Combination CI](../.github/workflows/combination.yml) | Reproducible installed Agent/Harness boundary checks | Explicit no-physics providers; not a model/robot task qualification |
 
 These delivered artifacts are useful applications, policies and verification
@@ -164,7 +164,7 @@ those results.
 business goal that permits registered B as one backup: visit A; if its navigation
 explicitly fails and Harness releases it, ask once whether to visit B or seek
 help. A success finishes only A. This task must not substitute for a different
-application that strictly requires A. Default tasks, CLI and preview stay unchanged.
+application that strictly requires A. Default task/CLI behavior and the published preview stay unchanged.
 
 Use the immutable [Harness dependency](../workspace.repos) and an explicitly
 prepared `scoped-two-context-nav2-failure-recovery-v1` Owner. The existing site
@@ -202,11 +202,22 @@ the public 147000ms maximum remain unchanged. Calls remain cooperative without
 hard preemption. Final B retains pending settlement, task verdict unassessed
 and native cleanup unknown.
 
-This Python entry has [application/installed checks](TESTING.md#single-backup-software-checks).
+The installed CLI explicitly selects this task with `--task recovery`;
+`--expected-map-id` binds the operator-prepared scene and is refused for the
+default fixed task. The host relay also requires explicit recovery mode and the
+same map. It reconstructs the failure identity and public measurements, then
+serves prepare/final for A success or prepare/after_failure/final for one backup.
+Credentials and model outputs remain on the host outside every container mount.
+The [prepared-owner entry](../examples/navigation/README.md#connect-the-single-backup-task-to-a-prepared-owner)
+does not create a recovery scene.
+
+This entry has [application/installed checks](TESTING.md#single-backup-software-checks).
 Controlled paired Humble/Nav2 scenes cover A-only success, one backup, help,
 missing successor readiness, failed backup, foreign proposal and global stop.
-Actual model/host relay, a public recovery simulation command and same-run video
-still need separate qualification; earlier videos do not establish those results.
+A new bounded actual-model/host-relay pair is recorded in Testing; its scene
+preparation remains research-specific. A public recovery simulation command,
+tutorial reproduction and homepage video publication remain pending. Earlier
+videos do not establish the new task/model combination.
 
 ## Models and algorithm providers
 

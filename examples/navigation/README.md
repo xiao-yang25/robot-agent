@@ -255,3 +255,35 @@ prepare/after_revision/final. Controlled subprocess tests cover these paths;
 a separate real host-model redirect run is qualified for the versions and
 environment in Testing. Final B remains pending and all task reports retain
 unassessed verdict/unknown native cleanup.
+
+
+## Connect the single-backup task to a prepared owner
+
+The installed CLI can explicitly select `RecoveryNavigationTask`. The operator
+must already have prepared an isolated public Navigation Session using Harness
+profile `scoped-two-context-nav2-failure-recovery-v1`, the fixed registered sites
+and the declared map. The business goal must permit B as a backup for failed A.
+This entry does not start or configure that scene; `examples/navigation/run.py`
+still supports only fixed, checkpoint and revision demonstrations.
+
+Inside the prepared client environment, with its existing host proposal relay:
+
+```sh
+robot-agent-navigation --endpoint "$NAVIGATION_ENDPOINT" \
+  --output /output/agent --model "$MODEL" \
+  --executable /client-prefix/bin/robot-agent-navigation-host-proposal \
+  --task recovery --expected-map-id turtlebot3-world-v1
+```
+
+Use a new output directory. The host worker must use the same explicit
+`--task recovery --expected-map-id` configuration, model and exchange directory;
+its private output stays outside all container mounts. An explicitly prepared
+other map requires that same identity on both sides. Fixed mode refuses the map
+option. A success finishes only A; accepted failed A must be released before one
+backup proposal and B submission. Final B remains pending; native cleanup and
+task verdict are not inferred from a model answer.
+
+[Software and actual-model checks](../../docs/TESTING.md#single-backup-software-checks)
+cover this increment. The real-model scene used research-specific static-map
+preparation; a public recovery scene/tutorial and homepage recordings remain a
+separate delivery.

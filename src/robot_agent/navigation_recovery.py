@@ -14,6 +14,14 @@ def native_id(value):
             and all(c in '0123456789abcdef' for c in value))
 
 
+def validate_map_id(value):
+    if (not isinstance(value, str) or not 0 < len(value) <= 128
+            or value.strip() != value
+            or any(ord(char) < 32 or ord(char) == 127 for char in value)):
+        raise ValueError('expected map identity must be a bounded nonempty identifier')
+    return value
+
+
 class RecoveryNavigationTask(_NavigationExecution):
     """Borrow Session and backend; caller owns their resources and close.
 
@@ -28,11 +36,7 @@ class RecoveryNavigationTask(_NavigationExecution):
     instruction_id = 'recovery_id'
 
     def __init__(self, decision_backend, *, expected_map_id=MAP, **kwargs):
-        if (not isinstance(expected_map_id, str) or not 0 < len(expected_map_id) <= 128
-                or expected_map_id.strip() != expected_map_id
-                or any(ord(char) < 32 or ord(char) == 127 for char in expected_map_id)):
-            raise ValueError('expected map identity must be a bounded nonempty identifier')
-        self.expected_map_id = expected_map_id
+        self.expected_map_id = validate_map_id(expected_map_id)
         super().__init__(decision_backend, **kwargs)
         self.a = self.a_admission = self.a_goal = None
         self.completed_site = None
