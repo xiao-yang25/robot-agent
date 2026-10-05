@@ -46,6 +46,19 @@ def revision_client(configuration, *, provider='controlled', model='controlled-r
 
 
 def run_controlled_checkpoint(command, configuration, *, revision=False):
+    source = revision_client(configuration) if revision else checkpoint_client(configuration)
+    return run_controlled_client(command, source)
+
+
+def run_controlled_recovery(command, expected_map_id):
+    from .navigation_recovery import validate_map_id
+    validate_map_id(expected_map_id)
+    source = ('from robot_agent.navigation_demo_client import main\n'
+              f'main(task="recovery", expected_map_id={expected_map_id!r})\n')
+    return run_controlled_client(command, source)
+
+
+def run_controlled_client(command, source):
     stopped = 0
     def stop(signum, _frame):
         nonlocal stopped
@@ -54,9 +67,9 @@ def run_controlled_checkpoint(command, configuration, *, revision=False):
     process = None
     result = 1
     try:
-        with tempfile.TemporaryDirectory(prefix='robot-agent-checkpoint-client-') as temporary:
+        with tempfile.TemporaryDirectory(prefix='robot-agent-navigation-client-') as temporary:
             client = Path(temporary)/'client.py'
-            client.write_text(revision_client(configuration) if revision else checkpoint_client(configuration))
+            client.write_text(source)
             command = list(command)
             command[command.index('--client-script')+1] = str(client)
             try:

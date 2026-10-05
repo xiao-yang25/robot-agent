@@ -10,6 +10,22 @@ import unittest
 
 
 class InstalledNavigationDemoTests(unittest.TestCase):
+    def test_installed_recovery_supervisor_binds_map_and_removes_exact_client(self):
+        import robot_agent._navigation_demo as demo
+        prefix=Path(os.environ['COMBINATION_AGENT_PREFIX']).resolve()
+        self.assertTrue(Path(demo.__file__).resolve().is_relative_to(prefix))
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);launch=root/'launch.py';record=root/'client.json'
+            launch.write_text('import json,sys\nfrom pathlib import Path\n'
+                'client=Path(sys.argv[sys.argv.index("--client-script")+1])\n'
+                f'Path({str(record)!r}).write_text(json.dumps(dict(path=str(client),source=client.read_text())))\n')
+            self.assertEqual(demo.run_controlled_recovery([sys.executable,str(launch),'--client-script','unused'],
+                'turtlebot3-occupied-a-probe-v1'),0)
+            value=json.loads(record.read_text())
+            self.assertIn('main(task="recovery"',value['source'])
+            self.assertIn('turtlebot3-occupied-a-probe-v1',value['source'])
+            self.assertFalse(Path(value['path']).exists())
+
     def test_packaged_controlled_proposals_complete_without_fabricated_settlement(self):
         executable = Path(os.environ['COMBINATION_AGENT_PREFIX']) / 'bin/robot-agent-navigation-controlled'
         self.assertTrue(executable.is_file())

@@ -69,8 +69,8 @@ used the fixed Harness `9278fea`, the existing qualified amd64 recording image,
 and actual host `gpt-6-sol`/high proposals through Codex0.159.0. Normal A-only used
 two decisions and finished 0.209m from A. A static occupied-A map produced an
 associated accepted native failure; the installed Owner actually closed its
-native work, established successor readiness and released A before the third
-stage sequence selected one B. Backup completed 0.230m from B using three
+native work, established successor readiness and released A before the failure
+proposal selected one B. Backup completed 0.230m from B using three
 proposals overall. No A arrival was required to propose the backup.
 
 Each run had one physical evaluation and bounded proposal-association checks;
@@ -85,14 +85,14 @@ bind; its failure remains recorded and was not evaluated or relabelled.
 
 Both successful runs retain same-run raw recordings and original-speed exports,
 with startup/teardown trimmed and approximate event captions. Full decoding and
-selected frame checks passed. These artifacts are prepared for a later public
-presentation batch, not already published recovery videos. The normal path uses
+selected frame checks passed. These original artifacts are
+[published as homepage players](https://xiao-yang25.github.io/robot-harness/#recovery-demos). The normal path uses
 the existing map; the backup's static occupancy fixture does not establish a
 physical obstacle or general unreachability. Scene map preparation remains
 research-specific; the actual task run does not qualify a public recovery scene
 command. Its installed public CLI is covered by the controlled combination
-checks. Public scene/tutorial reproduction and homepage publication remain
-pending. Task verdict stays unassessed, native/remote cleanup unknown and final
+checks. Subsequent public scene/tutorial reproduction uses the newer fixed pair
+described below; it does not change the original recording qualification. Task verdict stays unassessed, native/remote cleanup unknown and final
 B settlement pending. Hardware, Owner restart, general recovery, broad model
 reliability and a hard stopping limit are outside this increment.
 
@@ -657,3 +657,45 @@ exited0 and was reaped. This qualifies one normal public-entry combination, not
 model-service reliability, remote cleanup, Owner loss, hardware or a hard stopping
 limit. Historical model runs and published videos retain their own version/scope;
 this packaging increment does not claim a new recording.
+
+
+## Public recovery scene tutorial
+
+The tutorial consumes Harness `32c78ad7020e1ccbea5d9225e9a20b1c477b4da8`, the
+actual merged public-scene increment. `--task recovery --scene normal|occupied-a`
+forwards the failure profile, matching map identity and installed public CLI to
+the existing Harness launcher. The controlled client bind and host relay retain
+the existing owned-process supervisor. Occupied A with another task and recovery
+instruction options fail before checkout/process access. Earlier fixed,
+checkpoint and revision selections retain their behavior. See the
+[commands and outcome records](../examples/navigation/README.md#run-the-single-failure-recovery-task).
+
+Local macOS application checks passed131, including four focused selector/client
+checks. A new wheel consumed new real Harness Core installations outside both
+source trees; all34 installed combinations passed on macOS. The original
+macOS socket checks failed under filesystem sandbox permissions, then passed
+with permitted local socket access without changing code or assertions.
+Public image navigation needs no Pillow; the optional ALOHA/visual combination
+suite uses a separate existing Linux test image with those dependencies.
+
+
+All34 new installed combinations also passed offline on Ubuntu22.04 amd64 with
+the real new Core bridge and wheel. The first preparation attempt used an invalid
+wheel bind filename and did not install or execute tests; correcting only that
+filename completed installation and checks. Source, wheel and separate host/Linux
+installed runtime modules were directly compared. Existing application and
+combination CI discover the new checks without adding another workflow.
+
+The actual public tutorial then completed normal A-only and occupied-A single B
+with controlled proposals. A third occupied-A run through the same tutorial used
+actual host `gpt-6-sol`/high via Codex0.159.0 and three proposals. Its failed A
+closed/settled/released before the failure proposal; only B completed. Selected
+map identities, native/Core records, public CLI reports, relay reply/proposal
+association and owned process/container cleanup passed one focused entry check
+per run. Both host groups and local proposal children exited and were reaped
+without forced group cleanup; containers were removed without OOM. Private host
+logs/credentials were outside scene mounts; proposal answers used the exchange.
+These checks qualify the new installed public entry, not another physical arrival
+or video evaluation. The preceding Harness public-scene runs used an external
+physical evaluator; the older published videos retain their original pairing.
+Task verdict stays unassessed, native/remote cleanup unknown and final B pending.

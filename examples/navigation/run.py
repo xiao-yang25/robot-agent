@@ -21,11 +21,18 @@ def main():
     parser.add_argument('--model', help='required explicit host model for host-codex')
     parser.add_argument('--executable', default='codex', help='host-only model CLI')
     parser.add_argument('--host-output', type=Path, help='new private host directory, never mounted in the scene')
-    parser.add_argument('--task', choices=('fixed', 'checkpoint', 'revision'), default='fixed')
+    parser.add_argument('--task', choices=('fixed', 'checkpoint', 'revision', 'recovery'), default='fixed')
+    parser.add_argument('--scene', choices=('normal','occupied-a'), default='normal',
+                        help='occupied-a is a static map test and requires --task recovery')
     parser.add_argument('--instruction', choices=('continue_b', 'finish_at_a', 'none', 'stop', 'redirect_b'))
     parser.add_argument('--instruction-delay', type=float, default=None, help='business tutorial delay in [0, 9] seconds')
     args = parser.parse_args()
-    checkpoint = revision = None
+    if args.scene != 'normal' and args.task != 'recovery':
+        parser.error('occupied-a requires --task recovery')
+    checkpoint = revision = recovery = None
+    if args.task == 'recovery':
+        recovery = dict(expected_map_id='turtlebot3-world-v1' if args.scene=='normal'
+                        else 'turtlebot3-occupied-a-probe-v1')
     if args.task == 'checkpoint':
         from robot_agent.navigation_checkpoint_demo import TutorialInstruction
         if args.instruction is None:
@@ -70,6 +77,9 @@ def main():
             parser.error('prepare a new Agent installation including the revision tutorial')
         from robot_agent.navigation_revision import PROFILE
         command.extend(['--profile', PROFILE])
+    if recovery is not None:
+        from robot_agent.navigation_recovery import PROFILE
+        command.extend(['--profile', PROFILE, '--scene', args.scene])
     if args.provider == 'host-codex':
         if not args.model or not args.model.strip() or len(args.model) > 128 or args.host_output is None:
             parser.error('host-codex requires an explicit model and separate new --host-output')
@@ -78,9 +88,12 @@ def main():
         from robot_agent._navigation_demo import run_host
         return run_host(command, output=args.output.expanduser().resolve(),
             host_output=args.host_output.expanduser().resolve(), model=args.model, executable=args.executable,
-            mounted_roots=(prefix, python_prefix, harness / 'integrations/ros2/simulation'), checkpoint=checkpoint, revision=revision)
+            mounted_roots=(prefix, python_prefix, harness / 'integrations/ros2/simulation'), checkpoint=checkpoint, revision=revision, recovery=recovery)
     if args.model is not None or args.host_output is not None or args.executable != 'codex':
         parser.error('model/host-output/executable options require --provider host-codex')
+    if recovery is not None:
+        from robot_agent._navigation_demo import run_controlled_recovery
+        return run_controlled_recovery(command, recovery['expected_map_id'])
     if checkpoint is not None or revision is not None:
         # Keep this exact trusted bind file alive until Harness finishes its cleanup.
         # Use the existing supervisor for signal forwarding and process-group reaping.
