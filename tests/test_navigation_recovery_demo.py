@@ -62,10 +62,13 @@ class RecoveryDemoTests(unittest.TestCase):
             self.assertIn('main(task="recovery"',result['source']);self.assertIn(MAP,result['source'])
             self.assertFalse(Path(result['path']).exists())
 
-    def test_unknown_map_starts_no_owned_process(self):
-        with patch('robot_agent._navigation_demo.subprocess.Popen') as launch:
-            with self.assertRaises(ValueError):run_controlled_recovery(['unused'],'foreign-map')
-            launch.assert_not_called()
+    def test_invalid_map_identifier_fails_before_resource_access(self):
+        command=['launcher','--client-script','unused']
+        for map_id in ('', ' map ', 'map\nidentity', 'x'*129, None):
+            with self.subTest(map_id=map_id),patch('robot_agent._navigation_demo.tempfile.TemporaryDirectory') as directory,patch('robot_agent._navigation_demo.signal.signal') as handlers,patch('robot_agent._navigation_demo.subprocess.Popen') as launch:
+                with self.assertRaisesRegex(ValueError,'bounded nonempty identifier'):
+                    run_controlled_recovery(command,map_id)
+                directory.assert_not_called();handlers.assert_not_called();launch.assert_not_called()
 
 
 if __name__=='__main__':unittest.main()
