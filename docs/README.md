@@ -431,10 +431,14 @@ collection; unknown alignment cannot yield a physical success. Required numbers
 must be finite, required associations unique, and task/operation/scope/generation/
 native-goal relationships consistent. Extra optional metadata is allowed.
 
-Samples use the same container monotonic clock as the triggering Owner event.
-Each pose query has a five-second deadline; its recorded interval must begin
-after that terminal event and finish within 5.5 seconds. An A snapshot completed
-after B is submitted cannot establish A arrival. Missing, duplicate, foreign,
+Samples use the same container monotonic clock as the Owner's `arrival` event,
+which follows native success and fresh localization. Let `t` be that event's
+`steady` value: require `t <= started <= finished <= t + 5.5`, with a five-second
+pose-query deadline. For A, also require `finished < b_reserved.steady`, where
+`b_reserved` is the associated B `core_native_reserved` event emitted before
+the native send. This proves capture before B's native transmission, not before
+the caller's RPC; neither post-dispatch `core_admitted` nor `goal_sent` supplies
+that stronger caller boundary. Missing boundary or missing, duplicate, foreign,
 late or nonfinite samples yield `unknown`; they do not trigger another run.
 Host wall time and ROS simulation time cannot substitute for this clock relation.
 
@@ -465,6 +469,10 @@ Delivery will require focused success/failure/unknown and association checks,
 fresh wheel installation without research imports, one new public fixed-task
 run with its single evaluator, one independent safety-decision check, and
 applicable CI. This design adds no runnable command yet.
+Collector checks must also cover collection disabled, unsupported scope rejected
+before container creation, partial startup, slow/failed queries, and interruption
+or timeout with live query children. Observe actual child exit/reaping within the
+existing budgets; these checks do not repeat physical or settlement adjudication.
 
 ### Run navigation
 
