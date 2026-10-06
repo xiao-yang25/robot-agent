@@ -239,7 +239,8 @@ Then reproduce the public controlled tutorial in fresh Linux build/install and
 run directories. Check the three correlated proposals, A settled/released before
 B, final B accepted/pending, the unassessed task verdict, unknown native cleanup,
 and actual proposal/container reaping. Process completion is separate from
-physical task success; navigation has no installed physical evaluator.
+physical task success; the preview tag predates the
+[installed navigation evaluator](#installed-fixed-navigation-evaluation).
 
 The historical qualifications below retain their exact versions and environments;
 a version or documentation change does not rerun those experiments. CI uses
@@ -577,7 +578,8 @@ and passive-observer tools. The new [controlled business tutorial](../examples/n
 provides public preparation, launch and report inspection using the existing
 Harness supervisor and installed Agent CLI. The fixed new installation and
 controlled native run are qualified below; the subsequent host model workflow
-has its own qualification section. Navigation has no installed physical evaluator;
+has its own qualification section. This historical reproduction predates the
+[installed navigation evaluator](#installed-fixed-navigation-evaluation);
 `robot-agent-evaluate-handoff` applies only to ALOHA. CLI completion and an owner's
 process-completion verification file cannot prove physical task success.
 
@@ -719,10 +721,33 @@ jointly invalid receipt enums/native status types, nested optional metadata and
 overflowing derived distances have rejecting regression checks. Installed combination discovery checks the
 new executable/profile outside source trees, with `python -S`, all three exit
 codes and retained output on refusal. The application workflow also checks its
-installed help entry. No new workflow or physical evaluator is introduced.
+installed help entry. No new CI workflow or physics run is introduced by those checks.
 
 Fresh local application checks passed 148 tests, and the new wheel passed all
 35 installed combinations with the real portable Core bridge. These are software
-checks on synthetic/no-physics fixtures. Fresh installed public normal consumption
-and its once-per-run physical goal evaluation remain a separate qualification;
-existing recordings and Agent/native `unassessed`/`unknown` facts retain their scope.
+checks on synthetic/no-physics fixtures.
+
+On 2026-10-06, Agent `71a804dfa9ff7f8671d464f8ed562cd2eeaec5e8` and its exact
+Harness dependency `4b4bc5bf28c249016cfe4d7e272fa9877766a838` completed one new
+public controlled normal A→B run. The public preparation script made fresh Linux
+Core and Agent installations from this pair and a new wheel; package content
+was directly compared with source and a new host installation. The existing
+qualified Ubuntu22.04/Linux-amd64 Humble/Nav2 1.1.20/Gazebo Classic image was
+reused; the current source-mounted collector was not an image rebuild.
+
+The installed offline command ran exactly once and returned `succeeded`:
+A/B XY errors were **0.208517/0.188799m**, within the fixed 0.25m limit. Initial
+map/world anchor, actual configured controller, unique native associations and
+capture before B's native reservation were accepted by that predicate. A focused
+independent safety-decision check accompanies this qualification; it does not
+repeat physical evaluation or native closure adjudication.
+
+Owner reports A settled/released and final B pending/current; both native goals
+succeeded. The Agent report remains `task_verdict=unassessed` and native cleanup
+unknown. The collector and three pose queries exited zero and were reaped with
+no forced collector group kill; the container exited zero without OOM and was
+removed. These observed process facts do not prove complete native resource
+release. Three controlled proposals made no model calls. This is one fixed
+simulation qualification, not reliability, arbitrary-map, hardware or a new
+model qualification. Existing recordings retain their original versions and
+are not presented as recordings of this new evaluation run.
