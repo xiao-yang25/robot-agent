@@ -128,8 +128,9 @@ reports goal, execution and cleanup separately. Goal success may coexist with
 final B pending and native cleanup unknown. A completed collector alone is not
 a goal verdict; a missing collector record is a gap.
 
-Software tests use synthetic records. Fresh paired physical qualification remains
-separate. Existing [recordings](https://xiao-yang25.github.io/robot-harness/#failure-demos)
+Software tests use synthetic records. One new fixed installed pair has
+[separate normal A→B qualification](../../docs/TESTING.md#installed-fixed-navigation-evaluation);
+new pairs and task scopes need their own recorded qualification. Existing [recordings](https://xiao-yang25.github.io/robot-harness/#failure-demos)
 retain their original versions; this command does not retroactively qualify them.
 The [ALOHA evaluator](../../docs/TESTING.md#independent-evaluation) uses its own predicate.
 

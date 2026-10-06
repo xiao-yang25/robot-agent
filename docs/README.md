@@ -404,8 +404,9 @@ records the installed normal task and unresolved transport/fault scope.
 ### Installed navigation evaluation
 
 `robot-agent-evaluate-navigation` is a standard-library offline command for the
-fixed normal A→B task. Harness supplies opt-in passive truth collection; fresh
-paired physical qualification remains a separate delivery step. Existing runs
+fixed normal A→B task. Harness supplies opt-in passive truth collection; its
+[fixed-pair qualification](TESTING.md#installed-fixed-navigation-evaluation) is
+separate from software checks. Existing runs
 and recordings retain their recorded scope. The predicate covers fixed A→B in the normal
 TurtleBot3 Waffle / Gazebo Classic / Humble scene, with the existing scoped Nav2
 profile. Checkpoint, revision, recovery, other worlds and hardware need their own
@@ -472,9 +473,10 @@ are trusted local recordings, not tamper-proof attestations; only acquisition
 needs the declared Gazebo environment. Historical evidence is not re-evaluated.
 
 Software checks cover success/failure/unknown, association and fresh wheel
-installation without research imports. Fresh paired physical delivery still
-requires one new public fixed-task run with its single evaluator and one focused
-independent safety-decision check. Applicable CI verifies the software boundary.
+installation without research imports. The recorded fixed-pair delivery uses
+one new public fixed-task run, its single evaluator and one focused independent
+safety-decision check. New combinations require their own qualification;
+applicable CI verifies the software boundary.
 Collector checks must also cover collection disabled, unsupported scope rejected
 before container creation, partial startup, slow/failed queries, and interruption
 or timeout with live query children. Observe actual child exit/reaping within the
