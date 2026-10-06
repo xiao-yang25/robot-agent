@@ -25,6 +25,26 @@ class RecoveryDemoTests(unittest.TestCase):
         return ['run.py','--harness-source',str(root/'harness'),'--python-prefix',str(root/'core'),
                 '--agent-prefix',str(root/'agent'),'--image','test-image','--output',str(root/'scene'),*extra]
 
+    def test_fixed_collection_is_only_explicitly_forwarded(self):
+        for collect in (False, True):
+            with self.subTest(collect=collect),tempfile.TemporaryDirectory() as temporary:
+                args=self.arguments(Path(temporary),*(['--record-evaluation'] if collect else []))
+                revision=re.search(r'version: ([0-9a-f]{40})',(ROOT/'workspace.repos').read_text()).group(1)
+                with patch('sys.argv',args),patch.object(selector.subprocess,'check_output',return_value=revision+'\n'),\
+                        patch.object(selector.subprocess,'run'),patch.object(selector.os,'execv') as replace:
+                    selector.main()
+                self.assertEqual('--record-evaluation' in replace.call_args.args[1], collect)
+
+    def test_collection_scope_rejected_before_dependency_or_process_access(self):
+        for task in ('checkpoint','revision','recovery'):
+            with self.subTest(task=task),tempfile.TemporaryDirectory() as temporary:
+                args=self.arguments(Path(temporary),'--task',task,'--record-evaluation')
+                with patch('sys.argv',args),patch.object(selector.subprocess,'check_output') as git,\
+                        patch.object(selector.os,'execv') as replace:
+                    with self.assertRaises(SystemExit) as caught:selector.main()
+                    self.assertEqual(caught.exception.code,2)
+                git.assert_not_called();replace.assert_not_called()
+
     def test_recovery_scene_reaches_controlled_and_host_with_matching_identity(self):
         for scene,map_id in (('normal','turtlebot3-world-v1'),('occupied-a',MAP)):
             for provider in ('controlled','host-codex'):

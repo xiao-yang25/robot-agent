@@ -17,6 +17,8 @@ def main():
     parser.add_argument('--agent-prefix', type=Path, required=True, help='Linux pip --target installation')
     parser.add_argument('--image', required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--record-evaluation', action='store_true',
+                        help='passive truth collection for fixed normal A->B; evaluate offline separately')
     parser.add_argument('--provider', choices=('controlled', 'host-codex'), default='controlled')
     parser.add_argument('--model', help='required explicit host model for host-codex')
     parser.add_argument('--executable', default='codex', help='host-only model CLI')
@@ -27,6 +29,8 @@ def main():
     parser.add_argument('--instruction', choices=('continue_b', 'finish_at_a', 'none', 'stop', 'redirect_b'))
     parser.add_argument('--instruction-delay', type=float, default=None, help='business tutorial delay in [0, 9] seconds')
     args = parser.parse_args()
+    if args.record_evaluation and (args.task != 'fixed' or args.scene != 'normal'):
+        parser.error('--record-evaluation requires --task fixed and --scene normal')
     if args.scene != 'normal' and args.task != 'recovery':
         parser.error('occupied-a requires --task recovery')
     checkpoint = revision = recovery = None
@@ -72,6 +76,8 @@ def main():
         'session', '--image', args.image, '--python-prefix', str(python_prefix),
         '--client-script', str(client), '--client-prefix', str(prefix), '--caller-wait-seconds', '45',
         '--output', str(args.output.expanduser().resolve())]
+    if args.record_evaluation:
+        command.append('--record-evaluation')
     if revision is not None:
         if not (prefix/'robot_agent/navigation_revision_demo.py').is_file():
             parser.error('prepare a new Agent installation including the revision tutorial')

@@ -20,9 +20,10 @@ robot-agent-navigation = "robot_agent.navigation_cli:main"
 robot-agent-navigation-host-proposal = "robot_agent.navigation_host_proposal:main"
 robot-agent-navigation-controlled = "robot_agent.navigation_controlled_proposal:main"
 robot-agent-evaluate-handoff = "robot_agent.evaluate_handoff:main"
+robot-agent-evaluate-navigation = "robot_agent.evaluate_navigation:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-robot_agent = ["handoff_profile.json"]
+robot_agent = ["handoff_profile.json", "navigation_profile.json"]

@@ -53,7 +53,7 @@ its model/physics demonstration is pending.
 Model assessments, execution receipts and independent task verdicts are distinct.
 Before requesting B, navigation releases A; final B remains accepted/pending, with
 `task_verdict=unassessed` and native cleanup unknown. Inspect local process/container
-cleanup separately. Navigation has no installed physical evaluator;
+cleanup separately. Fixed normal A→B has an [offline evaluator](docs/README.md#planned-installed-navigation-evaluation);
 [ALOHA evaluation](docs/TESTING.md#independent-evaluation) uses its own fixed predicate.
 
 APIs are experimental, with no cross-version API/ABI promise, physical-robot

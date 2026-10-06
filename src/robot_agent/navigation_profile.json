@@ -1,0 +1,64 @@
+{
+  "id": "normal-scoped-nav2-two-stop-arrival-v1",
+  "scene": "normal",
+  "map_id": "turtlebot3-world-v1",
+  "profile": "scoped-two-context-nav2-shim-v1",
+  "model": "turtlebot3_waffle",
+  "collection_schema": "nav2-passive-truth-v1",
+  "clock": "container-clock-monotonic",
+  "targets": {
+    "A": [
+      0.7,
+      -0.5,
+      0.0
+    ],
+    "B": [
+      -1.5,
+      -0.5,
+      0.0
+    ]
+  },
+  "arrival_limit_m": 0.25,
+  "initial_anchor_limit_m": 0.25,
+  "query_limit_seconds": 5.0,
+  "trigger_window_seconds": 5.5,
+  "map_file": "/opt/ros/humble/share/nav2_bringup/maps/turtlebot3_world.yaml",
+  "world": "/opt/ros/humble/share/nav2_bringup/worlds/world_only.model",
+  "resolution": 0.05,
+  "origin": [
+    -10.0,
+    -10.0,
+    0.0
+  ],
+  "map_to_world_xy_yaw": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "spawn": {
+    "x": -2.0,
+    "y": -0.5,
+    "z": 0.01,
+    "R": 0.0,
+    "P": 0.0,
+    "Y": 0.0
+  },
+  "initial_pose": {
+    "x": -2.0,
+    "y": -0.5,
+    "z": 0.0,
+    "yaw": 0.0
+  },
+  "controller": {
+    "plugin": "nav2_rotation_shim_controller::RotationShimController",
+    "primary_controller": "dwb_core::DWBLocalPlanner",
+    "angular_dist_threshold": 0.785,
+    "angular_disengage_threshold": 0.785,
+    "forward_sampling_distance": 0.5,
+    "rotate_to_heading_angular_vel": 0.8,
+    "max_angular_accel": 3.2,
+    "simulate_ahead_time": 1.0,
+    "rotate_to_goal_heading": false,
+    "closed_loop": true
+  }
+}

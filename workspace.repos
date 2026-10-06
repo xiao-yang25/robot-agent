@@ -2,4 +2,4 @@ repositories:
   robot-harness:
     type: git
     url: https://github.com/xiao-yang25/robot-harness.git
-    version: 32c78ad7020e1ccbea5d9225e9a20b1c477b4da8
+    version: 4b4bc5bf28c249016cfe4d7e272fa9877766a838
