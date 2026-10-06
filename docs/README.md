@@ -400,18 +400,20 @@ is delivered for this local tutorial, not a general remote provider protocol.
 records the installed normal task and unresolved transport/fault scope.
 
 
-### Planned installed navigation evaluation
+<a id="planned-installed-navigation-evaluation"></a>
+### Installed navigation evaluation
 
-**Design only.** Navigation currently has no installed physical evaluator or
-public truth collector. Existing tutorial runs and recordings retain their
-recorded scope. The first increment will cover the fixed A→B task in the normal
+`robot-agent-evaluate-navigation` is a standard-library offline command for the
+fixed normal A→B task. Harness supplies opt-in passive truth collection; fresh
+paired physical qualification remains a separate delivery step. Existing runs
+and recordings retain their recorded scope. The predicate covers fixed A→B in the normal
 TurtleBot3 Waffle / Gazebo Classic / Humble scene, with the existing scoped Nav2
 profile. Checkpoint, revision, recovery, other worlds and hardware need their own
-later extensions; this plan does not qualify them.
+later extensions; this predicate does not qualify them.
 
-Agent will own one offline, task-specific evaluator, following the installed
+Agent owns one offline, task-specific evaluator, following the installed
 ALOHA evaluator's `--run` / fresh `--output` pattern and 0/1/2 exit codes.
-Harness simulation will own an explicitly enabled passive collector and its
+Harness simulation owns an explicitly enabled passive collector and its
 process cleanup. Collection must not gate native submission, supply model input,
 alter Owner receipts, or grant execution authority. No new framework, model
 dependency, general evaluator service or source digest is required.
@@ -422,13 +424,17 @@ dependency, general evaluator service or source digest is required.
 | Existing `caller.jsonl` and `agent/report.json` | Associate A/B requests, operations, native goals, task identity and the Owner's reported release before B |
 | New passive samples and collector outcome | Record same-run Gazebo model poses, terminal-event association, container identity and collection completeness |
 
-The installed predicate will fix A=(0.7,-0.5), B=(-1.5,-0.5), the existing
+The installed predicate fixes A=(0.7,-0.5), B=(-1.5,-0.5), the existing
 0.25m XY arrival limit and the normal scene's map/world relationship. It must
-check actual targets, scene/map/profile and sample identities against that
+check actual targets, scene/map/profile, required recorded controller values and sample identities against that
 predicate, not trust an arbitrary target or threshold supplied by a report.
-The fixed scene's map/world alignment must be recorded and checked during
-collection; unknown alignment cannot yield a physical success. Required numbers
-must be finite, required associations unique, and task/operation/scope/generation/
+Collection consumes the trusted installed Nav2 1.1.20 world/map pair and the
+actual matching spawn/AMCL configuration. The offline predicate checks that
+context plus an initial ready map/Gazebo anchor within 0.25m, captured before A's
+native reservation. This fixed configured identity transform is not a general
+calibration or tamper-resistant attestation; missing/mismatched alignment is
+unknown. Required numbers and derived metrics must be finite, receipt/status
+types and enums valid, required associations unique, and task/operation/scope/generation/
 native-goal relationships consistent. Extra optional metadata is allowed.
 
 Samples use the same container monotonic clock as the Owner's `arrival` event,
@@ -452,23 +458,23 @@ The goal verdict and execution facts remain separate:
   adjudication. Help, cancellation or process failure alone is not a complete
   physical failure measurement.
 
-The report will retain the consumed predicate and metrics, plus separately
+The report retains the consumed predicate and metrics, plus separately
 labelled Agent status, native outcomes, Owner-reported settlement/authority and
 observed process cleanup. In particular, goal success can coexist with final B
-pending. This evaluator will not re-prove native child closure or promote the
-Owner's assertion into independent native-resource verification. It will not
+pending. This evaluator does not re-prove native child closure or promote the
+Owner's assertion into independent native-resource verification. It does not
 modify `agent/report.json`, its `task_verdict=unassessed`, or future decisions.
 
-The command must refuse an existing output before evaluating, parse incomplete
-input into a retained `unknown` report when possible, and be run once per new
-run. Offline parsing uses no Docker, ROS, credentials or model calls. Samples
+The command refuses an existing output before evaluating and parses incomplete
+input into a retained `unknown` report when possible. Run it once per new run.
+Offline parsing uses no Docker, ROS, credentials or model calls. Samples
 are trusted local recordings, not tamper-proof attestations; only acquisition
 needs the declared Gazebo environment. Historical evidence is not re-evaluated.
 
-Delivery will require focused success/failure/unknown and association checks,
-fresh wheel installation without research imports, one new public fixed-task
-run with its single evaluator, one independent safety-decision check, and
-applicable CI. This design adds no runnable command yet.
+Software checks cover success/failure/unknown, association and fresh wheel
+installation without research imports. Fresh paired physical delivery still
+requires one new public fixed-task run with its single evaluator and one focused
+independent safety-decision check. Applicable CI verifies the software boundary.
 Collector checks must also cover collection disabled, unsupported scope rejected
 before container creation, partial startup, slow/failed queries, and interruption
 or timeout with live query children. Observe actual child exit/reaping within the

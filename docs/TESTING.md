@@ -699,3 +699,30 @@ These checks qualify the new installed public entry, not another physical arriva
 or video evaluation. The preceding Harness public-scene runs used an external
 physical evaluator; the older published videos retain their original pairing.
 Task verdict stays unassessed, native/remote cleanup unknown and final B pending.
+
+## Installed fixed navigation evaluation
+
+`robot-agent-evaluate-navigation` consumes recorded normal fixed A→B evidence
+with a packaged, fixed 0.25m arrival predicate. The [tutorial](../examples/navigation/README.md#collect-and-evaluate-the-fixed-normal-task)
+opts into Harness's passive collection; default runs remain unchanged. The
+[contract](README.md#planned-installed-navigation-evaluation) separates physical
+goal, native outcomes, Owner-reported settlement and observed process cleanup.
+The standard-library offline command neither modifies the task report nor
+imports ROS, Docker, research evaluators or private Host/Core modules.
+
+Synthetic checks cover correct/wrong/threshold arrivals, absent/malformed,
+foreign/duplicate/nonfinite evidence, mixed Session/native identity, unknown
+alignment/initial anchor, query/trigger deadlines, A capture after B reservation,
+missing release, forced/unreaped collection, optional metadata and refusing an
+existing output before evaluation. Controller replacement under the same ID,
+jointly invalid receipt enums/native status types, nested optional metadata and
+overflowing derived distances have rejecting regression checks. Installed combination discovery checks the
+new executable/profile outside source trees, with `python -S`, all three exit
+codes and retained output on refusal. The application workflow also checks its
+installed help entry. No new workflow or physical evaluator is introduced.
+
+Fresh local application checks passed 148 tests, and the new wheel passed all
+35 installed combinations with the real portable Core bridge. These are software
+checks on synthetic/no-physics fixtures. Fresh installed public normal consumption
+and its once-per-run physical goal evaluation remain a separate qualification;
+existing recordings and Agent/native `unassessed`/`unknown` facts retain their scope.

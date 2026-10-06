@@ -95,14 +95,43 @@ Inspect these different records:
 | `agent/decisions/decision-*/` | Declared model identifier `controlled-tutorial-no-model`, inputs/answers and reaped proposal process records |
 | `caller.jsonl`, `caller.log`, `request-client.log` | Native/Core progress, preparation diagnostics and application errors |
 
-There is no installed navigation physical evaluator. Research qualifications used
-separate same-run Gazebo observations and an offline predicate; ground truth never
-entered model/task decisions. These [published recordings](https://xiao-yang25.github.io/robot-harness/#failure-demos)
-retain their own versions and scope, rather than qualifying every tutorial run.
-The [ALOHA evaluator](../../docs/TESTING.md#independent-evaluation) cannot evaluate navigation.
-The [planned installed navigation evaluation](../../docs/README.md#planned-installed-navigation-evaluation)
-starts with the normal fixed A→B task. Its passive collection and offline command
-are not implemented yet; this tutorial does not produce their evidence.
+### Collect and evaluate the fixed normal task
+
+To record independent poses, append `--record-evaluation` to the default command
+above. It is accepted only with `--task fixed --scene normal`; checkpoint,
+revision and recovery require separate evaluation extensions. Defaults remain
+unchanged. Use the current wheel and exact pinned Harness source, with new Linux
+installations. The preview tag predates this option.
+
+Install that wheel into a host environment for the offline command:
+
+```sh
+python3 -m venv navigation-evaluation-host
+navigation-evaluation-host/bin/python -m pip install --no-index --no-deps navigation-consumer/dist/robot_agent-0.1.0a1-py3-none-any.whl
+navigation-evaluation-host/bin/robot-agent-evaluate-navigation \
+  --run runs/navigation-controlled-01 --output runs/navigation-controlled-01-evaluation.json
+```
+
+Run the evaluator once per new recorded run. It needs only Python's standard
+library: no ROS, Docker, model service or optional evaluation dependencies. An
+existing output is refused before evaluation. Exit 0/1/2 means physical goal
+`succeeded`/`failed`/`unknown`; missing/late/foreign truth is unknown, while complete
+measurements outside the fixed 0.25m arrival limit fail. It does not run another
+scene or modify `agent/report.json`.
+
+Harness writes the actual fixed configuration, initial/A/B samples and collector
+outcome/cleanup into separate `collection-context.json`, `physical.jsonl`,
+`collection.json` and `collector-process.json` files. These never enter proposals
+or grant authority. The [installed predicate](../../docs/README.md#planned-installed-navigation-evaluation)
+checks unique native association and sampling before B's native reservation, and
+reports goal, execution and cleanup separately. Goal success may coexist with
+final B pending and native cleanup unknown. A completed collector alone is not
+a goal verdict; a missing collector record is a gap.
+
+Software tests use synthetic records. Fresh paired physical qualification remains
+separate. Existing [recordings](https://xiao-yang25.github.io/robot-harness/#failure-demos)
+retain their original versions; this command does not retroactively qualify them.
+The [ALOHA evaluator](../../docs/TESTING.md#independent-evaluation) uses its own predicate.
 
 If preparation or execution fails, retain the logs and use a new directory for a
 separately diagnosed attempt. No automatic retry, reset or third admission is
