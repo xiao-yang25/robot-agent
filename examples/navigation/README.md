@@ -100,6 +100,9 @@ separate same-run Gazebo observations and an offline predicate; ground truth nev
 entered model/task decisions. These [published recordings](https://xiao-yang25.github.io/robot-harness/#failure-demos)
 retain their own versions and scope, rather than qualifying every tutorial run.
 The [ALOHA evaluator](../../docs/TESTING.md#independent-evaluation) cannot evaluate navigation.
+The [planned installed navigation evaluation](../../docs/README.md#planned-installed-navigation-evaluation)
+starts with the normal fixed A→B task. Its passive collection and offline command
+are not implemented yet; this tutorial does not produce their evidence.
 
 If preparation or execution fails, retain the logs and use a new directory for a
 separately diagnosed attempt. No automatic retry, reset or third admission is
