@@ -400,6 +400,72 @@ is delivered for this local tutorial, not a general remote provider protocol.
 records the installed normal task and unresolved transport/fault scope.
 
 
+### Planned installed navigation evaluation
+
+**Design only.** Navigation currently has no installed physical evaluator or
+public truth collector. Existing tutorial runs and recordings retain their
+recorded scope. The first increment will cover the fixed A→B task in the normal
+TurtleBot3 Waffle / Gazebo Classic / Humble scene, with the existing scoped Nav2
+profile. Checkpoint, revision, recovery, other worlds and hardware need their own
+later extensions; this plan does not qualify them.
+
+Agent will own one offline, task-specific evaluator, following the installed
+ALOHA evaluator's `--run` / fresh `--output` pattern and 0/1/2 exit codes.
+Harness simulation will own an explicitly enabled passive collector and its
+process cleanup. Collection must not gate native submission, supply model input,
+alter Owner receipts, or grant execution authority. No new framework, model
+dependency, general evaluator service or source digest is required.
+
+| Input | Purpose |
+|---|---|
+| Existing `run.json`, scene/profile records | Identify the actual isolated run, map, selected controller and observed launcher/container outcome |
+| Existing `caller.jsonl` and `agent/report.json` | Associate A/B requests, operations, native goals, task identity and the Owner's reported release before B |
+| New passive samples and collector outcome | Record same-run Gazebo model poses, terminal-event association, container identity and collection completeness |
+
+The installed predicate will fix A=(0.7,-0.5), B=(-1.5,-0.5), the existing
+0.25m XY arrival limit and the normal scene's map/world relationship. It must
+check actual targets, scene/map/profile and sample identities against that
+predicate, not trust an arbitrary target or threshold supplied by a report.
+The fixed scene's map/world alignment must be recorded and checked during
+collection; unknown alignment cannot yield a physical success. Required numbers
+must be finite, required associations unique, and task/operation/scope/generation/
+native-goal relationships consistent. Extra optional metadata is allowed.
+
+Samples use the same container monotonic clock as the triggering Owner event.
+Each pose query has a five-second deadline; its recorded interval must begin
+after that terminal event and finish within 5.5 seconds. An A snapshot completed
+after B is submitted cannot establish A arrival. Missing, duplicate, foreign,
+late or nonfinite samples yield `unknown`; they do not trigger another run.
+Host wall time and ROS simulation time cannot substitute for this clock relation.
+
+The goal verdict and execution facts remain separate:
+
+- `succeeded`: the fixed task's associated A/B sequence and two valid physical
+  samples satisfy the declared arrival predicate.
+- `failed`: otherwise complete associated evidence contradicts a required goal
+  condition, such as a measured endpoint outside the limit.
+- `unknown`: unsupported scope or missing/invalid/ambiguous evidence prevents
+  adjudication. Help, cancellation or process failure alone is not a complete
+  physical failure measurement.
+
+The report will retain the consumed predicate and metrics, plus separately
+labelled Agent status, native outcomes, Owner-reported settlement/authority and
+observed process cleanup. In particular, goal success can coexist with final B
+pending. This evaluator will not re-prove native child closure or promote the
+Owner's assertion into independent native-resource verification. It will not
+modify `agent/report.json`, its `task_verdict=unassessed`, or future decisions.
+
+The command must refuse an existing output before evaluating, parse incomplete
+input into a retained `unknown` report when possible, and be run once per new
+run. Offline parsing uses no Docker, ROS, credentials or model calls. Samples
+are trusted local recordings, not tamper-proof attestations; only acquisition
+needs the declared Gazebo environment. Historical evidence is not re-evaluated.
+
+Delivery will require focused success/failure/unknown and association checks,
+fresh wheel installation without research imports, one new public fixed-task
+run with its single evaluator, one independent safety-decision check, and
+applicable CI. This design adds no runnable command yet.
+
 ### Run navigation
 
 Build/install the exact Harness commit in [workspace.repos](../workspace.repos),
