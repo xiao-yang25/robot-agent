@@ -5,6 +5,7 @@ that host; do not copy personal paths or model/account configuration here.
 
 - [README](README.md) is the project/preview entry. [Application contracts](docs/README.md)
   own task behavior; [Testing](docs/TESTING.md) owns verification scope and limits.
+- [Architecture](docs/DESIGN.md) separates implemented boundaries from design proposals.
 - [Contributing](CONTRIBUTING.md) covers onboarding.
 - This repository owns goal, task state, budget, visual proposals and task reports.
   Robot Harness owns execution authority, native resources and Core settlement.

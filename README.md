@@ -6,7 +6,7 @@ Observation-driven task applications for
 Agent owns goals, task strategy and model proposals. Harness coordinates execution,
 results and settlement; robot stacks retain native control and device protection.
 
-[Documentation](docs/README.md) · [Demos](https://xiao-yang25.github.io/robot-harness/) ·
+[Documentation](docs/README.md) · [Architecture](docs/DESIGN.md) · [Demos](https://xiao-yang25.github.io/robot-harness/) ·
 [Testing](docs/TESTING.md) · [Contributing](CONTRIBUTING.md)
 
 <a id="run"></a>
