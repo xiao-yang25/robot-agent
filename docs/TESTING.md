@@ -32,11 +32,46 @@ not robot stopping. The Ubuntu job also checks installed command entry points.
 [Installed combination CI](../.github/workflows/combination.yml) remains the
 separate Ubuntu check for the pinned Harness Core and Session plus installed
 Agent consumption outside both source trees. Application tests do not replace
-that installation boundary or physical/model qualification. The new macOS job
-has local YAML/shell validation only until its actual hosted run completes.
-Future shared task-owner implementation must add deterministic handoff races and
-the two applications' normal, budget and cleanup regressions to these existing
-collections; the proposed coordinator is not implemented by this CI change.
+that installation boundary or physical/model qualification. Hosted Ubuntu and
+macOS application checks passed for the prerequisite input repair;
+subsequent implementation changes require their own accurate-revision checks.
+The private coordinator adds deterministic handoff/navigation regressions below.
+ALOHA reuse still needs its normal, budget and cleanup cases in these collections;
+workflow configuration alone does not establish coordinator behavior.
+
+## Private fixed-navigation coordinator
+
+The experimental `python -m robot_agent._navigation_runtime` entry uses the
+private coordinator/owners and original fixed-navigation policy. Public task
+commands, checkpoint/revision/recovery paths and the Harness dependency pin are
+unchanged. ALOHA has not yet adopted this mechanism.
+
+[Handoff tests](../tests/test_task_runtime.py) choose claim/stop/withdraw/close
+ordering with Events and the exchange Condition. They exercise zero invocation
+before claim, retained effects after claim, request withdrawal without task
+restart, bounded completion retention, close independent of consumption, mutable
+input isolation, initialization/close errors and draining non-daemon owners.
+[Navigation tests](../tests/test_navigation_runtime.py) preserve normal A→B,
+stale-observation refusal, original-request unknown/cancel, original budget,
+partial initialization and close error. An unfinished submit retains its original
+request ID, site and observation reference even when closing wait expires.
+A blocked final decision stays blocked
+while the business coordinator requests the original B cancellation.
+
+[Installed checks](../tests/combination/test_navigation_runtime_installed.py)
+consume the new Agent package outside source trees through the real public
+NavigationSession and Core. Native facts and proposals are controlled fixtures,
+without ROS, a model or physics. They cover normal A release/B pending and the
+actual module CLI under SIGINT while its final proposal child ignores TERM;
+the child is killed/reaped and Owner/session/thread cleanup is observed.
+
+Local macOS/Python 3.12 checks passed 17 new unit scenarios, 171 application tests
+and two new installed scenarios. The local installed run used a new Agent wheel
+with the retained Mac Harness installation; it is not a fresh native build
+qualification. Existing application and installed-combination workflows discover
+these tests automatically. Hosted checks, ALOHA reuse, selected simulation/video
+and any public-default migration remain separate requirements. No physical stop,
+arbitrary-plugin exit, restart recovery or new model qualification is implied.
 
 ## Single-backup software checks
 
