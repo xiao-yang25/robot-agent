@@ -1,5 +1,43 @@
 # Testing and qualification
 
+## Proposal input and exit checks
+
+The private proposal transport accepts at most 1 MiB of UTF-8 prompt data before
+launching a child. Nonblocking, partial pipe writes preserve the full input and
+EOF while checking cancellation and the original deadline under backpressure.
+The owner retains terminate, timed wait, kill and reap responsibility. Proposal
+acceptance checks cancellation and expiry again after JSON decoding.
+
+[Local subprocess regressions](../tests/test_proposal_input.py) exercise a delayed
+reader with Unicode input, a child that never reads a large prompt, oversized
+UTF-8 rejection before launch, and cancellation/expiry at completed decoding.
+They check actual child reaping as well as the returned result. The existing
+Ubuntu application workflow discovers these tests; configuration alone is not
+an executed Ubuntu result. These checks do not establish a hard exit bound for
+process launch, filesystem operations, parsing, descendants or robot motion.
+
+The local macOS/Python 3.12 run passed all six new regressions and 154 application
+tests. Focused independent review approved this repair and separately ran the
+six regressions plus fourteen existing proposal-adapter tests. This is a local
+software result; no new model, robot or Ubuntu qualification is implied.
+
+## Automated platform coverage
+
+[Application CI](../.github/workflows/agent.yml) retains the Ubuntu 22.04/Python
+3.10 `test` job and adds macOS 15/Python 3.12 `macos-test`. Both discover the full
+application suite, including controlled proposal input, signal and process cleanup
+checks; both jobs have a ten-minute execution limit. This limit bounds CI work,
+not robot stopping. The Ubuntu job also checks installed command entry points.
+
+[Installed combination CI](../.github/workflows/combination.yml) remains the
+separate Ubuntu check for the pinned Harness Core and Session plus installed
+Agent consumption outside both source trees. Application tests do not replace
+that installation boundary or physical/model qualification. The new macOS job
+has local YAML/shell validation only until its actual hosted run completes.
+Future shared task-owner implementation must add deterministic handoff races and
+the two applications' normal, budget and cleanup regressions to these existing
+collections; the proposed coordinator is not implemented by this CI change.
+
 ## Single-backup software checks
 
 The opt-in `RecoveryNavigationTask` consumes Harness `9278fea` from
