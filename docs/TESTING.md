@@ -116,6 +116,39 @@ Independent implementation review approved the limited software slice and ran
 the additional late-RGB regression. Hosted accurate-revision checks remain
 separate from these local results.
 
+## Selected shared-coordinator physics checks
+
+A local Linux run consumed Agent `f708afa` source-package installations and the
+fixed Harness `4b4bc5b` dependency, with retained native installations. It ran
+controlled business proposals against actual CPU ACT/MuJoCo and
+Ubuntu 22.04/Humble/Nav2/Gazebo; no LLM or VLM was invoked.
+
+Three selected scenes passed their original checks: ALOHA transfer400/hold50,
+ALOHA stop during the post-transfer decision with zero hold, and navigation A→B.
+The two normal scenes each used their existing offline physical evaluator once.
+ALOHA held the cube for one simulated second; navigation arrival errors were
+0.204 m at A and 0.153 m at B, within the fixed 0.25 m threshold. Same-run normal
+videos were fully decoded and representative frames inspected. ALOHA stop closed
+its Session before the late decision returned; sampled consumer-family processes
+were absent after exit. These are limited simulation observations, not model
+reliability or hardware stopping guarantees.
+
+The navigation final-decision stop scene **did not pass** its closing gate.
+Cancellation acknowledged the original B request and revoked its authority;
+settlement stayed pending and native cleanup unknown. In the existing default
+profile, cancellation enters Owner shutdown. The subsequent status query lost
+its connection, and Session close raised a connection error. The report retained
+those errors and `resources_closed=false`; no new operation was submitted and
+the late decision was not accepted. Container removal does not upgrade this
+result to confirmed cleanup. The four-scene batch and public-default migration
+remain open pending review of domain-specific cancellation/closing semantics.
+No retry or acceptance-predicate relaxation followed this failure.
+
+The initial navigation recording attempt used an image without `xvfb-run` and
+failed before physics. Its evidence was retained; an existing recording image
+passed a new prerequisite check before the fresh navigation scenes. All owned
+containers were removed, with no new images, dependencies or credentials.
+
 ## Single-backup software checks
 
 The opt-in `RecoveryNavigationTask` consumes Harness `9278fea` from
