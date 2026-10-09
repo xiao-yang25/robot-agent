@@ -1,6 +1,6 @@
 # Robot Agent architecture
 
-Status: **private fixed-navigation slice implemented; broader design remains a candidate, 2026-10-08**. This document separates the implemented
+Status: **private navigation and ALOHA slices implemented; broader design remains a candidate, 2026-10-09**. This document separates the implemented
 architecture from the proposed next increment. It does not add an API, qualify a
 new robot task, or change existing application or Harness contracts.
 
@@ -321,9 +321,9 @@ justify a default change. Checkpoint, revision and recovery applications are not
 implicitly migrated. Select one implementation before each task starts; never
 fall back to another implementation after an ambiguous submission.
 
-The private handoff/coordinator is now implemented for the experimental fixed
-navigation path only; ALOHA consumption and public-default migration remain
-unimplemented. Its deterministic handoff races, original budgets/reports,
+The private handoff/coordinator is implemented for experimental fixed navigation
+and ALOHA consumption. Public-default migration remains unimplemented.
+Its deterministic handoff races, original budgets/reports,
 domain-specific readiness/close, installed combination and selected actual
 execution evidence are implementation requirements. Preliminary experiments and
 older application tests do not qualify new coordinator behavior.
@@ -368,6 +368,47 @@ python -m robot_agent._navigation_runtime \
 
 Local software/installation results and remaining qualification are recorded in
 [Testing](TESTING.md#private-fixed-navigation-coordinator).
+
+### Experimental ALOHA reuse
+
+[ALOHA assembly](../src/robot_agent/_handoff_runtime.py) consumes the same
+TaskCalls, SessionBinding and `run_owned_task` as fixed navigation, in addition
+to the same Coordinator/Owner/exchange. The common module contains no site,
+skill-name or business-stage branches. Existing HandoffTask still owns policy:
+current camera/joints → transfer400 → settled/released → fresh observation →
+hold50 → settled/released → final visual assessment. Old observation or
+unconfirmed transfer release cannot start hold. Visual assessment remains
+separate from an independent task verdict.
+
+Domain bindings retain request/site or request/skill/steps/observation association
+and interpret close separately. Navigation connection disposal leaves native
+cleanup unknown; ALOHA's public Session close confirms worker cleanup and Host
+reap only when it returns successfully. A close error leaves cleanup unconfirmed.
+Business completion cannot hide missing owner termination. The selected ALOHA
+software closing wait is at most30 seconds for remaining RPC, cancel/status and
+close; startup/arbitrary plugins and robot stopping have no hard bound here.
+
+Stopping while the after-transfer decision waits blocks hold. A released transfer
+has no active cancellation obligation; a claimed unfinished submission retains
+its original request and outcome uncertainty, without replay. Both owners close
+independently of ordinary completion consumption. Public handoff/navigation
+commands and checkpoint/revision/recovery continue their original paths.
+
+A late observation retained in the task report omits binary RGB and labels the
+omission explicitly. Its measurement metadata and original call identity remain
+available for reconciliation; this record is not a complete model observation.
+Normal observation consumption and model input keep their original image data.
+
+```sh
+python -m robot_agent._handoff_runtime \
+  --output /path/to/new-private-run --checkpoint /path/to/prepared-policy \
+  --device cpu --model YOUR_MODEL --executable /path/to/proposal-cli
+```
+
+Use the original [ALOHA setup](../skills/aloha/README.md) for the actual skill
+environment. Software fixtures do not qualify ACT/physics or a visual model;
+selected actual execution/video and public-default migration remain separate.
+See [ALOHA reuse checks](TESTING.md#private-aloha-reuse).
 
 <a id="incremental-implementation-and-acceptance"></a>
 ## Paused inspection implementation proposal

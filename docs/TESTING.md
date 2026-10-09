@@ -36,7 +36,7 @@ that installation boundary or physical/model qualification. Hosted Ubuntu and
 macOS application checks passed for the prerequisite input repair;
 subsequent implementation changes require their own accurate-revision checks.
 The private coordinator adds deterministic handoff/navigation regressions below.
-ALOHA reuse still needs its normal, budget and cleanup cases in these collections;
+ALOHA adds its normal, budget and cleanup cases below;
 workflow configuration alone does not establish coordinator behavior.
 
 ## Private fixed-navigation coordinator
@@ -44,7 +44,7 @@ workflow configuration alone does not establish coordinator behavior.
 The experimental `python -m robot_agent._navigation_runtime` entry uses the
 private coordinator/owners and original fixed-navigation policy. Public task
 commands, checkpoint/revision/recovery paths and the Harness dependency pin are
-unchanged. ALOHA has not yet adopted this mechanism.
+unchanged. ALOHA reuse and its domain-specific close are described below.
 
 [Handoff tests](../tests/test_task_runtime.py) choose claim/stop/withdraw/close
 ordering with Events and the exchange Condition. They exercise zero invocation
@@ -69,9 +69,52 @@ Local macOS/Python 3.12 checks passed 17 new unit scenarios, 171 application tes
 and two new installed scenarios. The local installed run used a new Agent wheel
 with the retained Mac Harness installation; it is not a fresh native build
 qualification. Existing application and installed-combination workflows discover
-these tests automatically. Hosted checks, ALOHA reuse, selected simulation/video
-and any public-default migration remain separate requirements. No physical stop,
+these tests automatically. Hosted checks, selected simulation/video and any
+public-default migration remain separate requirements. No physical stop,
 arbitrary-plugin exit, restart recovery or new model qualification is implied.
+
+## Private ALOHA reuse
+
+The experimental `python -m robot_agent._handoff_runtime` path reuses the same
+handoff, call facade, Session binding and owner assembly as fixed navigation.
+HandoffTask retains its original policy and camera/joint whitelist. Both actual
+task policies still consume their distinct observations and release criteria;
+public commands, other task variants and the fixed Harness pin remain unchanged.
+
+[ALOHA regressions](../tests/test_handoff_runtime.py) cover400/50 steps with both
+releases, changed episode/new measurement zero-hold, pending transfer zero-hold,
+stop while a decision is blocked, effect-before-stopped-response, short closing
+expiry retaining original request/skill/steps/observation, original operation
+budget including caller delay, prestart stop/expiry and initialization/close
+errors. A stopped observation returning late must still produce a JSON report: its
+binary RGB is explicitly omitted and labelled, while observation and call identity
+remain available. This report record is not a reusable model observation.
+Resource factories/methods/close execute in their sole owners. A released
+transfer requires no cancellation at the decision boundary; an unfinished
+submission is reconciled/cancelled only through its original request.
+
+[Installed checks](../tests/combination/test_handoff_runtime_installed.py) use
+actual Session/Host/Core with controlled action/environment and proposal fixtures.
+They check450 actual recorded steps and correlated released receipts, stale
+answer zero-hold, and actual module SIGTERM during image decision: zero hold,
+TERM-ignoring proposal child killed/reaped, and Host/worker PIDs absent after
+close. PNG preparation uses the existing vision extra; combination CI now installs
+`.[vision,evaluation]` and automatically discovers these tests plus navigation.
+
+These are software/installation checks. No MuJoCo dynamics, ACT inference,
+business model, simulation video or hardware stopping is qualified. Selected
+actual execution/video and public-default migration remain separate gates.
+The30-second ALOHA closing wait is a software budget; unfinished owners stay
+non-daemon and explicitly draining, and cleanup failure cannot become confirmed.
+
+Local macOS/CPython3.12.14 passed182 application tests (eleven new ALOHA cases) and
+five selected installed cases: three new ALOHA plus two navigation regressions
+after the shared extraction. A new Agent package was installed outside source;
+the local Core binary is retained, not a fresh native build qualification.
+Independent implementation review approved the limited software slice and ran
+27 focused cases plus five installed cases, then separately approved and ran
+the additional late-RGB regression. Hosted accurate-revision checks remain
+separate from these local results.
 
 ## Single-backup software checks
 

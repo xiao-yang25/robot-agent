@@ -277,3 +277,109 @@ class Coordinator:
             raise
         self.pending[role] = None
         return value
+
+
+class SessionBinding:
+    def __init__(self, factory):
+        self.session = factory()
+
+    def capabilities(self):
+        return self.session.capabilities()
+
+    def observe(self):
+        return self.session.observe()
+
+    def submit(self, request, *, deadline_ms, admission_deadline, operation_deadline, **kwargs):
+        now = time.monotonic()
+        if now >= admission_deadline:
+            raise TimeoutError('proposal expired before actual submission')
+        remaining = min(deadline_ms, int((operation_deadline - now) * 1000))
+        if remaining < 1:
+            raise TimeoutError('no original operation budget remains')
+        return self.session.submit(request, deadline_ms=remaining, **kwargs)
+
+    def status(self, request):
+        return self.session.status(request)
+
+    def cancel(self, request):
+        return self.session.cancel(request)
+
+    def close(self):
+        return self.session.close()
+
+
+class TaskCalls:
+    """Private facade for the two existing task policies; domain association stays outside."""
+    def stopped(self):
+        return self.coordinator.stopped()
+
+    def decide(self, context, observation, deadline, stop_requested):
+        self.decision_deadline = deadline
+        return self.coordinator.call('decision', 'decide', (context, observation, deadline, lambda: self.coordinator.exchange.owner_stopped('decision')),
+                         {}, deadline=deadline)
+
+    def capabilities(self):
+        return self.coordinator.call('io', 'capabilities', (), {}, deadline=self.task.deadline)
+
+    def observe(self):
+        value = self.coordinator.call('io', 'observe', (), {}, deadline=self.task.deadline)
+        self.observation_completed_at = time.monotonic()
+        return value
+
+    def submit_bound(self, request, kwargs, association):
+        # Revalidation precedes the original policy's operation-budget start.
+        # This conservative anchor also counts caller delay before enqueueing.
+        operation_deadline = min(self.task.deadline,
+                                 self.observation_completed_at + self.task.budget.operation_seconds,
+                                 time.monotonic() + kwargs['deadline_ms'] / 1000)
+        kwargs.update(admission_deadline=self.decision_deadline, operation_deadline=operation_deadline)
+        return self.coordinator.call('io', 'submit', (request,), kwargs, deadline=operation_deadline,
+                         claim_deadline=min(self.decision_deadline, operation_deadline),
+                         association=association)
+
+    def status(self, request):
+        cleanup = self.task.report['status'] != 'running'
+        return self.coordinator.call('io', 'status', (request,), {}, cleanup=cleanup,
+                         deadline=self.coordinator.cleanup_until() if cleanup else self.task.deadline,
+                         association={'request_id': request})
+
+    def cancel(self, request):
+        return self.coordinator.call('io', 'cancel', (request,), {}, cleanup=True,
+                                     deadline=self.coordinator.cleanup_until(),
+                                     association={'request_id': request})
+
+
+def run_owned_task(task, calls, io_factory, decision_factory, *, stop_requested, cleanup_seconds):
+    """Shared one-task assembly; task policy and domain close interpretation stay outside."""
+    coordinator = Coordinator(task.task_id, stop_requested, cleanup_seconds)
+    calls.coordinator, calls.task = coordinator, task
+    calls.decision_deadline = task.deadline
+    owners = [Owner(coordinator.exchange, 'io', io_factory, close=lambda binding: binding.close()),
+              Owner(coordinator.exchange, 'decision', decision_factory)]
+    report = task.report
+    try:
+        coordinator.stopped()
+        task.check_budget()
+        for owner in owners:
+            owner.start()
+        report = task.run(calls)
+    except Exception as error:
+        report.update(status='cancelled' if isinstance(error, InterruptedError) else 'needs_help',
+                      reason=f'{type(error).__name__}: {error}')
+    finally:
+        until = coordinator.cleanup_until()
+        # Signal both owners before joining either; close is independent of slots.
+        for owner in owners:
+            coordinator.exchange.close(owner.role)
+        terminal = {owner.role: owner.finish(until) for owner in owners}
+        for owner in owners:
+            call = coordinator.exchange.collect(owner.role)
+            if call is not None:
+                coordinator.retain(owner.role, call)
+            elif coordinator.pending[owner.role] is not None:
+                coordinator.retain(owner.role, coordinator.pending[owner.role])
+        report['coordination'] = {
+            'owners': terminal, 'late_completions': coordinator.late,
+            'resources_closed': all(row['thread_stopped'] and row['close'] in ('confirmed', 'not_needed')
+                                    and 'owner_error' not in row for row in terminal.values())}
+    return report
