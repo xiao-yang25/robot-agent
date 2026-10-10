@@ -34,7 +34,8 @@ def run_navigation(session_factory, decision_factory, *, budget=NavigationBudget
                             stop_requested=stop_requested, cleanup_seconds=cleanup_seconds)
     io = report['coordination']['owners']['io']
     report['native_cleanup'] = 'unknown'
-    report['connection_close'] = ('local_closed' if io['close'] in ('confirmed', 'error') else
+    # The factory may fail before or after disposal; an error proves neither.
+    report['connection_close'] = ('local_closed' if io['close'] == 'confirmed' else
                                   'not_started' if io['initialization'] == 'not_started' else 'unknown')
     if 'close_response' in io:
         report['close_response'] = io['close_response']

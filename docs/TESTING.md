@@ -53,7 +53,15 @@ restart, bounded completion retention, close independent of consumption, mutable
 input isolation, initialization/close errors and draining non-daemon owners.
 [Navigation tests](../tests/test_navigation_runtime.py) preserve normal A→B,
 stale-observation refusal, original-request unknown/cancel, original budget,
-partial initialization and close error. An unfinished submit retains its original
+partial initialization and close error. Closing regressions include an exception
+before disposal and a lost reply after fixture disposal. Both retain the error,
+report connection disposal as unknown and keep resources_closed false; thread
+exit alone cannot establish disposal. Normal close still reports local_closed
+while native cleanup remains unknown. The two error cases failed on the previous
+report mapping and passed after its correction. These are software fixtures,
+without sockets, remote shutdown or physics. Existing application CI discovers
+the regression automatically.
+An unfinished submit retains its original
 request ID, site and observation reference even when closing wait expires.
 A blocked final decision stays blocked
 while the business coordinator requests the original B cancellation.

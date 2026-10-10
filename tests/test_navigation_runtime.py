@@ -221,6 +221,24 @@ class NavigationRuntimeTests(unittest.TestCase):
         self.assertFalse(self.session.submissions)
         self.assertTrue(report['coordination']['resources_closed'])
 
+    def test_close_error_before_disposal_does_not_claim_local_closed(self):
+        def configure(resource):
+            def close():
+                resource.record()
+                raise OSError('close failed before local disposal')
+            resource.close = close
+        report = self.run_task(configure=configure)
+        self.assertEqual(report['status'], 'completed', report)
+        self.assertFalse(self.session.closed)
+        self.assertEqual(report['connection_close'], 'unknown')
+        self.assertEqual(report['native_cleanup'], 'unknown')
+        self.assertFalse(report['coordination']['resources_closed'])
+        self.assertTrue(report['coordination']['owners']['io']['thread_stopped'])
+        self.assertTrue(report['coordination']['owners']['decision']['thread_stopped'])
+        self.assertEqual(report['coordination']['owners']['io']['close'], 'error')
+        self.assertNotIn('close_response', report)
+        self.assertIn('close failed before local disposal', report['close_error'])
+
     def test_partial_start_and_close_failure_keep_cleanup_facts(self):
         def backend_failure():
             raise ValueError('provider not ready')
@@ -241,8 +259,11 @@ class NavigationRuntimeTests(unittest.TestCase):
             resource.close = close
         report = self.run_task(configure=configure)
         self.assertEqual(report['status'], 'completed')
-        self.assertEqual(report['connection_close'], 'local_closed')
+        # A generic close exception cannot establish which resources were disposed.
+        self.assertTrue(self.session.closed)
+        self.assertEqual(report['connection_close'], 'unknown')
         self.assertEqual(report['native_cleanup'], 'unknown')
+        self.assertNotIn('close_response', report)
         self.assertFalse(report['coordination']['resources_closed'])
         self.assertIn('native close reply lost', report['close_error'])
 
