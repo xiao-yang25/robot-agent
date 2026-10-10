@@ -354,7 +354,12 @@ resource outcomes. A completed business report cannot conceal an owner that is
 still draining or a close error. A twelve-second overall software closing wait
 does not renew the task budget or prove native termination; unfinished owners
 remain non-daemon and explicitly unconfirmed. Navigation connection disposal
-continues to leave native cleanup unknown.
+continues to leave native cleanup unknown. A successful Session close reports
+`connection_close=local_closed` within that binding's declared scope. A close
+exception reports `connection_close=unknown`: the factory may fail before or
+after local disposal. The original error is retained and `resources_closed`
+remains false. Neither value confirms remote shutdown, Owner reaping or physical
+stop. The adapter does not inspect private transport state or retry close.
 
 The opt-in module entry below is experimental, supports only the fixed task and
 does not replace any installed public command. The operator provides a prepared
