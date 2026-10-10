@@ -929,3 +929,30 @@ the real portable Core/Unix Session, with synthetic native measurements. Existin
 combination CI discovers them without a new workflow. These checks do not qualify
 ROS/native movement or physical stopping; fresh public-entry scenes are recorded
 separately before this pair is accepted for simulation.
+
+On 2026-10-10, installed Agent
+`930eaf8273772b145f290b407a372950eed678f2` / fixed Harness
+`747d7d48a846ad361cf7260d2339b010c0b92a00` exercised both scenarios through this
+public entry, using controlled proposals, the existing ROS Humble/Nav2/Gazebo
+image, network-none, 2 CPU/4 GiB and an explicit eight-second terminal query
+window. Fresh software checks passed 191 application tests, 18 focused checks
+and four selected installed Core/Session checks. Existing CI discovers the new
+checks without an additional workflow.
+
+The normal task completed in 38.577 seconds; its one independent physical
+arrival evaluation succeeded (A 0.207816 m, B 0.183400 m). The stop task reached
+its final decision after B's successful native result, then withdrew while that
+decision was held. Original B cancel/query and local Session close completed
+before releasing the actual late answer, which was retained without another
+submission. Its wall time was 36.553 seconds. This qualifies the controlled
+waiting-decision boundary; it does not qualify cancellation during motion,
+hard physical stop latency or a real model. Final B remains pending/current in
+the normal sample and pending/revoked in the stop sample; native cleanup remains
+unknown in both. Each task report stays unassessed; the separate evaluator owns
+the normal physical-success verdict.
+
+Independent software and focused safety-fact reviews approved this bounded
+qualification. Both public launchers and passive same-container video observers exited zero;
+containers exited zero, no OOM, and were removed. Both recordings fully decoded,
+and representative frames showed actual navigation. Their original-speed clips
+are local presentation candidates; media publication is a separate batch.
