@@ -4,6 +4,8 @@ This tutorial starts a real Humble/Gazebo scene, the installed Harness owner,
 and the installed public Agent CLI. The default task visits A then B with
 controlled executable proposals. Checkpoint, revision and single-failure recovery
 are explicit task choices; an optional host model mode is described below.
+An [experimental coordination assembly](#experimental-coordination) separately
+demonstrates decision waiting and execution close with controlled proposals.
 The Agent still checks fresh observations, proposal identity and deadlines, and
 retains final pending settlement and unknown native cleanup.
 
@@ -94,6 +96,52 @@ Inspect these different records:
 | `agent/report.json` | Three controlled decisions, A/B operations, A settled/released, final B accepted/pending; task verdict unassessed and native cleanup unknown |
 | `agent/decisions/decision-*/` | Declared model identifier `controlled-tutorial-no-model`, inputs/answers and reaped proposal process records |
 | `caller.jsonl`, `caller.log`, `request-client.log` | Native/Core progress, preparation diagnostics and application errors |
+
+<a id="experimental-coordination"></a>
+### Explicit experimental coordination
+
+Use the current checkout and its exact [Harness pin](../../workspace.repos),
+not the older preview tag. Prepare new Linux installations as above. This opt-in
+assembly reuses the same NavigationTask and public Session with the private
+shared task coordinator. It keeps the Session and decision provider in separate
+owners; the original fixed/checkpoint/revision/recovery defaults stay on the
+legacy CLI. There is no stable coordinator SDK or delegated mission engine.
+
+```sh
+PYTHONPATH=src python3 examples/navigation/run.py --harness-source ../harness-navigation \
+  --python-prefix navigation-consumer/install --agent-prefix navigation-consumer/agent-install \
+  --image robot-navigation-demo:humble --output runs/coordination-normal-01 \
+  --assembly experimental-coordination --coordination-scenario normal \
+  --terminal-query-seconds 8 --record-evaluation
+```
+
+For the controlled stop demonstration, use a new result directory and replace
+the scenario with `--coordination-scenario final-decision-stop`. After B's result
+has been accepted, the final controlled decision requests task withdrawal and
+waits for the separate Session close attempt before returning its late answer.
+The task cancels and queries the original pending B, then closes; it retains
+the late decision without another submission. No model requests are made.
+This is a final-decision wait, not a robot still moving or a hard-stop test.
+
+Both scenarios require explicit finite terminal query seconds in `(0, 10]`.
+This is the deployed Owner's fixed post-cancel query-service budget, not a task,
+proposal, physical-stop or process-exit deadline. Unsupported task, provider,
+instruction or scene combinations are rejected before dependency/process work.
+Do not combine this assembly with host-Codex, checkpoint, revision or recovery.
+
+`agent/report.json` includes the original domain report plus `coordination` and
+`tutorial`. `agent/coordination.jsonl` records observed calls and decisions. A
+normal demonstration expects `completed`; the stop demonstration expects
+`cancelled`. A successful demo exit also requires both local owners to finish;
+`run.json:passed` still means launcher/process completion only. Final B settlement
+and native cleanup remain pending/unknown. A close exception remains unknown and
+cannot be reported as resource success. The controlled held decision has a
+45-second failure bound; it adds no hard termination guarantee to the runtime.
+
+Passive evaluation collection is supported with this fixed normal scene. Run
+the independent arrival evaluator below only for the completed normal task;
+the withdrawn task has no physical-success verdict. Public recording and prior
+simulation evidence retain their own checkout/scene versions.
 
 ### Collect and evaluate the fixed normal task
 

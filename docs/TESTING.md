@@ -908,3 +908,24 @@ release. Three controlled proposals made no model calls. This is one fixed
 simulation qualification, not reliability, arbitrary-map, hardware or a new
 model qualification. Existing recordings retain their original versions and
 are not presented as recordings of this new evaluation run.
+
+## Explicit coordination tutorial
+
+The current checkout pins Harness
+`747d7d48a846ad361cf7260d2339b010c0b92a00`. The
+[tutorial](../examples/navigation/README.md#experimental-coordination) explicitly
+selects the experimental assembly and an Owner terminal query budget. Existing
+public task defaults and historical qualifications retain their own versions.
+
+[Application checks](../tests/test_navigation_coordination_demo.py) cover actual
+host CLI selection/prevalidation, normal domain behavior, separate Session and
+decision ownership, close-before-late-answer order, original B cancellation and
+close failure retained as unknown. Diagnostic failure cannot bypass Session
+cleanup, and cancel/late-answer errors cannot produce a successful tutorial exit.
+Existing application discovery includes them.
+The [installed combination checks](../tests/combination/test_navigation_runtime_installed.py)
+add normal and final-decision-stop tutorial runs through installed packages and
+the real portable Core/Unix Session, with synthetic native measurements. Existing
+combination CI discovers them without a new workflow. These checks do not qualify
+ROS/native movement or physical stopping; fresh public-entry scenes are recorded
+separately before this pair is accepted for simulation.

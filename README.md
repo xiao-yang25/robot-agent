@@ -45,6 +45,11 @@ Current development also exposes an experimental
 [single-backup Python task](docs/README.md#one-backup-after-confirmed-failure);
 its model/physics demonstration is pending.
 
+The current checkout also offers an explicit
+[coordination tutorial](examples/navigation/README.md#experimental-coordination)
+for normal A→B and a controlled stop during the final decision. It reuses the
+private shared coordinator; public task defaults and the preview tag stay fixed.
+
 <a id="evaluate-the-recorded-task-independently"></a>
 <a id="installed-combination-ci"></a>
 <a id="acceptance-and-delivery"></a>
