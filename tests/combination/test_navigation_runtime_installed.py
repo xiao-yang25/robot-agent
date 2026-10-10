@@ -10,6 +10,7 @@ import time
 import unittest
 
 import robot_agent._navigation_runtime as runtime
+import robot_agent.navigation_coordination_demo as tutorial
 from robot_harness import NavigationSession
 from test_navigation_installed import Proposal
 
@@ -61,6 +62,42 @@ class InstalledRuntimeTests(unittest.TestCase):
         facts = json.loads(self.audit.read_text())
         self.assertEqual(len(facts['records']), 2)
         self.assertEqual(facts['stops'], [b['request_id']])
+
+    def run_tutorial(self, scenario):
+        self.assertTrue(Path(tutorial.__file__).resolve().is_relative_to(
+            Path(os.environ['COMBINATION_AGENT_PREFIX']).resolve()))
+        report = tutorial._run_tutorial(lambda: NavigationSession(self.endpoint),
+                                       output=self.root / 'tutorial', scenario=scenario)
+        self.reap_owner()
+        return report, json.loads(self.audit.read_text())
+
+    def test_installed_coordination_tutorial_normal_keeps_pending_b(self):
+        report, facts = self.run_tutorial('normal')
+        self.assertEqual(report['status'], 'completed')
+        self.assertTrue(report['coordination']['resources_closed'])
+        self.assertEqual(report['task_verdict'], 'unassessed')
+        self.assertEqual(report['operations'][-1]['receipt']['settlement'], 'pending')
+        self.assertEqual([row['site'] for row in facts['records']], ['A', 'B'])
+        self.assertEqual(facts['stops'], [report['operations'][-1]['request_id']])
+
+    def test_installed_coordination_tutorial_stop_retains_original_b(self):
+        report, facts = self.run_tutorial('final-decision-stop')
+        b = report['operations'][-1]
+        interrupted = report['interrupted_operation']
+        self.assertEqual(report['status'], 'cancelled')
+        self.assertTrue(report['coordination']['resources_closed'])
+        self.assertEqual(facts['stops'], [b['request_id']])
+        self.assertEqual([row['site'] for row in facts['records']], ['A', 'B'])
+        for key in ('request_id', 'operation_id', 'goal_id'):
+            self.assertEqual(interrupted[key], b[key])
+        self.assertEqual(interrupted['receipt']['authority_disposition'], 'revoked')
+        self.assertEqual(interrupted['receipt']['settlement'], 'pending')
+        self.assertEqual(report['connection_close'], 'local_closed')
+        self.assertEqual(report['native_cleanup'], 'unknown')
+        late = [row for row in report['coordination']['late_completions'] if row['role'] == 'decision']
+        self.assertEqual(len(late), 1)
+        self.assertEqual(late[0]['value']['task_id'], report['task_id'])
+        self.assertEqual(late[0]['value']['phase'], 'final')
 
     def test_installed_cli_stop_during_final_proposal_reaps_actual_children(self):
         executable = self.root / 'proposal'

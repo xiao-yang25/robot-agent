@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Run the installed navigation business application using Harness's public launcher."""
 import argparse
+import math
 import os
 from pathlib import Path
 import re
@@ -24,11 +25,27 @@ def main():
     parser.add_argument('--executable', default='codex', help='host-only model CLI')
     parser.add_argument('--host-output', type=Path, help='new private host directory, never mounted in the scene')
     parser.add_argument('--task', choices=('fixed', 'checkpoint', 'revision', 'recovery'), default='fixed')
+    parser.add_argument('--assembly', choices=('legacy', 'experimental-coordination'), default='legacy',
+                        help='explicit experimental coordinator; public task defaults remain legacy')
+    parser.add_argument('--coordination-scenario', choices=('normal', 'final-decision-stop'))
+    parser.add_argument('--terminal-query-seconds', type=float,
+                        help='required finite (0, 10] Owner query budget for experimental coordination')
     parser.add_argument('--scene', choices=('normal','occupied-a'), default='normal',
                         help='occupied-a is a static map test and requires --task recovery')
     parser.add_argument('--instruction', choices=('continue_b', 'finish_at_a', 'none', 'stop', 'redirect_b'))
     parser.add_argument('--instruction-delay', type=float, default=None, help='business tutorial delay in [0, 9] seconds')
     args = parser.parse_args()
+    coordinated = args.assembly == 'experimental-coordination'
+    if coordinated:
+        if (args.task != 'fixed' or args.provider != 'controlled' or args.scene != 'normal'
+                or args.instruction is not None or args.instruction_delay is not None
+                or args.model is not None or args.host_output is not None or args.executable != 'codex'):
+            parser.error('experimental coordination requires fixed/controlled/normal without model or instruction options')
+        if (args.coordination_scenario is None or args.terminal_query_seconds is None
+                or not math.isfinite(args.terminal_query_seconds) or not 0 < args.terminal_query_seconds <= 10):
+            parser.error('experimental coordination requires an explicit scenario and terminal query seconds in (0, 10]')
+    elif args.coordination_scenario is not None or args.terminal_query_seconds is not None:
+        parser.error('coordination options require --assembly experimental-coordination')
     if args.record_evaluation and (args.task != 'fixed' or args.scene != 'normal'):
         parser.error('--record-evaluation requires --task fixed and --scene normal')
     if args.scene != 'normal' and args.task != 'recovery':
@@ -72,12 +89,20 @@ def main():
         parser.error('Agent prefix lacks the installed tutorial; prepare a new Linux installation')
     if checkpoint is not None and not (prefix/'robot_agent/navigation_checkpoint_demo.py').is_file():
         parser.error('prepare a new Agent installation including the checkpoint tutorial')
+    if coordinated and not (prefix/'robot_agent/navigation_coordination_demo.py').is_file():
+        parser.error('prepare a new Agent installation including the coordination tutorial')
     command = [sys.executable, str(harness / 'integrations/ros2/simulation/simulate.py'),
         'session', '--image', args.image, '--python-prefix', str(python_prefix),
         '--client-script', str(client), '--client-prefix', str(prefix), '--caller-wait-seconds', '45',
         '--output', str(args.output.expanduser().resolve())]
     if args.record_evaluation:
         command.append('--record-evaluation')
+    if coordinated:
+        command.extend(['--terminal-query-seconds', str(args.terminal_query_seconds)])
+        from robot_agent._navigation_demo import run_controlled_client
+        source = ('from robot_agent.navigation_coordination_demo import main\n'
+                  f'raise SystemExit(main(scenario={args.coordination_scenario!r}))\n')
+        return run_controlled_client(command, source)
     if revision is not None:
         if not (prefix/'robot_agent/navigation_revision_demo.py').is_file():
             parser.error('prepare a new Agent installation including the revision tutorial')

@@ -374,6 +374,17 @@ python -m robot_agent._navigation_runtime \
 Local software/installation results and remaining qualification are recorded in
 [Testing](TESTING.md#private-fixed-navigation-coordinator).
 
+The [explicit coordination tutorial](../examples/navigation/README.md#experimental-coordination)
+now assembles this same private runtime through Harness's public launcher and
+the pinned default scoped Owner. Its controlled `normal` and
+`final-decision-stop` choices do not replace public CLI defaults. In the latter,
+the decision owner requests withdrawal and holds its answer until the I/O close
+attempt ends, without an extra timer/worker. The original request remains the
+cancel/query target; the late answer cannot restore authority or submit a step.
+The deployment selects the Owner's explicit terminal query window. Tutorial
+trace/reporting and software completion do not establish physical stopping,
+native cleanup, remote acknowledgement or a stable coordinator API.
+
 ### Experimental ALOHA reuse
 
 [ALOHA assembly](../src/robot_agent/_handoff_runtime.py) consumes the same
