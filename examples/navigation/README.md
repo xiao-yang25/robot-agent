@@ -5,7 +5,8 @@ and the installed public Agent CLI. The default task visits A then B with
 controlled executable proposals. Checkpoint, revision and single-failure recovery
 are explicit task choices; an optional host model mode is described below.
 An [experimental coordination assembly](#experimental-coordination) separately
-demonstrates decision waiting and execution close with controlled proposals.
+demonstrates decision waiting and execution close. The optional host model
+transport has software coverage; its new assembly still needs real-model qualification.
 The Agent still checks fresh observations, proposal identity and deadlines, and
 retains final pending settlement and unknown native cleanup.
 
@@ -127,7 +128,33 @@ Both scenarios require explicit finite terminal query seconds in `(0, 10]`.
 This is the deployed Owner's fixed post-cancel query-service budget, not a task,
 proposal, physical-stop or process-exit deadline. Unsupported task, provider,
 instruction or scene combinations are rejected before dependency/process work.
-Do not combine this assembly with host-Codex, checkpoint, revision or recovery.
+Checkpoint, revision and recovery cannot use this assembly.
+
+To connect the existing host proposal transport, use a prepared host environment
+and explicitly select `normal`:
+
+```sh
+navigation-host/bin/python examples/navigation/run.py \
+  --harness-source ../harness-navigation --python-prefix navigation-consumer/install \
+  --agent-prefix navigation-consumer/agent-install --image robot-navigation-demo:humble \
+  --output runs/coordination-host-01 --assembly experimental-coordination \
+  --coordination-scenario normal --terminal-query-seconds 8 \
+  --provider host-codex --model YOUR_EXPLICIT_MODEL --executable codex \
+  --host-output /absolute/new-private-host-output
+```
+
+The container owns the coordinator and separate decision/Session owners. Its
+decision owner calls the installed relay; the existing host worker owns the model
+CLI and private logs. The fixed task still validates correlated answers and fresh
+observations before admission. Credentials stay on the host.
+
+Use an external interrupt to withdraw while a real proposal is waiting.
+`final-decision-stop` is restricted to controlled proposals; a host provider does
+not manufacture its own withdrawal or hold a real answer. An interrupted normal
+run reports cancellation and exits unsuccessfully as a normal demonstration.
+Local helper reaping does not confirm remote model cancellation or physical stop.
+The controlled subprocess/installed Core tests qualify this software connection;
+a model, host environment and fresh simulation run must be selected separately.
 
 `agent/report.json` includes the original domain report plus `coordination` and
 `tutorial`. `agent/coordination.jsonl` records observed calls and decisions. A

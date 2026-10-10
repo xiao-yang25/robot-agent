@@ -93,9 +93,11 @@ def run_controlled_client(command, source):
     return result
 
 
-def run_host(command, *, output, host_output, model, executable, mounted_roots=(), checkpoint=None, revision=None, recovery=None):
+def run_host(command, *, output, host_output, model, executable, mounted_roots=(), checkpoint=None, revision=None, recovery=None, coordination=False):
     if sum(value is not None for value in (checkpoint,revision,recovery)) > 1:
         raise ValueError("select one navigation business task")
+    if coordination and any(value is not None for value in (checkpoint, revision, recovery)):
+        raise ValueError('host coordination supports only the fixed task')
     if recovery is not None:
         from .navigation_recovery import validate_map_id
         validate_map_id(recovery['expected_map_id'])
@@ -117,11 +119,15 @@ def run_host(command, *, output, host_output, model, executable, mounted_roots=(
     host = launcher = None
     result = 1
     record = {'model_requested': model, 'remote_cleanup': 'unknown'}
+    if coordination:
+        record['assembly'] = 'experimental-coordination'
     temporary = tempfile.TemporaryDirectory(prefix='robot-agent-navigation-client-')
     try:
         with (host_output / 'model-server.log').open('w') as log:
             client = Path(temporary.name) / 'client.py'
-            client.write_text(revision_client(revision, provider='host-codex', model=model)
+            client.write_text(('from robot_agent.navigation_coordination_demo import main\n'
+                f'raise SystemExit(main(provider="host-codex", model={model!r}))\n')
+                if coordination else revision_client(revision, provider='host-codex', model=model)
                 if revision is not None else checkpoint_client(checkpoint, provider='host-codex', model=model)
                 if checkpoint is not None else 'from robot_agent.navigation_demo_client import main\n'
                 f'main(provider="host-codex", model={model!r}, task="recovery", expected_map_id={recovery["expected_map_id"]!r})\n'

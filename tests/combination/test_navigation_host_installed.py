@@ -13,7 +13,8 @@ from robot_agent._navigation_demo import finish
 
 
 class InstalledNavigationHostTests(unittest.TestCase):
-    def run_case(self, model, tool_error=False, checkpoint=None, revision=None, recovery=None):
+    def run_case(self, model, tool_error=False, checkpoint=None, revision=None, recovery=None,
+                 coordination=False, stop_final=False):
         prefix = Path(os.environ['COMBINATION_AGENT_PREFIX']).resolve()
         self.assertTrue(Path(robot_agent.navigation_host_model.__file__).resolve().is_relative_to(prefix))
         self.assertTrue((prefix/'bin/robot-agent-navigation-host-proposal').is_file())
@@ -32,6 +33,22 @@ class InstalledNavigationHostTests(unittest.TestCase):
                 executable = root/'proposal'
                 source = Path(__file__).with_name('navigation_proposal_fixture.py').read_text()
                 executable.write_text(f'#!{sys.executable}\n'+source.split('\n', 1)[1])
+                executable.chmod(0o755)
+            if stop_final:
+                executable = root/'waiting-proposal'
+                executable.write_text(f'#!{sys.executable}\n'+'''import json,os,sys,time
+from pathlib import Path
+if '--version' in sys.argv: print('waiting-final-fixture-no-model');raise SystemExit(0)
+value=json.loads(sys.stdin.read().splitlines()[-1])
+out=Path(sys.argv[sys.argv.index('--output-last-message')+1])
+if value['phase']=='final':
+    (out.parent/'waiting.json').write_text(json.dumps({'pid':os.getpid()}))
+    time.sleep(30)
+answer={key:value[key] for key in ('task_id','phase','observation_reference')}
+answer.update(action={'prepare':'visit_a','after_a':'visit_b','final':'observed_complete'}[value['phase']],reason='controlled fixture')
+out.write_text(json.dumps(answer))
+print(json.dumps({'item':{'type':'agent_message'}}))
+''')
                 executable.chmod(0o755)
             processes = []
             with (root/'host.log').open('w+') as host_log, (root/'owner.log').open('w+') as owner_log, (root/'agent.log').open('w+') as agent_log:
@@ -59,6 +76,15 @@ class InstalledNavigationHostTests(unittest.TestCase):
                     client_command = [sys.executable, '-m', 'robot_agent.navigation_cli',
                         '--endpoint', str(endpoint), '--output', str(scene/'agent'),
                         '--model', model, '--executable', str(relay)]
+                    if coordination:
+                        code=('from pathlib import Path; import json; '
+                            'from robot_harness import NavigationSession; '
+                            'from robot_agent.navigation_coordination_demo import _run_tutorial; '
+                            f'report=_run_tutorial(lambda:NavigationSession({str(endpoint)!r}), '
+                            f'output=Path({str(scene/"agent")!r}),scenario="normal",provider="host-codex", '
+                            f'model={model!r},executable={str(relay)!r}); '
+                            'raise SystemExit(0 if report["status"]=="completed" and report["coordination"]["resources_closed"] else 1)')
+                        client_command=[sys.executable,'-c',code]
                     if recovery is not None:
                         client_command.extend(['--task','recovery'])
                     if checkpoint is not None or revision is not None:
@@ -69,15 +95,32 @@ class InstalledNavigationHostTests(unittest.TestCase):
                             f'backend=NavigationCodexDecision(Path({str(scene / "agent-proposals")!r}),model={model!r},executable={str(relay)!r});'
                             f'raise SystemExit(run({str(endpoint)!r},{str(scene / "agent")!r},instruction={instruction!r},delay=0,backend=backend))')
                         client_command=[sys.executable,'-c',code]
-                    result = subprocess.run(client_command,
-                        stdout=agent_log, stderr=subprocess.STDOUT, timeout=15)
+                    if stop_final:
+                        import signal
+                        client = subprocess.Popen(client_command, stdout=agent_log, stderr=subprocess.STDOUT,
+                                                  start_new_session=True)
+                        processes.append(client)
+                        waiting = private/'decisions/decision-3/waiting.json'
+                        until = time.monotonic()+10
+                        while not waiting.exists() and client.poll() is None and time.monotonic()<until:
+                            time.sleep(.01)
+                        self.assertTrue(waiting.exists(), 'host proposal never entered final wait')
+                        client.send_signal(signal.SIGINT)
+                        returncode = client.wait(timeout=10)
+                    else:
+                        result = subprocess.run(client_command,
+                            stdout=agent_log, stderr=subprocess.STDOUT, timeout=15)
+                        returncode = result.returncode
                     agent_log.seek(0)
-                    self.assertEqual(result.returncode, int(tool_error), agent_log.read())
+                    self.assertEqual(returncode, int(tool_error or stop_final), agent_log.read())
                     self.assertEqual(owner.wait(timeout=5), 0)
                     report = json.loads((scene/'agent/report.json').read_text())
                     facts = json.loads(audit.read_text())
                     self.assertEqual(report['task_verdict'], 'unassessed')
                     self.assertEqual(report['native_cleanup'], 'unknown')
+                    if coordination:
+                        self.assertTrue(report['coordination']['resources_closed'])
+                        self.assertEqual(report['tutorial']['proposal'], 'host-codex')
                     if tool_error:
                         self.assertEqual(report['status'], 'needs_help')
                         self.assertIn('decision CLI exited 1', report['reason'])
@@ -88,6 +131,15 @@ class InstalledNavigationHostTests(unittest.TestCase):
                         self.assertEqual(report['operations'], [])
                         self.assertEqual(facts['records'], [])
                         self.assertEqual(facts['stops'], [])
+                    elif stop_final:
+                        self.assertEqual(report['status'], 'cancelled')
+                        b=report['operations'][-1]
+                        self.assertEqual(facts['stops'], [b['request_id']])
+                        self.assertEqual([row['site'] for row in facts['records']], ['A', 'B'])
+                        self.assertEqual(report['interrupted_operation']['request_id'], b['request_id'])
+                        self.assertEqual(report['connection_close'], 'local_closed')
+                        self.assertFalse((scene/'model-requests/final/response.json').exists())
+                        self.assertTrue((scene/'model-requests/final/cancelled').exists())
                     else:
                         self.assertEqual(report['status'], 'stopped_by_instruction' if revision == 'stop' else 'completed')
                         if checkpoint is not None:
@@ -129,7 +181,7 @@ class InstalledNavigationHostTests(unittest.TestCase):
                     self.assertTrue(json.loads((private/'model-server.json').read_text())['stop_observed'])
                     for base in (scene/('agent-proposals' if checkpoint is not None or revision is not None else 'agent/decisions'), private/'decisions'):
                         paths = list(base.glob('*/process.json'))
-                        self.assertEqual(len(paths), 1 if tool_error else len(report['decisions']))
+                        self.assertEqual(len(paths), 1 if tool_error else 3 if stop_final else len(report['decisions']))
                         for path in paths:
                             child = json.loads(path.read_text())
                             self.assertTrue(child['reaped'])
@@ -155,6 +207,15 @@ class InstalledNavigationHostTests(unittest.TestCase):
 
     def test_installed_host_relay_completes_and_preserves_pending_settlement(self):
         self.run_case('controlled-tutorial-no-model')
+
+    def test_installed_coordination_host_relay_completes_original_task(self):
+        self.run_case('controlled-tutorial-no-model', coordination=True)
+
+    def test_installed_coordination_host_tool_attempt_has_zero_admissions(self):
+        self.run_case('error-before-a', tool_error=True, coordination=True)
+
+    def test_installed_coordination_external_stop_reaps_waiting_host_child(self):
+        self.run_case('controlled-fixture-no-model', coordination=True, stop_final=True)
 
     def test_host_tool_event_crosses_relay_as_error_with_zero_admissions(self):
         self.run_case('error-before-a', tool_error=True)
