@@ -385,6 +385,22 @@ The deployment selects the Owner's explicit terminal query window. Tutorial
 trace/reporting and software completion do not establish physical stopping,
 native cleanup, remote acknowledgement or a stable coordinator API.
 
+The same explicit tutorial now accepts `host-codex` for `normal` only, with an
+explicit model, separate private host output and terminal query window. The
+container's decision owner constructs the existing NavigationCodexDecision around
+the installed relay. The existing host worker owns its CLI processes and private
+logs; it reconstructs declared task/measurement context and never receives a
+Session. The coordinator owns task state, and the I/O owner keeps the public
+NavigationSession and its original cancellation/close obligations.
+
+External interruption latches task stop and withdraws the original decision
+call. Relay cancellation notifies the host helper while the independent I/O
+owner cancels/queries original B and closes. Completion cannot reopen authority
+or replay a request. The original task/proposal budgets and unknown native/remote
+cleanup remain. Host proposals cannot use the controlled final-decision-stop
+scenario. Software coverage of this assembly does not transfer the legacy host
+path's real-model or simulation qualification; no public default is migrated.
+
 ### Experimental ALOHA reuse
 
 [ALOHA assembly](../src/robot_agent/_handoff_runtime.py) consumes the same

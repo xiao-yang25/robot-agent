@@ -15,6 +15,7 @@ from types import SimpleNamespace
 from robot_agent.navigation_coordination_demo import _RecordedSession, _run_tutorial
 from robot_agent.navigation_coordination_demo import main
 from test_navigation_runtime import OwnedSession
+from test_navigation import Backend
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('coordination_selector', ROOT / 'examples/navigation/run.py')
@@ -23,6 +24,39 @@ spec.loader.exec_module(selector)
 
 
 class CoordinationDemoTests(unittest.TestCase):
+    def test_host_provider_uses_owned_backend_and_original_task(self):
+        sessions, providers = [], []
+        def session_factory():
+            session = OwnedSession()
+            sessions.append(session)
+            return session
+        def backend_factory(*args, **kwargs):
+            providers.append(threading.get_ident())
+            self.assertEqual(kwargs, dict(model='explicit-model', executable='relay'))
+            return Backend()
+        with tempfile.TemporaryDirectory() as temporary, \
+                patch('robot_agent.navigation_decision.NavigationCodexDecision', side_effect=backend_factory):
+            report = _run_tutorial(session_factory, output=Path(temporary)/'run', scenario='normal',
+                provider='host-codex', model='explicit-model', executable='relay')
+        self.assertEqual(report['status'], 'completed')
+        self.assertEqual([row['site'] for row in report['operations']], ['A', 'B'])
+        self.assertTrue(report['coordination']['resources_closed'])
+        self.assertNotEqual(providers[0], sessions[0].owner)
+        self.assertNotEqual(providers[0], threading.get_ident())
+        self.assertEqual(report['tutorial']['proposal'], 'host-codex')
+
+    def test_host_stop_scenario_or_missing_model_creates_no_resource(self):
+        cases = [dict(provider='host-codex', model='explicit', executable='relay', scenario='final-decision-stop'),
+                 dict(provider='host-codex', executable='relay', scenario='normal'),
+                 dict(provider='unsupported', scenario='normal')]
+        with tempfile.TemporaryDirectory() as temporary:
+            for arguments in cases:
+                with self.subTest(arguments=arguments), patch('robot_agent.navigation_coordination_demo.run_navigation') as run:
+                    with self.assertRaises(ValueError):
+                        _run_tutorial(lambda: None, output=Path(temporary)/'run', **arguments)
+                    run.assert_not_called()
+                    self.assertFalse((Path(temporary)/'run').exists())
+
     def test_installed_entry_rejects_cleanup_call_or_late_answer_error(self):
         import robot_agent
         harness = SimpleNamespace(__file__='/installed/robot_harness/__init__.py', NavigationSession=None)
@@ -133,7 +167,7 @@ class CoordinationDemoTests(unittest.TestCase):
         for directory in ('harness', 'core', 'agent/bin', 'agent/robot_agent'):
             (root / directory).mkdir(parents=True, exist_ok=True)
         for name in ('robot_agent/navigation_demo_client.py', 'robot_agent/navigation_coordination_demo.py',
-                     'bin/robot-agent-navigation-controlled'):
+                     'bin/robot-agent-navigation-controlled', 'bin/robot-agent-navigation-host-proposal'):
             (root / 'agent' / name).touch()
         return ['run.py', '--harness-source', str(root / 'harness'), '--python-prefix', str(root / 'core'),
                 '--agent-prefix', str(root / 'agent'), '--image', 'test-image', '--output', str(root / 'new'), *extra]
@@ -155,11 +189,30 @@ class CoordinationDemoTests(unittest.TestCase):
                 self.assertIn(f'scenario={scenario!r}', source)
                 legacy.assert_not_called()
 
+    def test_host_selector_retains_query_budget_and_uses_host_supervisor(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            args = self.arguments(root, '--assembly', 'experimental-coordination',
+                '--coordination-scenario', 'normal', '--terminal-query-seconds', '8',
+                '--provider', 'host-codex', '--model', 'explicit', '--host-output', str(root/'private'))
+            revision = re.search(r'version: ([0-9a-f]{40})', (ROOT/'workspace.repos').read_text()).group(1)
+            with patch('sys.argv', args), patch.object(selector.subprocess, 'check_output', return_value=revision), \
+                    patch.object(selector.subprocess, 'run'), patch('robot_agent._navigation_demo.run_host', return_value=0) as host, \
+                    patch('robot_agent._navigation_demo.run_controlled_client') as controlled:
+                self.assertEqual(selector.main(), 0)
+            command = host.call_args.args[0]
+            self.assertEqual(command[command.index('--terminal-query-seconds')+1], '8.0')
+            self.assertTrue(host.call_args.kwargs['coordination'])
+            self.assertEqual(host.call_args.kwargs['model'], 'explicit')
+            controlled.assert_not_called()
+
     def test_invalid_combinations_fail_before_dependencies_or_processes(self):
         selected = ['--assembly', 'experimental-coordination', '--coordination-scenario', 'normal',
                     '--terminal-query-seconds', '8']
         cases = [selected + ['--terminal-query-seconds=' + value] for value in ('0', '-1', 'nan', 'inf', '10.01')]
         cases += [selected + ['--task', 'revision'], selected + ['--provider', 'host-codex'],
+                  selected + ['--provider', 'host-codex', '--model', 'explicit', '--host-output', 'private',
+                              '--coordination-scenario', 'final-decision-stop'],
                   ['--assembly', 'experimental-coordination'], ['--terminal-query-seconds', '8']]
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

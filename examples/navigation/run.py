@@ -37,15 +37,21 @@ def main():
     args = parser.parse_args()
     coordinated = args.assembly == 'experimental-coordination'
     if coordinated:
-        if (args.task != 'fixed' or args.provider != 'controlled' or args.scene != 'normal'
+        if (args.task != 'fixed' or args.scene != 'normal'
                 or args.instruction is not None or args.instruction_delay is not None
-                or args.model is not None or args.host_output is not None or args.executable != 'codex'):
-            parser.error('experimental coordination requires fixed/controlled/normal without model or instruction options')
+                or (args.provider == 'controlled' and (args.model is not None
+                    or args.host_output is not None or args.executable != 'codex'))):
+            parser.error('experimental coordination requires fixed/normal without instruction options; controlled has no model options')
         if (args.coordination_scenario is None or args.terminal_query_seconds is None
                 or not math.isfinite(args.terminal_query_seconds) or not 0 < args.terminal_query_seconds <= 10):
             parser.error('experimental coordination requires an explicit scenario and terminal query seconds in (0, 10]')
+        if args.provider == 'host-codex' and args.coordination_scenario != 'normal':
+            parser.error('host coordination uses normal; withdraw externally while a decision waits')
     elif args.coordination_scenario is not None or args.terminal_query_seconds is not None:
         parser.error('coordination options require --assembly experimental-coordination')
+    if args.provider == 'host-codex' and (not args.model or not args.model.strip()
+            or len(args.model) > 128 or args.host_output is None):
+        parser.error('host-codex requires an explicit model and separate new --host-output')
     if args.record_evaluation and (args.task != 'fixed' or args.scene != 'normal'):
         parser.error('--record-evaluation requires --task fixed and --scene normal')
     if args.scene != 'normal' and args.task != 'recovery':
@@ -99,6 +105,7 @@ def main():
         command.append('--record-evaluation')
     if coordinated:
         command.extend(['--terminal-query-seconds', str(args.terminal_query_seconds)])
+    if coordinated and args.provider == 'controlled':
         from robot_agent._navigation_demo import run_controlled_client
         source = ('from robot_agent.navigation_coordination_demo import main\n'
                   f'raise SystemExit(main(scenario={args.coordination_scenario!r}))\n')
@@ -112,14 +119,13 @@ def main():
         from robot_agent.navigation_recovery import PROFILE
         command.extend(['--profile', PROFILE, '--scene', args.scene])
     if args.provider == 'host-codex':
-        if not args.model or not args.model.strip() or len(args.model) > 128 or args.host_output is None:
-            parser.error('host-codex requires an explicit model and separate new --host-output')
         if not (prefix / 'bin/robot-agent-navigation-host-proposal').is_file():
             parser.error('prepare the matching relay installation')
         from robot_agent._navigation_demo import run_host
         return run_host(command, output=args.output.expanduser().resolve(),
             host_output=args.host_output.expanduser().resolve(), model=args.model, executable=args.executable,
-            mounted_roots=(prefix, python_prefix, harness / 'integrations/ros2/simulation'), checkpoint=checkpoint, revision=revision, recovery=recovery)
+            mounted_roots=(prefix, python_prefix, harness / 'integrations/ros2/simulation'), checkpoint=checkpoint, revision=revision, recovery=recovery,
+            coordination=coordinated)
     if args.model is not None or args.host_output is not None or args.executable != 'codex':
         parser.error('model/host-output/executable options require --provider host-codex')
     if recovery is not None:

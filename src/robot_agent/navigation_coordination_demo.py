@@ -1,4 +1,4 @@
-"""Explicit controlled coordination tutorial; no model or physical-stop verdict."""
+"""Explicit coordination tutorial; task proposals never establish physical success."""
 import json
 from pathlib import Path
 import platform
@@ -109,9 +109,34 @@ class _ControlledProposal:
         return answer
 
 
-def _run_tutorial(session_factory, *, output, scenario):
+class _RecordedProposal:
+    def __init__(self, backend, trace):
+        self.backend, self.trace = backend, trace
+
+    def decide(self, context, observation, deadline, stop_requested):
+        self.trace.event('decision_begin', context=context, observation=observation)
+        try:
+            answer = self.backend.decide(context, observation, deadline, stop_requested)
+        except Exception as error:
+            self.trace.event('decision_error', error=f'{type(error).__name__}: {error}')
+            raise
+        self.trace.event('decision_return', answer=answer)
+        return answer
+
+
+def _run_tutorial(session_factory, *, output, scenario, provider='controlled',
+                  model=None, executable=None):
     if scenario not in SCENARIOS:
         raise ValueError('unsupported coordination scenario')
+    if provider == 'controlled':
+        if model is not None or executable is not None:
+            raise ValueError('controlled coordination does not accept model options')
+    elif provider == 'host-codex':
+        if (scenario != 'normal' or not isinstance(model, str) or not model.strip()
+                or len(model) > 128 or not isinstance(executable, str) or not executable):
+            raise ValueError('host coordination requires normal and an explicit model/relay')
+    else:
+        raise ValueError('unsupported coordination provider')
     output = Path(output)
     output.mkdir(parents=True, exist_ok=False)
     trace = _Trace(output / 'coordination.jsonl')
@@ -123,13 +148,22 @@ def _run_tutorial(session_factory, *, output, scenario):
         trace.event('start', domain='navigation',
                     scenario='normal' if scenario == 'normal' else 'stop-decision',
                     tutorial_scenario=scenario, python=platform.python_version(),
-                    assembly='experimental-coordination', proposal='controlled-no-model')
+                    assembly='experimental-coordination',
+                    proposal='controlled-no-model' if provider == 'controlled' else provider,
+                    model_requested=model)
+        def decision_factory():
+            if provider == 'controlled':
+                return _ControlledProposal(scenario, trace, stopped, closed)
+            from .navigation_decision import NavigationCodexDecision
+            return _RecordedProposal(NavigationCodexDecision(output / 'decisions',
+                model=model, executable=executable), trace)
         report = run_navigation(lambda: _RecordedSession(session_factory(), trace, closed),
-            lambda: _ControlledProposal(scenario, trace, stopped, closed),
+            decision_factory,
             stop_requested=stopped.is_set, started_at=started)
         report['wall_seconds'] = time.monotonic() - started
         report['tutorial'] = dict(assembly='experimental-coordination', scenario=scenario,
-                                  proposal='controlled-no-model')
+            proposal='controlled-no-model' if provider == 'controlled' else provider,
+            model_requested=model)
         (output / 'report.json').write_text(json.dumps(report, indent=2, allow_nan=False) + '\n')
         trace.event('task_report', report=report)
         return report
@@ -138,7 +172,7 @@ def _run_tutorial(session_factory, *, output, scenario):
             signal.signal(sig, handler)
 
 
-def main(*, scenario='normal'):
+def main(*, scenario='normal', provider='controlled', model=None):
     import robot_agent
     import robot_harness
     from robot_harness import NavigationSession
@@ -146,7 +180,9 @@ def main(*, scenario='normal'):
         if not Path(module.__file__).resolve().is_relative_to(prefix):
             raise ValueError('coordination tutorial did not import its declared installed packages')
     report = _run_tutorial(lambda: NavigationSession(sys.argv[1]),
-                           output='/output/agent', scenario=scenario)
+        output='/output/agent', scenario=scenario, provider=provider, model=model,
+        executable='/client-prefix/bin/robot-agent-navigation-host-proposal'
+                   if provider == 'host-codex' else None)
     expected = 'completed' if scenario == 'normal' else 'cancelled'
     successful = (report['status'] == expected and report['coordination']['resources_closed']
                   and 'cancel_error' not in report

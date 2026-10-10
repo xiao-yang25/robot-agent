@@ -956,3 +956,27 @@ qualification. Both public launchers and passive same-container video observers 
 containers exited zero, no OOM, and were removed. Both recordings fully decoded,
 and representative frames showed actual navigation. Their original-speed clips
 are local presentation candidates; media publication is a separate batch.
+
+## Host proposals with shared coordination
+
+The explicit experimental navigation assembly connects the existing host worker
+and relay to the same private task coordinator for `normal` only. Application
+checks cover selection before resource creation, an explicit model/private output,
+separate Session/decision ownership and rejection of the controlled stop scenario
+with a host provider. Legacy task entries and the Harness pin remain unchanged.
+
+[Installed host composition tests](../tests/combination/test_navigation_host_installed.py)
+exercise actual installed Agent, public NavigationSession and portable Core with
+controlled executable proposals and synthetic native measurements. The new cases
+complete A→B, reject a tool attempt with zero admissions, and externally interrupt
+while an actual host proposal child waits at final. The stop case retains original
+B cancellation, local Session close, relay withdrawal, no final response and
+reaped local children. Cancellation is an unsuccessful normal demonstration;
+native/remote cleanup and task verdict retain their original unknown/unassessed
+scope. Existing combination discovery includes these cases without a separate
+workflow or additional model dependency.
+
+This is software/installation coverage. No real model, ROS/physics run or new
+video is qualified for this assembly yet. The old host path and controlled
+coordination scenes keep their own versions and evidence. Choose the actual
+model and prepared host environment before the next simulation experiment.
