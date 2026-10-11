@@ -182,7 +182,7 @@ discover these cases; no duplicate job is needed.
 
 Local macOS application checks passed 122 cases, including 15 new recovery
 cases; the fresh wheel/Core installation passed all 31 combination cases.
-The same wheel and a fresh Core install in the retained Ubuntu22.04/Humble amd64
+The same wheel and a fresh Core install in the retained Ubuntu 22.04/Humble amd64
 image passed all 31 combinations and the 15 recovery application cases offline.
 The first container invocation used the wrong default scene entry; the next
 precheck unnecessarily requested unavailable Pillow for these no-image checks.
@@ -196,7 +196,7 @@ installed combinations and 17 recovery application checks. These software
 results do not by themselves establish arbitrary-map or physical qualification.
 
 Seven controlled operator scenes then exercised the installed task and public
-Session with the fixed Harness in Ubuntu22.04/Humble/Nav2 1.1.20. A-only success
+Session with the fixed Harness in Ubuntu 22.04/Humble/Nav2 1.1.20. A-only success
 finished 0.205m from A; accepted/failed A was actually closed and released before
 one B, which finished 0.228m from B. Released-A help, actual paused successor
 readiness, foreign failure proposal and global stop all issued zero B. A separate
@@ -216,7 +216,7 @@ ignored. The prepared-owner wrapper forwards task/map/client selection and reaps
 its actual host/launcher groups. New installed host/relay/CLI/Core cases cover
 normal A-only and failed-A release before one B, with controlled proposals.
 Local macOS application checks passed 127 cases; all 33 installed combinations
-passed on macOS and Ubuntu22.04 amd64. The offline image also passed all 18
+passed on macOS and Ubuntu 22.04 amd64. The offline image also passed all 18
 host/relay application cases. Full Ubuntu application results belong to the
 exact candidate in the existing Actions workflow.
 
@@ -256,7 +256,7 @@ reliability and a hard stopping limit are outside this increment.
 ## In-motion revision qualification
 
 The installed Agent `1891459` / immutable Harness `7279cd1` pair has bounded
-Ubuntu22.04/Humble/Nav2/Gazebo qualification for the explicit revision profile.
+Ubuntu 22.04/Humble/Nav2/Gazebo qualification for the explicit revision profile.
 Installed Python packages were compared directly to those source revisions;
 the fresh Core/Agent installations from the software batch and retained amd64
 image were reused. This is not a complete image rebuild or a broad reliability
@@ -327,7 +327,7 @@ controlled subprocess proposals. Existing fixed/checkpoint/ALOHA checks also run
 against the new pin. Both existing Ubuntu workflows automatically discover these
 cases; no duplicate job or physics/model qualification is introduced.
 
-The same new wheel is installed outside the source tree on macOS and Ubuntu22.04
+The same new wheel is installed outside the source tree on macOS and Ubuntu 22.04
 amd64 using the retained Humble image. Local macOS application tests passed
 106 cases. Both platforms exercised 26 installed cases; an incorrect old
 failed-proposal process count was corrected and the affected seven host cases
@@ -345,7 +345,7 @@ The explicit [checkpoint tutorial](../examples/navigation/README.md#run-the-chec
 has new installed software checks and bounded Humble/Nav2 qualification, separate
 from the original fixed A→B runs below. Recorded application code `2ac951b` uses
 the unchanged immutable Harness dependency `13bc75e` with new Linux Core/Agent
-installations and the existing qualified Ubuntu22.04/Humble amd64 image. The
+installations and the existing qualified Ubuntu 22.04/Humble amd64 image. The
 whole image and optional Python-header download branch were not rebuilt.
 Application and installed combination checks passed 86/18 on macOS; the two new
 installed host/relay cases use controlled model and native providers.
@@ -571,7 +571,7 @@ The Ubuntu workflow discovers these tests and checks the installed CLI help.
 Its result must be checked for the exact delivered Agent commit.
 
 A fresh installed navigation application consumed the matching local Harness
-candidate in isolated Ubuntu22.04/Humble amd64 simulation. Codex0.159.0 requested
+candidate in isolated Ubuntu 22.04/Humble amd64 simulation. Codex0.159.0 requested
 `gpt-6-sol` / high for three actual text proposals: visit A, visit B and observation
 complete. Model input was only task context and public map pose/time/sensor health.
 The model ran on the host; the network-disabled 2 CPU/4 GiB simulation container
@@ -724,7 +724,7 @@ Selected live-owner interruption and proposal-failure paths, same-strategy nativ
 normal/late-proposal comparisons, and a fresh installed public-version normal run
 have bounded research evidence. The fresh run fetched this application's
 `ffad065` version and its immutable Harness `ea7b1eb` dependency, used new Linux
-build/install directories in an existing Ubuntu22.04/Humble image, and exercised
+build/install directories in an existing Ubuntu 22.04/Humble image, and exercised
 three controlled proposals through the installed CLI. It did not rebuild the
 entire ROS image or repeat live-model qualification. Failed preparation and
 evaluation attempts were retained separately. The published videos above are
@@ -757,7 +757,7 @@ these historical experiments.
 Fresh GitHub checkouts of Agent `721140b` and its fixed Harness
 `13bc75e903f6005da3dd5d969f8242ce211d182f` exercised the published wheel, Linux
 preparation and launch commands. New Core and Agent installations used an existing
-qualified Ubuntu22.04/Humble amd64 image with Python3.10 headers; this did not
+qualified Ubuntu 22.04/Humble amd64 image with Python3.10 headers; this did not
 rebuild the entire ROS image or test the optional header-download branch.
 The Linux Python Session check passed; exact-candidate hosted CI passed ten
 installed combination and 56 application checks. The preceding installation also
@@ -793,7 +793,7 @@ Fresh public Agent `72908370f7c8ee3b8f8b56f63fe9fe226d18776e` and manifest Harne
 `13bc75e903f6005da3dd5d969f8242ce211d182f` were fetched into a new consumer.
 The published wheel/preparation commands built new Linux Core/Agent prefixes and
 installed that same wheel into a separate host environment. An existing qualified
-Ubuntu22.04/Humble amd64 image with Python headers was reused; the whole image and
+Ubuntu 22.04/Humble amd64 image with Python headers was reused; the whole image and
 optional header-download branch were not requalified. macOS application checks and
 exact-candidate Ubuntu CI passed all 67 application and twelve installed combination
 cases, including the two new host/relay cases. Failed initial missing-extras and
@@ -838,7 +838,7 @@ Public image navigation needs no Pillow; the optional ALOHA/visual combination
 suite uses a separate existing Linux test image with those dependencies.
 
 
-All34 new installed combinations also passed offline on Ubuntu22.04 amd64 with
+All34 new installed combinations also passed offline on Ubuntu 22.04 amd64 with
 the real new Core bridge and wheel. The first preparation attempt used an invalid
 wheel bind filename and did not install or execute tests; correcting only that
 filename completed installation and checks. Source, wheel and separate host/Linux
@@ -889,7 +889,7 @@ Harness dependency `4b4bc5bf28c249016cfe4d7e272fa9877766a838` completed one new
 public controlled normal A→B run. The public preparation script made fresh Linux
 Core and Agent installations from this pair and a new wheel; package content
 was directly compared with source and a new host installation. The existing
-qualified Ubuntu22.04/Linux-amd64 Humble/Nav2 1.1.20/Gazebo Classic image was
+qualified Ubuntu 22.04/Linux-amd64 Humble/Nav2 1.1.20/Gazebo Classic image was
 reused; the current source-mounted collector was not an image rebuild.
 
 The installed offline command ran exactly once and returned `succeeded`:
@@ -976,7 +976,47 @@ native/remote cleanup and task verdict retain their original unknown/unassessed
 scope. Existing combination discovery includes these cases without a separate
 workflow or additional model dependency.
 
-This is software/installation coverage. No real model, ROS/physics run or new
-video is qualified for this assembly yet. The old host path and controlled
-coordination scenes keep their own versions and evidence. Choose the actual
-model and prepared host environment before the next simulation experiment.
+This is software/installation coverage. At this increment no real model,
+ROS/physics run or new video was qualified for the assembly. The old host path
+and controlled coordination scenes keep their own versions and evidence. The
+subsequent qualification below uses an explicitly selected model and environment.
+
+## Real-model shared coordination
+
+On 2026-10-11, installed Agent
+`0a91a2f0f0018aaadcb14587795a58ff2c9cb154` consumed its fixed Harness
+`747d7d48a846ad361cf7260d2339b010c0b92a00` through the public opt-in
+experimental-coordination host-codex path. GPT-6.1 Sol/high via CLI 0.159.0,
+original 30 s per proposal/max 3 and 240 s task budgets, and the existing offline
+Ubuntu 22.04/Humble/Nav2/Gazebo amd64 scene at 2 CPUs/4 GiB were retained. The host
+network path was verified separately; credentials/raw model logs stay private.
+
+- Normal: three actual proposals returned in about 10.97/11.27/9.93 s. Task
+  completed in 69.923 s; A released before B admission. The one independent
+  physical evaluator succeeded, A/B arrival error 0.204/0.198 m. Final B remains
+  pending/current, task verdict unassessed, native/remote cleanup unknown.
+- Withdrawal: after the actual visits, a research observer identified the
+  business Task by final proposal nonce, endpoint and process start identity,
+  then delivered SIGINT during the real final CLI turn without holding an
+  answer. The original B cancel/query and Session close completed; no final
+  answer or further submission was accepted. Task cancelled, B pending/revoked,
+  local model children/process groups and exact scene container absent. Native
+  ROS cleanup reported shutdown-context errors; native/remote cleanup unknown
+  is not upgraded. No physical-success or hard-stop verdict is assigned.
+
+A focused independent review checks the admission/withdrawal association and
+local exit facts without repeating the complete evaluator. The normal scene
+exits 0; withdrawn client/scene exits 1 as expected for this interrupted normal
+Task, independently of the boundary verdict. The observer targets the business
+Task, not the outer launcher, whose graceful cancellation is not qualified here.
+The public controlled final-decision-stop/host-codex combination stays rejected.
+
+The earlier first-proposal timeout without a shell proxy remains a failed sample.
+A separately authorized same-budget proxy scene is the normal qualification
+above; it does not prove an exclusive root cause or general service availability.
+An initial evaluator import-path failure occurred before physical adjudication;
+its record is retained and the one physical evaluation used the installed Agent
+import path. These actual-model runs are separate from software/installation CI
+and do not migrate the public default, qualify another provider or hardware.
+[Same-run videos and limits](https://xiao-yang25.github.io/robot-harness/guide/docs/assets/demo/index.html#real-model-shared-coordination)
+remain separately playable, with retained waits and original motion speed.
