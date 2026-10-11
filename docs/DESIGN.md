@@ -1,14 +1,17 @@
 # Robot Agent architecture
 
-Status: **private navigation and ALOHA slices implemented; broader design remains a candidate, 2026-10-09**. This document separates the implemented
+Status: **private navigation and ALOHA slices implemented; station inspection prerequisites partially implemented, 2026-10-11**. This document separates the implemented
 architecture from the proposed next increment. It does not add an API, qualify a
 new robot task, or change existing application or Harness contracts.
 
 Comparative embodied-system research now informs this responsibility design.
-Inspection implementation and repository extraction remain paused while
-overall boundaries, implementation alternatives and targeted reference-validation
-scope are discussed. The fragment contract and camera feasibility work remain
-candidates after that architectural review.
+The design baseline has passed independent review; inspection implementation
+and repository extraction are not delivered by that review. The selected next task is station-status
+inspection with capability-specific failure handling, described below. Its camera
+path and private event coordination now have scoped software/stationary ROS
+checks below; full task implementation and qualification remain pending.
+The selected deployment keeps execution in the existing Linux
+simulation container and model access on the host. Fragment delegation is deferred.
 No fragment interface or new robot capability is delivered by this proposal.
 
 Robot Agent turns a goal and fresh observations into a bounded sequence of
@@ -51,10 +54,46 @@ Final device output and manual takeover belong to the declared motion gateway an
 native controller, not to model proposals. Existing scoped simulation protection
 does not establish a complete device gateway, hard stop bound or restart recovery.
 
-### Explicit execution fragments (design only)
+### Selected coordination structure (partially implemented)
 
-Retain direct per-capability Session calls for existing applications. Add a
-separate target mode where Agent explicitly delegates a bounded execution fragment
+Use a shared event coordinator with separate task policies and replaceable
+decision and capability adapters. The coordinator alone commits business task
+state. Policies interpret facts and return bounded intents without blocking I/O;
+the decision owner manages model calls, and one I/O owner creates, uses and closes
+the public Harness Session. Model waits must not prevent consuming stop requests,
+relevant fact invalidations or correlated feedback from previously submitted work.
+
+The first inspection task advances one capability at a time: Agent requests
+navigation to A, consumes inspection facts after arrival, and chooses completion,
+help or the single permitted B visit. Harness owns admitted execution and native
+resource obligations; it does not infer inspection branches. Invalidating a model
+proposal does not discard an already submitted operation or prove it has stopped.
+
+The first private software increment reuses the exchange/owners and adds
+nonblocking `Coordinator.begin/poll`, a one-source metadata inbox with independent
+stop/fault latches, and an optional waiting adapter for fixed navigation. Its
+source represents navigation context; a fault invalidates proposals and the
+original task cancels the original navigation request. It is not an inspection
+camera dependency or a general task state machine. Policy callbacks run on the
+caller outside locks and must remain nonblocking. Returned asynchronous calls
+still require policy interpretation of withdrawal, errors and unknown effects.
+
+Full event-driven inspection progression remains implementation work. Private
+source time/association, historical-record/current-health separation and camera
+data lifetimes now have limited software and stationary ROS checks below. The inbox keeps only bounded
+immutable references, not frame bytes or historical inspection records. Preserve
+existing entry points and qualified behavior during migration;
+validate the new mechanism with inspection and one existing consumer before
+widening adoption. This choice creates no new service, public task language or
+repository. The deployment/lifetime design below has passed independent review;
+inspection/runtime qualification remains pending. The software scope and
+verification are recorded in [Testing](TESTING.md#private-event-consumption).
+
+### Explicit execution fragments (deferred alternative)
+
+Retain direct per-capability Session calls for existing applications and the
+selected inspection task. Reconsider a separate mode only when a concrete need
+requires Agent to explicitly delegate a bounded execution fragment
 and receives control at a declared return point. A fragment is a finite accepted
 sequence such as `Navigate(A) -> Observe(A) -> return facts to Agent`, not a new
 business goal or arbitrary model-generated program. The first target is sequential
@@ -237,11 +276,18 @@ business planner. Task-local context can later support memory or RSI experiments
 this proposal does not introduce cross-restart memory, autonomous code changes,
 training, vector storage, model serving or a Robot OS deployment supervisor.
 
-## Candidate integration task: mobile visual inspection (paused)
+<a id="candidate-integration-task-mobile-visual-inspection-paused"></a>
+## Selected next design task: mobile visual inspection
 
-Proposed bounded goal: **visit registered A, inspect a visible status marker;
+Selected bounded goal: **visit registered A, inspect a visible status marker;
 finish with a report if normal, or visit registered B once for a second inspection
 if abnormal. Ask for help if the observation or execution state is uncertain.**
+
+This task and the dependency-based failure policy are selected design requirements.
+The bounded architecture baseline is accepted and first-batch prerequisites are
+under development. The private metadata/navigation slice above is implemented;
+camera feasibility, temporal contracts and the full inspection strategy remain
+pending. The inspection task is not an installed or qualified application.
 
 This tests navigation plus sensor interpretation and a result-driven business
 branch. The marker is an explicit simulation test asset, not a production fault
@@ -256,9 +302,19 @@ three concrete responsibilities; no new manipulation or third motion goal is nee
 - At B: require correlated arrival and fresh feedback, then one read-only inspection
   under its declared sensor contract. This does not turn B's pending settlement
   into release or permit another actuating operation.
-- Retain the two inspection observations and interpretation provenance in the
-  report. At most two navigation submissions and two declared image acquisitions;
+- Retain both inspections' observations and interpretation provenance in the
+  report. A normal B reading does not erase an earlier abnormal A reading or prove
+  that equipment was repaired. At most two navigation submissions and one B branch;
   no automatic action retry, robot reset or unbounded search.
+- Use bounded observation windows to handle relevant changes while a proposal is
+  pending. This replaces the earlier design candidate's two-image acquisition
+  limit; sampling, retention and timeout limits must be declared in the new task's
+  deployment profile. Existing navigation and ALOHA contracts are unchanged.
+- If the inspection camera fails while navigation does not depend on it and all
+  navigation continuation conditions remain valid, let accepted navigation reach
+  its current destination, block inspection and subsequent actions, and report the
+  need for help. An explicit user stop still requests cancellation of the original
+  work. Camera failure is not evidence that navigation itself is safe to continue.
 
 Use actual robot-camera sensor output. A rendered overview, evaluator image,
 fixture image or simulator status bit is not a robot observation. RGB plumbing,
@@ -275,12 +331,13 @@ Isaac/RTX. Decide the minimal read-only observation binding and its owning proje
 from that evidence before implementing it. ALOHA camera support does not establish
 navigation-camera support.
 
-Start with controlled proposals and a deterministic interpretation baseline on the
-explicit marker; then qualify one explicit visual model on actual images. The
-existing visual proposal adapter is a reusable starting point, not a ready navigation
-inspection backend. Its new schema, host-image path and remaining-budget handling
-need design and validation. Compare correct/uncertain decisions and cost within
-this task; no broad model benchmark or automatic model selection is proposed.
+Start with controlled proposals and deterministic interpretation of the explicit
+marker, then let the existing host model path consume the sourced structured facts.
+Direct visual-model interpretation is a deferred alternative, requiring a selected
+model and separate qualification on actual images. The existing visual proposal
+adapter does not establish a navigation inspection backend; a new image schema,
+host-image transport and its resource/budget behavior would need separate design
+and validation. They are not prerequisites for this first inspection task.
 
 The installed fixed A→B evaluator cannot evaluate this new goal or its A-only
 branch. Design a task-specific extension with one evaluator per run, separating
@@ -443,30 +500,100 @@ selected actual execution/video and public-default migration remain separate.
 See [ALOHA reuse checks](TESTING.md#private-aloha-reuse).
 
 <a id="incremental-implementation-and-acceptance"></a>
-## Paused inspection implementation proposal
+## Selected inspection deployment and fact lifetime (design)
 
-The following sequence belongs to the paused inspection candidate above. It is
-retained for reconsideration after the current shared-mechanism slice; it is not
-the active implementation order.
+Keep Agent, Harness and the navigation/camera simulation in the existing Linux
+container. Reuse the host model bridge, with credentials and raw model logs on
+the host. This is a selected design, not qualification of a new camera pipeline.
+The first interpreter uses only real camera pixels and declared station/pose/time
+association; simulator truth is reserved for independent evaluation.
 
-1. **Fragment contract and feasibility scope:** design the first bounded
-   `Navigate(A) -> Observe(A) -> return` fragment, its single execution owner,
-   step inputs/results, readiness and cancellation. Agent retains interpretation
-   and the business decision about B. Inspect the existing profile and real-camera
-   boundary before selecting a private prototype. Existing direct-call tasks and
-   budgets remain intact; this proposal does not implement the fragment.
-2. **Feasibility and smallest implementation:** qualify actual camera acquisition
-   and marker visibility, then build the task. Extract only the shared mechanism
-   genuinely used by the new task and an existing application; retain existing
-   entry points, schemas, budgets and qualification scope. Do not move every file
-   or introduce a universal Task base class before the contract is clear.
+Check freshness when accepting a sample into a bounded inspection window. Closing
+that window produces a time-scoped inspection record; it does not require the
+original frame to remain a current frame when a slow model returns. A window that
+ends normally is not a camera failure. Missing or conflicting unsupported readings
+produce unknown. Retain both A and B records without rewriting an earlier anomaly.
+
+Continue bounded source-health, generation and clock-continuity monitoring while
+a decision is pending. Missing fresh health evidence is unknown. A source failure,
+changed generation, corrected station/quality association, changed goal or revoked
+permission invalidates affected proposals. The first task latches camera failure
+as help rather than automatically retrying after recovery. A later frame describing
+a different observation time does not erase a historical record or trigger an
+unbounded redecision loop.
+
+Before B submission require the valid A-anomaly record, unchanged permitted task,
+remaining budget, current camera health, and actual native navigation readiness
+and reuse conditions. After acceptance, navigation follows its own dependencies;
+camera failure blocks inspection and further actions while independent navigation
+may finish. Stop requests always request cancellation of the original operation.
+Keep bounded observation storage separate from latched control/invalidation and
+correlated completion slots. Sample references remain valid until their borrower
+finishes or explicitly releases them; replacing a latest slot cannot overwrite
+borrowed bytes. Source and resource shutdown remain distinct from task reporting.
+
+## Private inspection source contract
+
+The private `_inspection_source` software implements the historical/current
+separation above. It owns one latest immutable RGB frame, one bounded read and
+at most two pixel-free closed-window records. Default SourceProfile is5 seconds,
+5Hz acquisition admission,640×480 RGB,1-second health/frame ages and3–25 results.
+Pose is snapshotted before validation; mutable pixels are copied. The adapter
+supplies actual image-time pose, registered target and same-clock acquisition
+plus local receive time. It owns startup/readiness and producer shutdown.
+
+A closed record is not expired just because its window ended. Source health
+must continue; silence, paused/backward clock, generation or required-input
+failure latches unavailability while preserving history. Inbox turns refresh
+health even with a blocked decision owner. Source failure withdraws decisions
+without automatically cancelling independent I/O. `applicable` covers only
+source/record validity; policy still checks goal, permission, budget and native
+readiness/reuse before any action. No new worker or authority owner is introduced.
+
+Consumers explicitly release their frame read. Deadline/release/close checks
+prevent new reads or recording stale results; returned immutable bytes cannot be
+revoked and must not be called current later. Latest replacement cannot overwrite
+borrowed data. Classification belongs to the image interpreter; missing/unknown
+or contradictory results produce unknown rather than favorable frame selection.
+The current private A/B source has software checks and a bounded live ROS binding,
+but no complete inspection-policy qualification. Heartbeats must come from actual source health,
+not a local timer, process-alive flag or advancing /clock alone.
+
+## Inspection implementation handoff
+
+Implementation follows the reviewed design baseline. The selected path uses
+per-capability progression, not execution fragments. Keep three bounded increments:
+
+1. **Prerequisites and event coordination:** investigate native shutdown ordering
+   in the Harness combination; extend the private mechanism with nonblocking
+   policy progression and bounded fact/control/completion handling. Validate with
+   an existing consumer and confirm actual camera acquisition, station/time
+   association and marker visibility before building the inspection workflow.
+2. **Inspection loop:** implement A observation, normal completion, one permitted
+   B recheck and uncertainty/help. Begin with deterministic image interpretation
+   and controlled decisions; bind model proposals to the same sourced facts and
+   permission checks. Test source invalidation during model waits, dependency-aware
+   continuation and explicit stop. Include a model response after the observation
+   window closes: valid historical evidence may still be consumed, but a real source
+   failure during the wait must block the next action. Preserve prior entry points
+   and task contracts.
 3. **Fixed installed delivery:** normal A-only, abnormal A→B, uncertain/stale/foreign
    sensor zero-B, rejected/unknown execution zero-next-action and cancellation or
    late proposal checks. Preserve old navigation/ALOHA regressions. Use fresh
    installations, one offline evaluation per physical run, focused independent
    safety checking, applicable exact CI and a same-run public video/tutorial.
 
-The first shared mechanism is accepted only if both the new inspection task and
+A bounded stationary Humble/Gazebo source probe has established actual camera
+pixels, clock/CameraInfo and image-time TF association at two registered stations.
+This supports retaining the selected source path. A subsequent private binding
+qualifies post-window image-derived health and local observation-path loss with
+a controlled waiting owner. Neither probe qualifies arrival, orientation/target
+registration, full inspection, a real model or a hard stop bound.
+The first increment now has the private history/health/read software above;
+actual ROS binding and source lifecycle must precede the second increment's
+task consumption. No public camera Session API is implied.
+
+The new event-driven extension is accepted only if both the inspection task and
 an existing application actually consume it, and domain-specific receipt/close
 handling remains intact. Tests of an unused abstraction do not establish reuse.
 Independent implementation review is required for affected ownership, cancellation,
@@ -476,5 +603,33 @@ Alternatives: another navigation-only branch would extend behavior but would not
 exercise cross-skill context; navigation-plus-grasping would require a new combined
 robot and native resource contract before providing this first architecture test.
 A full generic planning framework would freeze untested abstractions. This bounded
-inspection task is the proposed middle step. Revisit the choice if real camera
+inspection task is the selected next design task. Revisit the choice if real camera
 feasibility, a concrete consumer or a deployment requirement changes those premises.
+
+## Private ROS inspection binding
+
+The lazy-import `_inspection_camera` owner uses a separate ROS Context and an
+executor attached to that Context. The caller pumps callbacks and owns source,
+executor, node and Context shutdown; no background spin thread is introduced.
+The pure binding owns one pending immutable image alongside the source's latest
+frame/read. Matching clock, CameraInfo and TF may arrive later, within the original
+receive-age limit. One image acquisition stamp renews health at most once.
+Missing map TF/AMCL prevents inspection but does not suppress camera health when
+new images and optical association remain valid. The closed window continues
+health observation without accumulating pixels or requiring the old station pose.
+
+Actual new images, advancing clock, finite intrinsics, optical association and
+one stable publisher are required. Clock callbacks or a live process alone cannot
+renew health. Humble fixed-double CameraInfo values normalize once at the typed
+boundary, then retain finite/positive checks. Final admitted association metadata
+is separate from the earlier health snapshot. Publisher GID is graph identity in
+the isolated single-publisher profile, not authenticated per-message provenance.
+AMCL is a timestamp/frame readiness gate; image-time TF supplies station position.
+
+The private `_inspection_marker` interpreter reads only pixels of the controlled
+colored panel and white border; it is not a general visual model. Gazebo truth
+is absent from the online adapter. A stationary offline qualification covered
+normal post-window ten-second waiting and local image-subscription loss while
+clock continued, with historical classification retained and current applicability
+revoked. This does not qualify a moving inspection task, device failure, model,
+throughput, physical stopping or restart recovery. See [Testing](TESTING.md#private-ros-camera-binding).

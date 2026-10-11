@@ -63,6 +63,31 @@ class InstalledRuntimeTests(unittest.TestCase):
         self.assertEqual(len(facts['records']), 2)
         self.assertEqual(facts['stops'], [b['request_id']])
 
+    def test_installed_event_fault_rejects_waiting_final_and_cancels_exact_b(self):
+        from robot_agent._task_events import EventInbox
+        inbox = EventInbox()
+        class FaultProposal(Proposal):
+            def decide(self, context, observation, deadline, stop):
+                if context['phase'] == 'final':
+                    inbox.invalidate('navigation context no longer valid')
+                return super().decide(context, observation, deadline, stop)
+        report = runtime.run_navigation(lambda: NavigationSession(self.endpoint),
+                                        FaultProposal, events=inbox)
+        self.reap_owner()
+        facts = json.loads(self.audit.read_text())
+        self.assertEqual(report['status'], 'needs_help', report)
+        self.assertEqual(len(facts['records']), 2)
+        b = report['operations'][-1]
+        self.assertEqual(facts['stops'], [b['request_id']])
+        interrupted = report['interrupted_operation']
+        for key in ('request_id', 'operation_id', 'goal_id'):
+            self.assertEqual(interrupted[key], b[key])
+        self.assertEqual(interrupted['receipt']['authority_disposition'], 'revoked')
+        self.assertEqual(interrupted['receipt']['settlement'], 'pending')
+        self.assertFalse(any(row['context']['phase'] == 'final' for row in report['decisions']))
+        self.assertTrue(report['coordination']['resources_closed'])
+        self.assertEqual(report['native_cleanup'], 'unknown')
+
     def run_tutorial(self, scenario):
         self.assertTrue(Path(tutorial.__file__).resolve().is_relative_to(
             Path(os.environ['COMBINATION_AGENT_PREFIX']).resolve()))

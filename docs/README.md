@@ -4,8 +4,9 @@ Robot Agent owns task decisions and uses Robot Harness's public Session.
 Core belongs to Harness; the dependency runs from Agent to Harness.
 
 [Architecture](DESIGN.md) maps the current implementation, including the private
-shared coordinator for experimental fixed navigation and ALOHA. Inspection remains
-a paused candidate; a general task engine and camera capability are not implemented.
+shared coordinator for experimental fixed navigation and ALOHA. Station-status
+inspection is selected for the next design baseline; its implementation remains
+paused. A general task engine and navigation-camera capability are not implemented.
 
 ## Application artifacts and reusable boundaries
 
