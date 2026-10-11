@@ -72,7 +72,7 @@ checks passed, including event invalidation with exact B request/operation/goal
 identity, revoked authority, pending settlement and unknown native cleanup.
 This is not a new full combination build or physical cancellation qualification.
 Existing application and combination CI discover these additions automatically;
-remote CI on this candidate has not run. Public commands and the dependency pin
+accurate-revision delivery results are listed below. Public commands and the dependency pin
 remain unchanged. A separate offline Humble/Gazebo stationary-source probe captured
 25 actual RGB640×480 samples in each normal-A/abnormal-B scene, with recorded
 clock/CameraInfo/AMCL and image-time map/base TF. Fixed quality checks rejected
@@ -99,7 +99,7 @@ checks against a freshly installed package from outside source trees passed.
 Independent review reproduced and closed pose snapshot/input-failure defects,
 including numeric overflow; final scoped software approval is separate from ROS
 integration. Existing application CI discovers these checks automatically;
-exact remote CI on this uncommitted slice has not run. Public entry points,
+accurate-revision CI results are recorded in the delivery summary below. Public entry points,
 Harness pin and prior task consumers remain unchanged. Subsequent private ROS
 source binding is qualified below; complete inspection policy remains pending.
 
@@ -1104,7 +1104,7 @@ final association metadata keeps its own consumption time. ROS imports are lazy,
 so these fourteen standard-library tests run in both existing application CI jobs
 without a ROS dependency. Final macOS/Linux Python3.12 suites passed239 each;
 31 source/binding checks passed against a fresh installation outside source trees.
-Accurate remote CI on this candidate remains pending; no redundant workflow is added.
+Accurate-revision CI results are recorded below; no redundant workflow is added.
 
 Two offline Ubuntu22.04/Humble/Gazebo amd64 stationary scenes consumed the freshly
 installed Agent at2CPUs/4GiB, with640×480 RGB and a five-second/max25 window. Both
@@ -1131,3 +1131,16 @@ model, navigation Action, arrival or full inspection task. No device crash, hard
 response/stop bound, sustained throughput, localization accuracy or restart
 qualification is inferred. Final paired installation/CI and full task scenarios
 remain separate. Public defaults and the Harness dependency pin do not move.
+
+## Inspection foundation delivery
+
+The private event/source/camera foundation was delivered through
+[PR40](https://github.com/xiao-yang25/robot-agent/pull/40), merged as
+`96339257fe38b25aa284a1d615a3e62d60efca0c`. Accurate candidate and main checks
+passed: Ubuntu/macOS application239 each and installed combination46.
+[Main application run](https://github.com/xiao-yang25/robot-agent/actions/runs/38154174248)
+and [main installed run](https://github.com/xiao-yang25/robot-agent/actions/runs/38154174256)
+record those results. This updates Git/CI delivery status, not the earlier
+stationary-camera qualification or its controlled waiting-owner scope. The
+fixed Harness dependency and public defaults remain unchanged; complete
+inspection policy and final paired physics/video qualification remain separate.
