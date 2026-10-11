@@ -279,6 +279,16 @@ print(json.dumps({'item':{'type':'agent_message'}}))
         self.assertFalse(answer.exists())
         self.assertTrue((slot/'cancelled').is_file())
 
+    def test_relay_rejects_bound_host_timeout_error_and_notifies_withdrawal(self):
+        process, slot, answer = self.relay()
+        request = json.loads((slot/'request.json').read_text())
+        with directory(slot) as fd:
+            write_json(fd, 'response.json', dict(nonce=request['nonce'],
+                error='TimeoutError: decision deadline elapsed'))
+        self.assertNotEqual(process.wait(timeout=5), 0)
+        self.assertFalse(answer.exists())
+        self.assertTrue((slot/'cancelled').is_file())
+
     def test_original_relay_deadline_withdraws_slow_host_child_without_an_answer(self):
         host = self.server('slow-fixture')
         relay, slot, answer = self.relay(model='slow-fixture', budget=.5)
@@ -287,7 +297,14 @@ print(json.dumps({'item':{'type':'agent_message'}}))
         self.assertTrue((slot/'cancelled').is_file())
         self.assertFalse(answer.exists())
         self.wait_file(self.host/'decisions/decision-1/process.json', host)
-        self.assertFalse((slot/'response.json').exists())
+        # Host expiry may publish an error before the relay's cancellation
+        # marker. That is not a model answer; the relay still withdraws.
+        if (slot/'response.json').exists():
+            response = json.loads((slot/'response.json').read_text())
+            request = json.loads((slot/'request.json').read_text())
+            self.assertEqual(response['nonce'], request['nonce'])
+            self.assertNotIn('answer', response)
+            self.assertTrue(response['error'].startswith('TimeoutError:'))
         child = json.loads((self.host/'decisions/decision-1/process.json').read_text())
         self.assertTrue(child['reaped'])
         with self.assertRaises(ProcessLookupError): os.kill(child['pid'], 0)
