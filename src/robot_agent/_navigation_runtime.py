@@ -12,6 +12,17 @@ from .navigation import NavigationBudget, NavigationTask
 
 
 class _NavigationCalls(TaskCalls):
+    def on_event(self, kind, value):
+        # This optional source represents this fixed task's navigation context,
+        # not a camera on which navigation is independent. A fault aborts this
+        # policy; its original-request cancellation remains in NavigationTask.
+        if kind == 'invalidated':
+            self.task.report['context_failure'] = value
+            raise ValueError(f'navigation context invalidated: {value}')
+        self.task.report['latest_context_event'] = {
+            'generation': value.generation, 'sequence': value.sequence,
+            'reference': value.reference}
+
     def submit(self, request, **kwargs):
         return self.submit_bound(request, kwargs, {
             'request_id': request, 'site': kwargs['site'],
@@ -19,7 +30,7 @@ class _NavigationCalls(TaskCalls):
 
 
 def run_navigation(session_factory, decision_factory, *, budget=NavigationBudget(),
-                   stop_requested=lambda: False, started_at=None, cleanup_seconds=12.):
+                   stop_requested=lambda: False, started_at=None, cleanup_seconds=12., events=None):
     """One-shot assembly; factories and Session close run only in their owners.
 
     Twelve seconds is a software closing wait for this selected binding (five
@@ -31,7 +42,8 @@ def run_navigation(session_factory, decision_factory, *, budget=NavigationBudget
     calls = _NavigationCalls()
     task = NavigationTask(calls, budget=budget, stop_requested=calls.stopped, started_at=started_at)
     report = run_owned_task(task, calls, lambda: _Binding(session_factory), decision_factory,
-                            stop_requested=stop_requested, cleanup_seconds=cleanup_seconds)
+                            stop_requested=stop_requested, cleanup_seconds=cleanup_seconds,
+                            events=events, on_event=calls.on_event)
     io = report['coordination']['owners']['io']
     report['native_cleanup'] = 'unknown'
     # The factory may fail before or after disposal; an error proves neither.

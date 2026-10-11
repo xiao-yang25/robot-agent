@@ -39,6 +39,70 @@ The private coordinator adds deterministic handoff/navigation regressions below.
 ALOHA adds its normal, budget and cleanup cases below;
 workflow configuration alone does not establish coordinator behavior.
 
+## Private event consumption
+
+The private one-source [event inbox](../src/robot_agent/_task_events.py) retains
+one latest immutable metadata reference, one stop latch and the first failure.
+Duplicate/older updates cannot roll its identity back; a generation change
+invalidates this task rather than restarting it. It stores no frame bytes and
+does not establish source freshness, clock relationships or payload borrowing.
+
+`Coordinator.begin/poll` provide nonblocking enqueue/consumption on the caller.
+A finite turn processes control/faults before completions and at most one latest
+update. Policies interpret completions and perform action admission; a collected
+call is not automatically an accepted proposal. The optional fixed-navigation
+adapter pumps these turns while its model or I/O owner waits. Its event source
+represents navigation context; failures cause help and original-request cancel.
+A camera independent of navigation needs the inspection policy's separate
+dependency handling, which is not implemented here.
+
+[Event tests](../tests/test_task_events.py) include two actual blocked owners,
+independent I/O completion, metadata bursts, stop/fault priority, generation and
+association invalidation, completed-but-unconsumed proposal withdrawal, deadline
+expiry, callback failure preserving accepted effects, and original navigation
+cancellation before a blocked model exits. They do not measure sustained video
+throughput or a real-time bound. Local macOS and Linux/Python 3.12 application
+regressions each passed 208 tests, including 13 new cases; focused independent
+implementation review found no remaining blockers in this software slice.
+
+The [installed navigation checks](../tests/combination/test_navigation_runtime_installed.py)
+also consume a newly installed Agent outside source trees with the retained pinned
+Harness, actual Core/Session/socket and synthetic native facts. All five selected
+checks passed, including event invalidation with exact B request/operation/goal
+identity, revoked authority, pending settlement and unknown native cleanup.
+This is not a new full combination build or physical cancellation qualification.
+Existing application and combination CI discover these additions automatically;
+remote CI on this candidate has not run. Public commands and the dependency pin
+remain unchanged. A separate offline Humble/Gazebo stationary-source probe captured
+25 actual RGB640×480 samples in each normal-A/abnormal-B scene, with recorded
+clock/CameraInfo/AMCL and image-time map/base TF. Fixed quality checks rejected
+the earlier grey-border fixture; invalid focal lengths are rejected after review.
+This research feasibility does not exercise this Agent task or its public API,
+arrival, source health during model waits, frame borrowing or cancellation.
+Later source/binding software checks appear below; complete camera inspection
+task qualification remains pending.
+
+## Private inspection history and health
+
+[Source tests](../tests/test_inspection_source.py) exercise the private
+[inspection source](../src/robot_agent/_inspection_source.py), existing inbox and
+actual gated Model Owner. Controlled clocks distinguish a normal closed window
+plus10-second decision wait from real source silence/paused clock/generation or
+association invalidation. Source failure withdraws the old proposal but preserves
+original independent I/O. Tests cover immutable producer snapshots, read expiry
+and release, conflicting/unknown results, maximum-two-window behavior, old-frame
+rejection and malformed/overflow inputs. They do not run a real model or prove
+live source health, throughput, action admission or a hard stopping bound.
+
+Final focused17 checks, macOS/Linux Python3.12 application225 checks each, and17
+checks against a freshly installed package from outside source trees passed.
+Independent review reproduced and closed pose snapshot/input-failure defects,
+including numeric overflow; final scoped software approval is separate from ROS
+integration. Existing application CI discovers these checks automatically;
+exact remote CI on this uncommitted slice has not run. Public entry points,
+Harness pin and prior task consumers remain unchanged. Subsequent private ROS
+source binding is qualified below; complete inspection policy remains pending.
+
 ## Private fixed-navigation coordinator
 
 The experimental `python -m robot_agent._navigation_runtime` entry uses the
@@ -1029,3 +1093,41 @@ fixture now permits only a matching-nonce TimeoutError without an answer, retain
 actual child reaping/absence checks. A separate actual-Relay error-response test
 covers that ordering. This is a software-test correction, not a production change
 or another model/physics run; the original failed CI remains a failed record.
+
+## Private ROS camera binding
+
+[Binding regressions](../tests/test_inspection_camera.py) cover actual-image health
+provenance, clock-only silence, owned pixel/intrinsics snapshots, stale and future
+images, publisher change, invalid inputs, delayed TF and a missing-map distinction.
+The delay tests reject permanent frame loss and repeated-pump health renewal;
+final association metadata keeps its own consumption time. ROS imports are lazy,
+so these fourteen standard-library tests run in both existing application CI jobs
+without a ROS dependency. Final macOS/Linux Python3.12 suites passed239 each;
+31 source/binding checks passed against a fresh installation outside source trees.
+Accurate remote CI on this candidate remains pending; no redundant workflow is added.
+
+Two offline Ubuntu22.04/Humble/Gazebo amd64 stationary scenes consumed the freshly
+installed Agent at2CPUs/4GiB, with640×480 RGB and a five-second/max25 window. Both
+used the same abnormal-panel fixture, which was absent from the online interpreter:
+
+- Continuous source:13 actual abnormal observations; after closure,10.014 seconds
+  of controlled decision waiting and51 new-image health updates. Historical record
+  remained applicable, no source pixel slot/read retained, proposal not withdrawn.
+- Local observation-path loss:15 abnormal observations; destroy the client's Image
+  subscription while clock advanced6.4→7.5. About1.066 seconds later, health expired,
+  the old proposal was withdrawn and history stayed abnormal but inapplicable.
+  One already-held frame completed association after destruction; its original
+  receive time precedes destruction. No post-destruction new image is claimed.
+
+Both gated decision threads stopped, camera Context closed, and actual Gazebo,
+scene supervisor and containers exited zero without OOM. All dedicated containers
+were removed; no image build/download or volume was created. Independent review
+approved the repaired implementation and focused association/withdrawal/exit facts.
+An earlier default-executor Context failure and then Humble numpy-scalar input
+failure remain failed runs. The fixes preserve the same quality/time predicates.
+
+These are real camera observations with a controlled waiting owner, not a real
+model, navigation Action, arrival or full inspection task. No device crash, hard
+response/stop bound, sustained throughput, localization accuracy or restart
+qualification is inferred. Final paired installation/CI and full task scenarios
+remain separate. Public defaults and the Harness dependency pin do not move.

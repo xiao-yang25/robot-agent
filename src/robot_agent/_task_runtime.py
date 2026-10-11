@@ -221,17 +221,24 @@ class Owner:
 
 class Coordinator:
     """Caller-owned exchange consumption and closing budget; no domain verdicts."""
-    def __init__(self, task_id, stop_requested, cleanup_seconds):
+    def __init__(self, task_id, stop_requested, cleanup_seconds, *, events=None, on_event=None):
         self.exchange = Exchange(task_id)
         self.stop_requested = stop_requested
         self.cleanup_seconds = cleanup_seconds
         self.cleanup_deadline = None
         self.pending = {'decision': None, 'io': None}
+        self.waiting_until = {}
         self.late = []
+        self.events, self.on_event = events, on_event
 
     def stopped(self):
         if self.stop_requested():
             self.exchange.stop()
+        if self.events is not None:
+            with self.events.lock:
+                stop = self.events.stop_requested
+            if stop:
+                self.exchange.stop()
         with self.exchange.condition:
             return self.exchange.stopped
 
@@ -244,10 +251,64 @@ class Coordinator:
         with self.exchange.condition:
             record = {'role': role, 'command_id': call.identity, 'method': call.method,
                       'started': call.started, 'state': call.state, 'value': call.value,
-                      'association': call.association}
+                      'association': call.association, 'withdrawn': call.withdrawn}
             error = call.error
         record['error'] = None if error is None else f'{type(error).__name__}: {error}'
         self.late.append(record)
+
+    def begin(self, role, method, args, kwargs, *, deadline, claim_deadline=None,
+              cleanup=False, association=None):
+        """Enqueue without waiting; one unresolved call per owner remains the limit."""
+        if self.pending[role] is not None:
+            raise RuntimeError('previous call must be consumed before another command')
+        if not cleanup:
+            self.stopped()
+        call = self.exchange.publish(role, method, args, kwargs,
+            deadline if claim_deadline is None else claim_deadline,
+            cleanup=cleanup, association=association)
+        self.pending[role] = call
+        self.waiting_until[role] = deadline
+        return call
+
+    def poll(self, *, roles=('decision', 'io')):
+        """One finite turn: control/fault, completions, then at most one observation.
+
+        The caller owns interpretation of returned Calls, including withdrawn
+        proposals and unknown effects. This does not admit a subsequent action.
+        Event handlers run on the caller, outside locks, and must not block or
+        recursively invoke this coordinator. No worker or resource is added.
+        """
+        self.stopped()
+        stop, failure, latest = (False, None, None) if self.events is None else self.events.take()
+        if stop:
+            self.exchange.stop()
+        if failure is not None:
+            with self.exchange.condition:
+                call = self.exchange.slots['decision']
+                if call is not None:
+                    self.exchange.withdraw('decision', call)
+            if self.on_event is not None and not self.stopped():
+                self.on_event('invalidated', failure)
+        completed = {}
+        for role in roles:
+            with self.exchange.condition:
+                waiting = self.pending[role]
+                if (waiting is not None and not waiting.cleanup
+                        and time.monotonic() >= self.waiting_until[role]):
+                    self.exchange.withdraw(role, waiting)
+            call = self.exchange.collect(role)
+            if call is not None:
+                self.pending[role] = None
+                completed[role] = call
+        if latest is not None and self.on_event is not None and not self.stopped():
+            try:
+                self.on_event('observation', latest)
+            except Exception:
+                # A policy failure cannot erase already consumed effects.
+                for role, call in completed.items():
+                    self.retain(role, call)
+                raise
+        return completed
 
     def call(self, role, method, args, kwargs, *, deadline, claim_deadline=None,
              cleanup=False, association=None):
@@ -263,17 +324,47 @@ class Coordinator:
                 self.exchange.collect(role)
             self.retain(role, previous)
             self.pending[role] = None
-        call = self.exchange.publish(role, method, args, kwargs,
-                                     deadline if claim_deadline is None else claim_deadline,
-                                     cleanup=cleanup, association=association)
-        self.pending[role] = call
+        # Existing callers keep their original wait path. Event-aware callers
+        # pump finite turns while owners perform the blocking resource work.
+        if self.events is not None and not cleanup:
+            self.poll(roles=())
+        call = self.begin(role, method, args, kwargs, deadline=deadline,
+                          claim_deadline=claim_deadline, cleanup=cleanup, association=association)
         try:
-            value = self.exchange.wait(role, call, deadline,
-                                       stop_requested=self.stop_requested, interruptible=not cleanup)
+            if self.events is None or cleanup:
+                value = self.exchange.wait(role, call, deadline,
+                    stop_requested=self.stop_requested, interruptible=not cleanup)
+            else:
+                while True:
+                    # collect only this call; unrelated I/O completion remains
+                    # in its own slot until the caller explicitly consumes it.
+                    completed = self.poll(roles=(role,))
+                    if self.stopped():
+                        if role in completed:
+                            self.retain(role, call)
+                        raise InterruptedError('call withdrawn; original completion retained')
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        if role in completed:
+                            self.retain(role, call)
+                        raise TimeoutError('call wait expired; original completion retained')
+                    if call.withdrawn:
+                        if role in completed:
+                            self.retain(role, call)
+                        raise InterruptedError('call withdrawn; original completion retained')
+                    if role in completed:
+                        if call.error is not None:
+                            raise call.error
+                        value = call.value
+                        break
+                    with self.exchange.condition:
+                        self.exchange.condition.wait(min(.01, remaining))
         except Exception:
             with self.exchange.condition:
                 if self.exchange.slots[role] is None:
                     self.pending[role] = None
+                elif self.events is not None and not cleanup:
+                    self.exchange.withdraw(role, call)
             raise
         self.pending[role] = None
         return value
@@ -349,9 +440,11 @@ class TaskCalls:
                                      association={'request_id': request})
 
 
-def run_owned_task(task, calls, io_factory, decision_factory, *, stop_requested, cleanup_seconds):
+def run_owned_task(task, calls, io_factory, decision_factory, *, stop_requested, cleanup_seconds,
+                   events=None, on_event=None):
     """Shared one-task assembly; task policy and domain close interpretation stay outside."""
-    coordinator = Coordinator(task.task_id, stop_requested, cleanup_seconds)
+    coordinator = Coordinator(task.task_id, stop_requested, cleanup_seconds,
+                              events=events, on_event=on_event)
     calls.coordinator, calls.task = coordinator, task
     calls.decision_deadline = task.deadline
     owners = [Owner(coordinator.exchange, 'io', io_factory, close=lambda binding: binding.close()),
