@@ -1020,3 +1020,12 @@ import path. These actual-model runs are separate from software/installation CI
 and do not migrate the public default, qualify another provider or hardware.
 [Same-run videos and limits](https://xiao-yang25.github.io/robot-harness/guide/docs/assets/demo/index.html#real-model-shared-coordination)
 remain separately playable, with retained waits and original motion speed.
+
+A later macOS main-CI deadline fixture exposed an overstrong file-absence
+assertion: host expiry can publish a correlated timeout error before the relay's
+withdrawal marker arrives. The relay must reject that error, publish cancellation
+and produce no answer; an error response is not successful model output. The
+fixture now permits only a matching-nonce TimeoutError without an answer, retaining
+actual child reaping/absence checks. A separate actual-Relay error-response test
+covers that ordering. This is a software-test correction, not a production change
+or another model/physics run; the original failed CI remains a failed record.
