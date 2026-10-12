@@ -272,12 +272,12 @@ class RuntimeTests(unittest.TestCase):
         self.assertTrue(result['execution_records'])
 
     def test_interpretation_crossing_normal_deadline_keeps_prior_window_history(self):
-        self.camera = Camera(window_seconds=.08)
+        self.camera = Camera(window_seconds=.5)
         samples = []
         def interpret(frame):
             samples.append(frame.sequence)
             if len(samples) == 4:
-                time.sleep(.09)
+                time.sleep(max(0., self.camera.window_deadline-time.monotonic())+.01)
             return 'normal', 1., 1.
         result = self.run_task(interpreter=interpret)
         self.assertEqual(result['status'], 'completed', result)

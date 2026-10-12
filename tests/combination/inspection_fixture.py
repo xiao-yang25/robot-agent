@@ -5,7 +5,9 @@ from robot_agent._inspection_source import Frame, InspectionSource, SourceProfil
 
 class Camera:
     """Synthetic new-image health/frames; no ROS, classification is supplied separately."""
-    def __init__(self, window_seconds=.04):
+    def __init__(self, window_seconds=.25):
+        # This fixture must provide >=3 samples even on coarse CI scheduling.
+        # Production window/budget and source-quality predicates are unchanged.
         self.source = InspectionSource(7, profile=SourceProfile(window_seconds=window_seconds))
         self.binding = type('Binding', (), {'failure': None})()
         self.clock = 10.

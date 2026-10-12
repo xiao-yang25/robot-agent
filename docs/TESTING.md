@@ -1238,3 +1238,12 @@ the shared controlled camera fixture and discovers the3 new loop tests. Check
 candidate/main runs for the exact delivered revision. This increment does not
 qualify moving inspection, real models, physical stopping, sustained throughput,
 restart recovery, final paired migration or a new video.
+
+Initial hosted macOS CI exposed a controlled-fixture preparation problem: its
+40ms window produced only one sample under coarse scheduling, so decision tests
+never reached their intended branch. The fixture now provides250ms sampling
+headroom; production source predicates and budgets are unchanged. The deadline
+regression waits past the actual original deadline on interpretation4 and still
+asserts exactly3 recorded samples. Independent ordinary/coarse-scheduling20-case
+runs and a paired old/new-window probe passed; updated installed20 and Core3
+checks also passed. Accurate-revision CI remains the delivery check.
