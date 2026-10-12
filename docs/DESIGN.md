@@ -1,6 +1,6 @@
 # Robot Agent architecture
 
-Status: **private navigation and ALOHA slices implemented; station inspection prerequisites partially implemented, 2026-10-11**. This document separates the implemented
+Status: **private navigation, ALOHA and station inspection policy software implemented, 2026-10-12**. This document separates the implemented
 architecture from the proposed next increment. It does not add an API, qualify a
 new robot task, or change existing application or Harness contracts.
 
@@ -78,7 +78,7 @@ camera dependency or a general task state machine. Policy callbacks run on the
 caller outside locks and must remain nonblocking. Returned asynchronous calls
 still require policy interpretation of withdrawal, errors and unknown effects.
 
-Full event-driven inspection progression remains implementation work. Private
+Actual event-driven inspection assembly remains implementation work. Private
 source time/association, historical-record/current-health separation and camera
 data lifetimes now have limited software and stationary ROS checks below. The inbox keeps only bounded
 immutable references, not frame bytes or historical inspection records. Preserve
@@ -633,3 +633,37 @@ normal post-window ten-second waiting and local image-subscription loss while
 clock continued, with historical classification retained and current applicability
 revoked. This does not qualify a moving inspection task, device failure, model,
 throughput, physical stopping or restart recovery. See [Testing](TESTING.md#private-ros-camera-binding).
+
+## Private station inspection policy
+
+`_inspection_policy` implements a pure, bounded state transition at the Agent
+task-strategy boundary. The caller commits each returned immutable state before
+executing its intents through the existing Coordinator and owners. The policy
+owns no Session, model, camera, thread or execution authority. A capability
+adapter must establish navigation association, arrival pose and reuse; the source
+adapter must establish record applicability and current health. Ordinary Python
+condition objects do not establish these facts for an actual robot.
+
+The flow is A navigation/check/decision, then completion, help or one B visit and
+check/decision. At most two navigation requests and two checks are retained.
+Decisions bind task/revision/site/window/source generation and original budgets.
+A must be reusable before observation or B admission. Unknown, foreign or stale
+bases produce help without a new action. B's result retains A's anomaly; it does
+not declare repair. A completed business report can retain B pending and always
+leaves independent task verdict and native cleanup unassessed/unknown.
+
+A reserved request is not an accepted operation. Loss of the inspection source
+withdraws an unconfirmed submission and requests cancellation/query of the
+original possible effect. Known accepted navigation can continue to its original
+destination while its own conditions and budget remain valid; no inspection or
+successor is admitted. Explicit stop, goal change, navigation failure and expiry
+request cancellation of the original unresolved operation. Terminal policy state
+still records late correlated execution facts, without restarting the task.
+Queued exchange work can be withdrawn; claimed work may already have effects.
+The actual binding must revalidate admission immediately before submitting and
+retain its late result. This is not a global atomic cancellation cutoff.
+
+[Software verification](TESTING.md#private-station-inspection-policy) covers the
+reducer and controlled owner interleavings. Actual public-Session/camera assembly,
+moving inspection, real model, physical stop and final paired installation remain
+separate work. No public command, dependency or Harness pin changes here.

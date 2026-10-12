@@ -1144,3 +1144,33 @@ record those results. This updates Git/CI delivery status, not the earlier
 stationary-camera qualification or its controlled waiting-owner scope. The
 fixed Harness dependency and public defaults remain unchanged; complete
 inspection policy and final paired physics/video qualification remain separate.
+
+## Private station inspection policy
+
+[Policy tests](../tests/test_inspection_policy.py) add23 software checks: normal A,
+single B with A history retained, unknown without a successor, pose/reuse and
+current readiness gates, original request/decision correlation, stale/foreign
+window rejection, original task/operation/decision deadlines, clock rollback,
+terminal late facts and duplicate results. Provider text cannot turn observations
+into claims of repair or native release.
+
+Controlled Source time distinguishes a closed historical record from current
+health. Real Coordinator/Owner threads test model-wait withdrawal while original
+I/O is collected and cancelled, withdrawal before submission claim, and a late
+accepted result after claim. These use synthetic navigation/services, not actual
+Session or camera navigation. A reserved request is not an accepted operation;
+only confirmed accepted work may continue through an independent camera fault.
+Actual pre-submit revalidation remains the binding's responsibility.
+
+Final local macOS/Python3.12 and offline Ubuntu22.04 ARM64 runs passed262
+application tests each. A fresh installed package outside the source trees passed
+all23 policy tests. Focused independent review approved the final software slice
+after repairing first-turn clock rollback and clarifying reservation/acceptance.
+An intermediate test-placement failure was repaired without weakening the
+original budget assertions. Existing application CI discovers these tests; its
+candidate/main runs must be checked for the delivered revision. The installed
+Agent/Harness workflow retains its existing compatibility scope and fixed pin.
+
+These checks do not qualify moving inspection, actual model decisions, ROS
+arrival, physical stop, sustained throughput or native cleanup. Full task
+assembly and final paired physics/video qualification remain separate.
