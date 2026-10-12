@@ -1247,3 +1247,59 @@ regression waits past the actual original deadline on interpretation4 and still
 asserts exactly3 recorded samples. Independent ordinary/coarse-scheduling20-case
 runs and a paired old/new-window probe passed; updated installed20 and Core3
 checks also passed. Accurate-revision CI remains the delivery check.
+
+## Selected moving inspection checks
+
+The delivered private caller ran in retained Ubuntu22.04/Humble/Nav2/Gazebo
+containers on an ARM Mac through amd64 emulation. Each scene retained2 CPU,
+4GiB,512 PID slots and420 seconds externally; original task/operation/decision
+and startup/cleanup budgets were unchanged. No model, GPU inference or hardware
+was invoked. A current Agent installation and retained native Harness installation
+were consumed; this is not a fresh native build or final public paired migration.
+
+| Scene | Actual closed observations | Independent arrival error | Caller time |
+| --- | --- | --- | --- |
+| Normal A-only |19 normal samples |A0.190m |23.943s |
+| A anomaly then single B |A14 abnormal; B15 normal |A0.206m; B0.187m |50.592s |
+
+The one offline evaluator linked original Core requests/operations to reserved
+native goals, terminal receipts, same-goal Gazebo queries and accepted image
+records. Both selected scenes passed the fixed0.25m physical arrival threshold.
+Actual image acquisition/receive/consume times, CameraInfo and image-time map TF
+were retained. Source classification used the existing fixed color/white-border
+thresholds and at least3 samples; fixture status and pose truth were excluded
+from the online caller. A-only preserves the earlier fixed-A/B collector's
+`unknown` status; required raw start/A samples and query errors/reaping were
+checked directly for this distinct task.
+
+A focused independent safety-decision check confirmed one A request or one A/B
+pair, actual A release before B admission, original task/check/source association
+and B pending/current at arrival then pending/revoked during closing. Reports
+retain native cleanup unknown and independent task verdict unassessed. Owned
+containers exited0 without OOM and were removed; native Owner and auxiliary
+processes were reaped without force. Raw and original-speed preview videos were fully decoded; representative
+frames confirmed navigation movement and same-run labelled captured camera
+samples. Captured stills are not a live camera stream or precise timing evidence.
+These are local preview assets; public tutorial/showcase release is separate.
+
+Earlier runs remain failed evidence: one lost navigation conditions before A
+arrival and retained unknown execution/close errors; its precise cause remains
+unconfirmed. Two later camera windows returned unknown at the accepted arrival
+pose because a controlled panel was off-center. Only the fixture's horizontal
+readable width was changed, preserving vertical border geometry and original
+classification/source predicates. Software rendering and recorder filter threads
+were bounded within the same resource envelope; those combined changes do not
+establish a unique cause for the first timing failure. One passive pose query
+failed before the thread configuration change and is not successful evidence.
+
+Independent review repaired research-supervisor cleanup-result propagation and
+three evaluator association/recording gaps before accepting these two scenes.
+Controlled waiting/source-fault and explicit-stop moving cases, sustained-load
+performance, general visual recognition, real models, native/physical stopping,
+restart recovery, supported public inspection tooling and final paired migration
+remain unqualified. Existing software/installed CI keeps its separate scope.
+
+The normal/recheck runs had maximum sampled container memory1.784/1.787GiB
+and sampled PID counts466/467. Maximum sampled caller camera-pump gaps were
+0.106/0.107s. These observations include the emulator and display workload,
+are not worst-case measurements, and do not establish a response or stop SLO.

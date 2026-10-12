@@ -732,4 +732,28 @@ draining; a close error preserves attempt identity and keeps resources_closed
 false. Local resource closure does not prove native stop or physical success.
 Public commands/defaults and the Harness dependency pin remain unchanged.
 [Software checks](TESTING.md#private-inspection-caller-loop) qualify controlled
-sources and native facts; moving ROS inspection remains the next qualification.
+sources and native facts. Selected moving checks are qualified below; source
+fault/stop scenes and final paired migration remain separate.
+
+## Selected moving inspection qualification
+
+The private caller has now consumed actual Humble/Nav2/Gazebo navigation and
+RGB camera observations in two isolated research scenes: normal A-only and
+abnormal A followed by one B recheck. The original map, drive authority and
+native contexts remain; visual-only status panels supply a controlled task.
+Online input is public Session feedback and associated pixels, never Gazebo truth.
+A rule provider routes the observed state. This is not a general visual model.
+
+Native arrival permits observation only after A release/current pose checks.
+The report retains A's anomaly when B is normal; B remains pending and cannot
+be reused. Cleanup cancels the original B, with retained receipts reporting revoked
+authority and pending settlement. Local Owner/connection disposal does not
+upgrade native cleanup or independent task verdict. The bounded source record
+remains distinct from current health and from independently collected physical pose.
+
+These checks used the current private Agent assembly and retained Harness runtime
+with its ROS shutdown repair. The public dependency pin/defaults remain unchanged.
+Research scene adaptations are not a supported public inspection launcher.
+Moving source-loss/stop scenes, real-model qualification, final paired installation
+and reusable tutorials remain separate gates. [Testing](TESTING.md#selected-moving-inspection-checks)
+records measured scope and earlier failures.
