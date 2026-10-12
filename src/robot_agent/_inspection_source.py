@@ -171,6 +171,12 @@ class InspectionSource:
             self._outcomes, self._latest, self._last_sample_stamp = [], None, None
             return reference
 
+    @property
+    def window_deadline(self):
+        """Original local deadline; consumers must not create a second anchor."""
+        with self._lock:
+            return None if self._window is None else self._window[3]
+
     def ingest(self, frame):
         with self._lock:
             now = self.now()

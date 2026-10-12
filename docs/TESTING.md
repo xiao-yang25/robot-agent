@@ -1203,3 +1203,38 @@ discover these additions; check exact candidate/main runs for delivery status.
 This is software/installation evidence, not a production inspection runner,
 actual camera navigation, model quality, physical stop or final paired migration.
 Public defaults and the fixed Harness pin remain unchanged.
+
+## Private inspection caller loop
+
+[Twenty caller tests](../tests/test_inspection_runtime.py) exercise normal A,
+single abnormal-A/B recheck, unknown without a successor, source loss versus
+explicit stop, new health during slow decisions, native invalidation, original
+ambiguous/late I/O, wrong/withdrawn decisions, startup budget, partial admission,
+close errors and draining owners. Navigation/source checks additionally cover
+original feedback and window deadline anchors and execution facts surviving a
+condition-query failure. Synthetic images and manual classifications do not
+qualify visual recognition or a live ROS camera.
+
+Focused final checks passed75. macOS/Python3.12 and offline Ubuntu22.04 ARM64
+passed297 application tests each; a fresh installed package passed20 caller
+checks outside source trees. Its module help runs without initializing ROS.
+[Three installed loop checks](../tests/combination/test_inspection_runtime_installed.py)
+consume the retained pinned Harness through actual public Session/socket/Core:
+normal A release, one B with anomaly history/pending context, and source loss
+during B decision with cancellation of the exact original operation. Fixture
+processes exit and sockets disappear. Native/source facts remain synthetic; the
+local Core installation is retained rather than newly built.
+
+Independent implementation review identified and reproduced normal-deadline
+history loss, JSON failure when callback faults retained an original typed fact,
+and cleanup of a reserved request without an established grant. Those defects
+were repaired and regression-tested without extending deadlines or weakening
+admission. Final scoped review approved the code, independently passing10
+regressions and3 distinguishing probes. Initial failed checks remain research
+evidence; they are not successful qualification.
+
+Existing application CI discovers the new tests; installed-combination CI copies
+the shared controlled camera fixture and discovers the3 new loop tests. Check
+candidate/main runs for the exact delivered revision. This increment does not
+qualify moving inspection, real models, physical stopping, sustained throughput,
+restart recovery, final paired migration or a new video.

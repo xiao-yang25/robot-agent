@@ -83,6 +83,11 @@ class Control:
 
 
 @dataclass(frozen=True)
+class Failure:
+    reason: str  # Caller/adapter error, distinct from a changed user goal.
+
+
+@dataclass(frozen=True)
 class NavigationFact:
     request_id: str
     site: str
@@ -204,6 +209,9 @@ def advance(state, event, conditions):
             return Transition(state) if state.phase in TERMINAL else _end(state, 'needs_help', error)
     if state.phase in TERMINAL:
         return Transition(state)
+    if isinstance(event, Failure):
+        reason = event.reason if isinstance(event.reason, str) and 0 < len(event.reason) <= 2000 else 'inspection failure'
+        return _end(state, 'needs_help', reason)
     if isinstance(event, Control) and event.kind == 'stop':
         return _end(state, 'cancelled', 'explicit inspection stop')
     if isinstance(event, Control) and event.kind == 'goal_changed':

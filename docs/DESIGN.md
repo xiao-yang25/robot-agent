@@ -695,7 +695,41 @@ Cancel and connection-close responses remain distinct from native stop/release.
 The final local check is not a global atomic cancellation cutoff.
 
 [Binding verification](TESTING.md#private-inspection-navigation-binding) includes
-installed public Session/socket/Core with synthetic native/source facts. Actual
-camera/caller event-loop assembly, moving inspection, real models and physical
-stopping remain unqualified. This private binding adds no public CLI/API or
-Harness dependency change.
+installed public Session/socket/Core with synthetic native/source facts. The
+follow-on caller loop is described below. Moving inspection, actual camera
+navigation, real models and physical stopping remain unqualified. This private
+binding adds no public CLI/API or Harness dependency change.
+
+## Private inspection caller loop
+
+The opt-in `python -m robot_agent._inspection_runtime` assembly connects the
+station policy, Camera/Source and public Session binding through the existing
+Coordinator. The caller commits immutable policy state before finite intents,
+pumps camera callbacks and borrows/releases each frame locally. Separate decision
+and I/O owners retain their original resources; no new execution authority or
+system scheduler is introduced. The first provider is a finite rule, not a model.
+
+Controls/source faults precede original I/O facts, which precede proposal
+admission. Original navigation progress and current conditions are read during
+inspection and decision waits. A preparation failure cannot erase a previously
+obtained execution fact. Feedback uses its original receive-time anchor; it
+cannot be renewed just by consumption. Confirmed independent navigation may
+continue through camera loss while its own conditions remain valid. Explicit
+stop withdraws proposals/submissions and cancels the original possible effect.
+
+The Source owns the one window deadline. A late interpretation is dropped while
+normal closure retains earlier history; interpreter/read faults still invalidate
+the source. Readers release in `finally`. Reserved and authorized requests remain
+distinct, including initialization/admission failure before any submission.
+Reports normalize retained original facts at one JSON boundary, including
+Coordinator callback-failure retention. An actual runtime failure is reported as
+failure, not a fabricated user goal change.
+
+Startup consumes the original task budget. Cleanup consumes late original I/O,
+requests only original cancellations, stops both owners and waits within its
+original cleanup budget before closing camera/source. An unfinished owner remains
+draining; a close error preserves attempt identity and keeps resources_closed
+false. Local resource closure does not prove native stop or physical success.
+Public commands/defaults and the Harness dependency pin remain unchanged.
+[Software checks](TESTING.md#private-inspection-caller-loop) qualify controlled
+sources and native facts; moving ROS inspection remains the next qualification.
