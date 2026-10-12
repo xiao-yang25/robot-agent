@@ -1174,3 +1174,32 @@ Agent/Harness workflow retains its existing compatibility scope and fixed pin.
 These checks do not qualify moving inspection, actual model decisions, ROS
 arrival, physical stop, sustained throughput or native cleanup. Full task
 assembly and final paired physics/video qualification remain separate.
+
+## Private inspection navigation binding
+
+[Twelve software tests](../tests/test_inspection_navigation.py) check original
+Session association, A reuse/B pending, pose/realm gates, applicable source record
+identity, submission-time health/stop/revocation/deadlines, retained site
+reservations, ambiguous reply without replay and original status/cancel after
+camera failure. A controlled real I/O Owner crosses claim while the Source fails
+during preparation; the final guard rejects with zero Session submissions.
+
+Final local macOS and offline Ubuntu22.04 ARM64 application runs passed274 each.
+A fresh installed package outside source trees passed12 focused checks and
+[three Session/socket/Core checks](../tests/combination/test_inspection_navigation_installed.py).
+The installed caller consumes actual correlated adapter facts through the policy
+and Coordinator; the fixture supplies synthetic native results, logical source
+time and manual classifications. Actual submit-entry counting distinguishes zero
+replay from Core idempotence. Owned fixture processes exit normally and sockets
+disappear; B's receipt remains pending before connection close.
+
+Independent review repaired a submission guard interval during Source checks;
+the final test invalidates permission at that exact point. A review of installed
+tests strengthened lost-reply counting, and a fixture budget-anchor error was
+fixed without relaxing the original deadline. Initial preparation failures are
+not qualification. Existing application and installed-combination CI automatically
+discover these additions; check exact candidate/main runs for delivery status.
+
+This is software/installation evidence, not a production inspection runner,
+actual camera navigation, model quality, physical stop or final paired migration.
+Public defaults and the fixed Harness pin remain unchanged.
