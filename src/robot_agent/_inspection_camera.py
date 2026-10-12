@@ -260,7 +260,7 @@ class RosCamera:
             raise RuntimeError('camera not ready')
         reference = self.source.open_window(site, target)
         self.binding.observation = site, target
-        self.window_deadline = time.monotonic()+self.source.profile.window_seconds
+        self.window_deadline = self.source.window_deadline
         return reference
 
     def finish_window(self):

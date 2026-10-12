@@ -22,6 +22,13 @@ class SourceTests(unittest.TestCase):
         self.source.health(7, 0.)
         self.window = self.source.open_window('A', 'indicator-A')
 
+    def test_window_deadline_is_original_anchor_and_disappears_at_close(self):
+        self.assertEqual(self.source.window_deadline, 5.)
+        self.clock.value = .3
+        self.assertEqual(self.source.window_deadline, 5.)
+        self.source.close()
+        self.assertIsNone(self.source.window_deadline)
+
     def frame(self, seq, *, site='A', pixels=None, **changes):
         return replace(Frame(7, seq, site, f'indicator-{site}', self.clock.value,
             self.clock.value, SITES[site], pixels if pixels is not None else bytes(640*480*3)), **changes)

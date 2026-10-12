@@ -199,6 +199,23 @@ class BindingTests(unittest.TestCase):
         self.assertEqual(self.session.cancellations, ['inspection-A'])
         self.assertEqual(self.binding.close()['closure'], 'unknown')
 
+    def test_progress_keeps_original_arrival_if_new_navigation_condition_read_fails(self):
+        self.binding.authorize(self.admission()); self.binding.submit('inspection-A')
+        original = self.session.capabilities
+        self.session.capabilities = lambda: dict(original(), profile='unqualified')
+        result = self.binding.progress('inspection-A')
+        self.assertTrue(result['fact'].reusable)
+        self.assertEqual(result['fact'].request_id, 'inspection-A')
+        self.assertIsNone(result['prepared'])
+        self.assertIn('unavailable', result['condition_error'])
+
+    def test_prepared_receive_time_keeps_its_original_anchor(self):
+        prepared = self.binding.prepare()
+        self.assertEqual(prepared['received_at'], self.clock.value)
+        original = prepared['received_at']
+        self.clock.value += .2
+        self.assertEqual(prepared['received_at'], original)
+
     def test_pre_submit_cancel_and_invalid_identity_never_touch_session(self):
         for change in ({'generation': True}, {'admission_deadline': float('nan')},
                        {'operation_deadline': 21.}, {'site': 'C'}):

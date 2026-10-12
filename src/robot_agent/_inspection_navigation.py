@@ -64,11 +64,14 @@ class InspectionNavigation:
                 raise RuntimeError('site already reserved')
             self.grants[admission.request_id] = admission
 
-    def revoke(self, request_id):
+    def revoke(self, request_id, *, missing_ok=False):
         with self.lock:
             if request_id not in self.grants:
+                if missing_ok:
+                    return False
                 raise ValueError('foreign inspection admission')
             self.revoked.add(request_id)
+            return True
 
     def _authorization(self, request_id):
         with self.lock:
@@ -101,7 +104,8 @@ class InspectionNavigation:
         observation = self.contract.normalize_observation(self.session.observe())
         if self.stopped() or self.now() >= self.task_deadline:
             raise InterruptedError('inspection navigation preparation expired')
-        return dict(available=cap.get('available') is True, observation=observation)
+        return dict(available=cap.get('available') is True, observation=observation,
+                    received_at=self.now())
 
     def submit(self, request_id):
         if request_id in self.attempts:
@@ -175,6 +179,16 @@ class InspectionNavigation:
         if request_id not in self.attempts:
             raise ValueError('no original inspection attempt to query')
         return self._result(request_id, self.session.status(request_id))
+
+    def progress(self, request_id):
+        """Retain original execution even if the subsequent condition read fails."""
+        fact = self.status(request_id)
+        try:
+            prepared = self.prepare(require_available=False)
+        except Exception as error:
+            return dict(fact=fact, prepared=None,
+                        condition_error=f'{type(error).__name__}: {error}')
+        return dict(fact=fact, prepared=prepared, condition_error=None)
 
     def cancel(self, request_id):
         if request_id not in self.grants:
