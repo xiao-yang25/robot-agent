@@ -1,6 +1,6 @@
 # Robot Agent architecture
 
-Status: **private navigation, ALOHA and station inspection policy software implemented, 2026-10-12**. This document separates the implemented
+Status: **private navigation, ALOHA, inspection policy and Session binding software implemented, 2026-10-12**. This document separates the implemented
 architecture from the proposed next increment. It does not add an API, qualify a
 new robot task, or change existing application or Harness contracts.
 
@@ -667,3 +667,35 @@ retain its late result. This is not a global atomic cancellation cutoff.
 reducer and controlled owner interleavings. Actual public-Session/camera assembly,
 moving inspection, real model, physical stop and final paired installation remain
 separate work. No public command, dependency or Harness pin changes here.
+
+## Private inspection navigation binding
+
+`_inspection_navigation` adapts only the public Navigation Session in the
+existing I/O owner. A private `NavigationContract` holds the established
+capability, map measurement, original request/native receipt and result checks
+shared with fixed navigation; the original imports and task behavior remain.
+The adapter produces policy facts only after matching request/site/operation,
+observation reference and authority binding. Arrival additionally requires the
+domain result/native identity and fresh map pose. A must arrive and release;
+B's arrival retains its current/pending native context.
+
+The caller authorizes an immutable original Admission. Short locked grant and
+revocation state crosses the caller/owner boundary; RPCs and Source calls never
+run under that lock. After claim, the owner obtains actual current capability
+and fresh observation. Source health/generation, original deadlines, stop and
+revocation are rechecked after preparation and source checks, and again just
+before Session submission. B requires actual reusable A and the original
+applicable A anomaly record. Revocation retains the original site reservation;
+the task cannot replace its admission, extend its budget or repeat a site.
+
+An attempt's original observation reference is retained before the RPC. An
+ambiguous reply cannot cause resubmission; status/cancel use the original request.
+Source loss blocks new submission but does not suppress original status/cancel.
+Cancel and connection-close responses remain distinct from native stop/release.
+The final local check is not a global atomic cancellation cutoff.
+
+[Binding verification](TESTING.md#private-inspection-navigation-binding) includes
+installed public Session/socket/Core with synthetic native/source facts. Actual
+camera/caller event-loop assembly, moving inspection, real models and physical
+stopping remain unqualified. This private binding adds no public CLI/API or
+Harness dependency change.
