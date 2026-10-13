@@ -732,8 +732,8 @@ draining; a close error preserves attempt identity and keeps resources_closed
 false. Local resource closure does not prove native stop or physical success.
 Public commands/defaults and the Harness dependency pin remain unchanged.
 [Software checks](TESTING.md#private-inspection-caller-loop) qualify controlled
-sources and native facts. Selected moving checks are qualified below; source
-fault/stop scenes and final paired migration remain separate.
+sources and native facts. Selected moving and source-loss checks are qualified
+below; full explicit-stop qualification and final paired migration remain open.
 
 ## Selected moving inspection qualification
 
@@ -754,6 +754,21 @@ remains distinct from current health and from independently collected physical p
 These checks used the current private Agent assembly and retained Harness runtime
 with its ROS shutdown repair. The public dependency pin/defaults remain unchanged.
 Research scene adaptations are not a supported public inspection launcher.
-Moving source-loss/stop scenes, real-model qualification, final paired installation
-and reusable tutorials remain separate gates. [Testing](TESTING.md#selected-moving-inspection-checks)
+Further fault coverage, whole-scene explicit-stop qualification, real-model
+qualification, final paired installation and reusable tutorials remain gates. [Testing](TESTING.md#selected-moving-inspection-checks)
 records measured scope and earlier failures.
+
+The same private loop has also qualified a healthy ten-second decision wait and
+actual Image subscription loss during A's decision. New associated image health
+keeps a normally closed check usable during waiting. When images cease while
+clock messages continue, original Source health expires; the anomaly remains
+history, the old visit-B proposal is withdrawn, and no B is admitted. The
+controlled provider deliberately returns its original correlated proposal after
+withdrawal, so the check covers late-result rejection rather than provider silence.
+
+An explicit stop during B's decision was observed to cancel the original B and
+withdraw its late proposal while retaining pending/revoked receipts. That entire
+scene remains unqualified: independent A arrival exceeded its fixed physical
+threshold. Earlier startup and B-wait navigation freshness failures remain open.
+These are limited research observations, with unchanged public APIs, pin and
+budgets; they do not establish physical stop deadlines or sustained operation.

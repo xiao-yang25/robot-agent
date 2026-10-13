@@ -1294,12 +1294,52 @@ failed before the thread configuration change and is not successful evidence.
 
 Independent review repaired research-supervisor cleanup-result propagation and
 three evaluator association/recording gaps before accepting these two scenes.
-Controlled waiting/source-fault and explicit-stop moving cases, sustained-load
-performance, general visual recognition, real models, native/physical stopping,
-restart recovery, supported public inspection tooling and final paired migration
-remain unqualified. Existing software/installed CI keeps its separate scope.
+Additional waiting/source-loss checks are recorded below. Full explicit-stop
+qualification, sustained-load performance, general visual recognition, real
+models, native/physical stopping, restart recovery, supported public inspection
+tooling and final paired migration remain open. Software CI keeps its scope.
 
 The normal/recheck runs had maximum sampled container memory1.784/1.787GiB
 and sampled PID counts466/467. Maximum sampled caller camera-pump gaps were
 0.106/0.107s. These observations include the emulator and display workload,
 are not worst-case measurements, and do not establish a response or stop SLO.
+
+## Selected decision-wait and source-loss checks
+
+The same installed caller/native runtime, original budgets and offline2 CPU /
+4GiB /512 PID envelope were used for controlled decision waiting. The research
+RViz display was reduced from10 to5Hz; camera5Hz and original source/navigation
+predicates stayed unchanged. No real model was called. Each selected scene was
+submitted to its one offline evaluator once.
+
+| Scene | Observed decision/history | Whole-scene evaluation |
+| --- | --- | --- |
+| Healthy A wait |10.003s;49 new health updates; A15 normal |Passed; independent A error0.208m |
+| Image loss during A wait |A17 abnormal retained; actual subscription destroyed; clock33.2 to34.2; original visit-B proposal withdrawn; zero B |Passed; independent A error0.182m |
+| Explicit stop during B wait |A19 abnormal/B19 normal retained; original B cancel response; late report proposal withdrawn |Failed; independent A error0.259m exceeds fixed0.25m |
+
+The Source became inapplicable after Image loss with its original health-expiry
+reason. The event was observed0.930s after subscription destruction; this is one
+sample, not a worst-case failure or stop bound. The provider returns the original
+proposal after withdrawal; task/check/source association and late retention are
+checked directly. The caller retains the actual original check for Source
+applicability; the decision owner receives an isolated copy. History does not
+grant new authority after source failure or explicit stop.
+
+All three selected containers and native/auxiliary processes exited normally
+without OOM or forced reaping and were removed. Reports retain native cleanup
+unknown and independent task verdict unassessed. The explicit-stop observation
+does not make its failed whole-scene qualification pass. Two other runs remain
+failed: initial scan receive age1.0014s exceeded1s before any A; a B-wait pose
+lag0.526s exceeded0.5s before the stop trigger. The latter overlapped host media
+conversion; a later isolated run reached the stop, but that does not establish
+a root cause or eliminate intermittent freshness failure.
+
+Maximum sampled memory was1.774/1.779/1.783GiB and PID count465 for these three
+selected runs. Local original-speed videos retain captured-still labels; public
+publication is separate. Research-helper identity/failure/challenge-action gaps
+were repaired and independently reviewed before evaluation. The navigation
+arrival margin and feedback freshness, full explicit-stop qualification,
+independent navigation during inspection-source loss, missing/stale/wrong
+association and final paired migration remain open. Existing software CI was
+not replaced with these machine-specific scenes.
