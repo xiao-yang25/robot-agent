@@ -1343,3 +1343,33 @@ arrival margin and feedback freshness, full explicit-stop qualification,
 independent navigation during inspection-source loss, missing/stale/wrong
 association and final paired migration remain open. Existing software CI was
 not replaced with these machine-specific scenes.
+
+## Navigation prerequisite diagnosis
+
+An observation-only diagnostic instrumented the existing Owner and Camera TF
+buffers, with no additional ROS node or background thread. B's controlled wait
+lasted 10.002s; each consumer supplied 98 wait snapshots and both transform chains
+advanced. The complete recorded B period had 149 paired snapshots, no query or
+pairing gaps, and a maximum successful Owner pose age of 0.031s. Sampling and
+instrumentation can affect timing; this did not reproduce or explain the earlier
+0.526s failure. A missing predicate-failure file is recorded as unknown rather
+than proof of zero invalid observations. No whole-task qualification was inferred
+from this diagnostic.
+
+A separate, single margin trial changed only the two controllers' DWB and
+SimpleGoalChecker XY tolerances from 0.25 to 0.15m; stateful and other parameters
+were retained. The existing Owner read both actual parameter pairs before Core
+admission. The independent physical threshold stayed 0.25m. A's diagnostic
+physical error was 0.113m, but all 14 recorded marker observations were unknown:
+the first central region had 0.628 color coverage, below the unchanged 0.7 threshold.
+Source health remained valid. The report requested help, retained the unknown
+check, and admitted no B or decision; explicit stop was never reached. The one
+whole-scene evaluator failed, and no repeat or threshold relaxation followed.
+
+The margin case's native Owner and local resources closed normally; its container
+returned 1 because the requested stop branch was not reached, without OOM, and
+was removed. Configuration/observation helpers received independent software
+review; focused actual-fact checks remain distinct from task evaluation. Inspection
+viewpoint/quality applicability and complete stop qualification remain open.
+This research configuration has not changed product defaults, dependency pin,
+public API or hosted software-test scope.

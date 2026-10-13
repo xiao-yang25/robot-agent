@@ -772,3 +772,17 @@ scene remains unqualified: independent A arrival exceeded its fixed physical
 threshold. Earlier startup and B-wait navigation freshness failures remain open.
 These are limited research observations, with unchanged public APIs, pin and
 budgets; they do not establish physical stop deadlines or sustained operation.
+
+A later bounded diagnostic observed both existing TF consumers advancing during
+B's ten-second decision wait; the earlier intermittent feedback expiry was not
+reproduced and remains unexplained. This does not justify changing freshness
+requirements or execution scheduling.
+
+One research arrival-margin trial tightened both controller XY tolerances to
+0.15 m and read the actual values from both controllers before public admission.
+Physical A arrival was observed closer, but the fixed central image region did
+not cover enough of the marker. The check remained unknown, preserving history
+and requesting help with no B or decision. That trial did not reach explicit stop
+and its whole-scene evaluation failed. It shows that navigation arrival and
+inspection viewpoint/reading quality need distinct conditions. The research
+configuration has not changed public defaults or qualified a general detector.
