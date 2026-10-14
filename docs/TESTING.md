@@ -1387,6 +1387,10 @@ The existing caller tests cover actual shifted pixels through the opt-in reader,
 accepted-source diagnostic identity, unknown with zero B, late interpretation
 with zero recorded diagnostics, and explicit stop during interpretation. Reports
 remain pixel-free and retain unassessed task verdict/unknown native cleanup.
+Real-RGB positive caller checks use the production five-second observation window
+with an explicit task budget; they require at least three accepted samples and
+are not subsecond throughput benchmarks. Separate negative checks retain sample
+insufficiency, late completion and stop semantics.
 The installed combination adds real pixel reading and original source-record
 expiry outside the source tree. Existing Ubuntu/macOS application discovery and
 installed-combination discovery include these files without a new workflow.
