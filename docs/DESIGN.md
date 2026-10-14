@@ -848,3 +848,21 @@ then closed that owned group without force. Supported-launcher descendant cleanu
 is therefore still an integration gap, and this scene does not promote native
 cleanup, final settlement, physical-stop deadlines or supported deployment.
 [Measured verification](TESTING.md#bright-wide-decision-stop-scene) records scope.
+
+
+## Inspection-camera loss during accepted navigation
+
+Inspection Source readiness and navigation execution conditions have separate
+ownership. In a bounded Humble scene, the caller lost its Image subscription only
+after the original native A goal was accepted and valid public map feedback showed
+in-flight progress. The Source's existing health expiry then prevented inspection
+and successor decisions, while valid independent navigation continued to A. A
+settled/released before the task requested help; no check, decision, cancellation,
+B or retry occurred. This validates the existing per-capability dependency rule,
+without adding a task owner, changing the default profile or allowing truth to
+drive the Agent. It does not authorize continuation when navigation conditions
+fail or when the user explicitly stops.
+
+The Agent still reports native cleanup unknown and task verdict unassessed.
+Research process-group disposal completed the scene; independent supported
+launcher process-tree closure remains a separate delivery requirement.
