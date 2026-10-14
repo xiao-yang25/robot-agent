@@ -777,7 +777,8 @@ false. Local resource closure does not prove native stop or physical success.
 Public commands/defaults and the Harness dependency pin remain unchanged.
 [Software checks](TESTING.md#private-inspection-caller-loop) qualify controlled
 sources and native facts. Selected moving and source-loss checks are qualified
-below; full explicit-stop qualification and final paired migration remain open.
+below; a later decision-stop scene is qualified with research-owned process-group
+cleanup. Supported-launcher closure and final paired migration remain open.
 
 ## Selected moving inspection qualification
 
@@ -798,8 +799,8 @@ remains distinct from current health and from independently collected physical p
 These checks used the current private Agent assembly and retained Harness runtime
 with its ROS shutdown repair. The public dependency pin/defaults remain unchanged.
 Research scene adaptations are not a supported public inspection launcher.
-Further fault coverage, whole-scene explicit-stop qualification, real-model
-qualification, final paired installation and reusable tutorials remain gates. [Testing](TESTING.md#selected-moving-inspection-checks)
+Further fault coverage, supported-launcher closure, real-model qualification,
+final paired installation and reusable tutorials remain gates. [Testing](TESTING.md#selected-moving-inspection-checks)
 records measured scope and earlier failures.
 
 The same private loop has also qualified a healthy ten-second decision wait and
@@ -830,3 +831,20 @@ and requesting help with no B or decision. That trial did not reach explicit sto
 and its whole-scene evaluation failed. It shows that navigation arrival and
 inspection viewpoint/reading quality need distinct conditions. The research
 configuration has not changed public defaults or qualified a general detector.
+
+
+### Bright-wide decision-stop qualification
+
+A fresh local scene used the explicit bright-white reader and 2.2rad camera:
+A supplied 16 abnormal samples, then a single B supplied 17 normal samples.
+A's release preceded B's admission. Explicit stop during the original B decision
+wait revoked its pending authority and withdrew the original late report proposal;
+no third operation or business completion was accepted. Separate physical arrival
+observations met the unchanged 0.25m threshold at both sites.
+
+This scene completed with a research-owned process-group wrapper. The retained
+product launcher returned while ROS descendants were still alive; the wrapper
+then closed that owned group without force. Supported-launcher descendant cleanup
+is therefore still an integration gap, and this scene does not promote native
+cleanup, final settlement, physical-stop deadlines or supported deployment.
+[Measured verification](TESTING.md#bright-wide-decision-stop-scene) records scope.

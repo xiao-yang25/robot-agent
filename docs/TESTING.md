@@ -1410,3 +1410,33 @@ and clipped frame on gray. Legacy/default and v1 checks remain in discovery.
 Existing application and installed-combination workflows discover these additions.
 These software checks do not establish actual camera intrinsics, visibility or
 whole-task stop qualification; stationary camera experiments are separate.
+
+
+## Bright-wide decision-stop scene
+
+One fresh Ubuntu22/Humble/Nav2/Gazebo run used the installed private Agent,
+explicit bright-white reader and 2.2rad camera, with the original source windows
+and budgets. A's 16 abnormal samples led to one B with 17 normal samples;
+separate physical arrival errors were 0.124m and 0.094m, within the unchanged
+0.25m threshold. Actual camera intrinsics, image-time transforms and accepted
+reader diagnostics were checked. A was released before B's admission.
+
+During B's decision wait, explicit stop withdrew the original report proposal
+and cancelled the original request/operation/native goal; revoked authority and
+pending settlement remained. Five new healthy image updates were observed during
+the 1.057s wait. Caller elapsed 55.700s; maximum observed interpretation cost
+0.182s and caller pump gap 0.283s are finite samples, not bounds or stop SLOs.
+Native cleanup remains unknown and task verdict unassessed in the Agent report.
+
+One independent scene evaluator and a focused safety review accepted this
+bounded research scenario. The existing product launcher returned with 22 live
+ROS descendants; the research wrapper's group SIGINT closed them in about 0.308s
+without force, followed by recording/TF and display disposal. Container exit and
+removal do not establish that the product launcher independently closes its tree.
+That closure gap must be repaired before the supported tutorial/deployment gate.
+Earlier failed arrivals and unknown-view trials retain their original verdicts.
+
+Same-run local media preserves original speed and labels camera images as captured
+stills. This is a rule-provider decision-stop after arrival, not a real-model,
+moving emergency-stop, physical-error-envelope, default/pin migration or public
+showcase qualification. Machine-specific scenes remain outside hosted software CI.
