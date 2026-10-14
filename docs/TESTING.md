@@ -1373,3 +1373,27 @@ review; focused actual-fact checks remain distinct from task evaluation. Inspect
 viewpoint/quality applicability and complete stop qualification remain open.
 This research configuration has not changed product defaults, dependency pin,
 public API or hosted software-test scope.
+
+## Opt-in localized panel software checks
+
+`test_inspection_marker.py` draws controlled RGB rectangles independently of the
+reader's helpers. It covers complete centered/shifted panels, no target, unframed
+color, gray/insufficient state, mixed colors, missing sides, clipping, multiple
+frames, adjoining frames and bounded scene complexity. Regression cases include
+a severely clipped second frame and an adjoining incomplete frame: neither may
+be hidden by one complete panel. The legacy fixed-center interpreter is retained.
+
+The existing caller tests cover actual shifted pixels through the opt-in reader,
+accepted-source diagnostic identity, unknown with zero B, late interpretation
+with zero recorded diagnostics, and explicit stop during interpretation. Reports
+remain pixel-free and retain unassessed task verdict/unknown native cleanup.
+The installed combination adds real pixel reading and original source-record
+expiry outside the source tree. Existing Ubuntu/macOS application discovery and
+installed-combination discovery include these files without a new workflow.
+
+An offline replay of a prior failed camera frame is software input only; its
+clipped/ambiguous view remains unknown, and the historical task stays failed.
+Synthetic image checks, installed packages and sampled interpreter cost do not
+qualify ROS camera geometry, visual target identity, physical stopping or a new
+complete inspection scene. Those remain separate qualifications before default
+or dependency migration.

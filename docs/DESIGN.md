@@ -634,6 +634,38 @@ clock continued, with historical classification retained and current applicabili
 revoked. This does not qualify a moving inspection task, device failure, model,
 throughput, physical stopping or restart recovery. See [Testing](TESTING.md#private-ros-camera-binding).
 
+### Opt-in localized panel reader
+
+The private `read_marker` interpreter locates a controlled white-bordered red/green
+panel from immutable 640x480 RGB pixels. The existing `classify` interpreter and
+caller default keep their fixed-center behavior. The private caller can select
+`--marker-reader located-white-panel`; there is no automatic fallback or motion.
+
+The `located-white-panel-v1` profile supports a separated, near-frontal frame,
+80x60 to 560x400 pixels, with aspect ratio 0.9 to 3.0. Each of four proportional
+border bands must have at least 0.6 white coverage. A single enclosed non-white
+interior is required; multiple interiors, an open interior reaching the declared
+reading region, or a substantial white fragment at the image edge yield unknown.
+The latter conservatively rejects some background structures as view ambiguity.
+Connected white pixels alone do not establish one target. Target identity is
+still a declared station/profile assumption, not visually authenticated.
+
+The reading region is inset by fixed proportions of the white-frame bounds
+(12% horizontally, 20% vertically), before inspecting state color. Dominant color
+coverage must reach 0.7; opposite color coverage above 0.05 is conflicting evidence.
+These ratios describe the new region, not equivalence with the legacy fixed ROI.
+The profile rejects unsupported scale, missing/ambiguous/incomplete frames and
+insufficient color; it is not general object detection or perspective correction.
+
+One immutable `MarkerReading` carries classification and pixel-free diagnostic
+region, ratios, reason and profile. The existing caller records diagnostics only
+after the original Source accepts the sample. CheckRecord remains the single
+history/applicability authority; diagnostics cannot revive a record or grant B.
+The original window, sample limits, current source supervision, request identity,
+budgets and unknown-help policy remain unchanged. Work stays synchronous on the
+caller with bounded image/component traversal; measured cost is not a hard stop
+bound. Late reads are discarded under the original source/window deadlines.
+
 ## Private station inspection policy
 
 `_inspection_policy` implements a pure, bounded state transition at the Agent
