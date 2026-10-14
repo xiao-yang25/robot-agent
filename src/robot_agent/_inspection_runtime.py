@@ -10,7 +10,7 @@ import time
 import uuid
 
 from ._inspection_camera import RosCamera
-from ._inspection_marker import classify
+from ._inspection_marker import MarkerReading, classify, read_marker
 from ._inspection_navigation import Admission, InspectionNavigation
 from ._inspection_policy import (Conditions, Control, Failure, NavigationFact, Proposal,
     TERMINAL, TARGETS, WindowClosed, advance, new_task, report)
@@ -49,6 +49,8 @@ class _Loop:
         self.queue = []  # finite intents from the bounded two-site policy
         self.cancelled = set()
         self.samples = 0
+        self.reading_diagnostics = []
+        self.maximum_interpret_seconds = 0.
         self.turns = 0
         self.decisions = []
         self.closing_calls = []
@@ -126,12 +128,27 @@ class _Loop:
         try:
             reader = self.source.borrow(value.reference)
             frame = reader.read()
-            classification, _, _ = self.interpret(frame)
+            started = time.monotonic()
+            try:
+                reading = self.interpret(frame)
+            finally:
+                self.maximum_interpret_seconds = max(self.maximum_interpret_seconds,
+                                                     time.monotonic()-started)
+            if isinstance(reading, MarkerReading):
+                classification = reading.classification
+            else:
+                classification, _, _ = reading  # Preserve the existing interpreter contract.
             if time.monotonic() >= self.camera.window_deadline:
                 return  # Normal closure drops a late interpretation, not history.
             recording = True
             if self.source.record(reader, classification):
                 self.samples += 1
+                if isinstance(reading, MarkerReading):
+                    # Only accepted Source samples are reported; diagnostics do
+                    # not become another record/applicability authority.
+                    self.reading_diagnostics.append(dict(generation=frame.generation,
+                        sequence=frame.sequence, site=frame.site, target=frame.target,
+                        acquired=frame.acquired, **asdict(reading)))
         except Exception as error:
             normal_end = (recording and isinstance(error, RuntimeError) and self.source.refresh()
                           and time.monotonic() >= self.camera.window_deadline)
@@ -338,7 +355,9 @@ class _Loop:
         result = report(self.state)
         result.update(status=self.state.phase, decisions=self.decisions, camera_close=camera_close,
                       runtime_error=self.runtime_error, samples=self.samples, turns=self.turns,
-                      cancellation_responses=self.closing_calls)
+                      cancellation_responses=self.closing_calls,
+                      reading_diagnostics=self.reading_diagnostics,
+                      maximum_interpret_seconds=self.maximum_interpret_seconds)
         result['coordination'] = dict(owners=terminal,
             late_completions=[] if self.coordinator is None else
                 [self._wire_row(row) for row in self.coordinator.late],
@@ -374,6 +393,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--endpoint', required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--marker-reader', choices=('fixed-center', 'located-white-panel'),
+                        default='fixed-center', help='Private interpreter profile; no automatic fallback')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     stopped = threading.Event()
@@ -383,7 +404,8 @@ def main():
     try:
         from robot_harness import NavigationSession
         result = run_inspection(lambda: NavigationSession(args.endpoint),
-                                stop_requested=stopped.is_set, started_at=started)
+                                stop_requested=stopped.is_set, started_at=started,
+                                interpreter=read_marker if args.marker_reader == 'located-white-panel' else classify)
         (args.output/'report.json').write_text(json.dumps(result, indent=2)+'\n')
     finally:
         for sig, handler in handlers.items():

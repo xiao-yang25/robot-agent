@@ -7,6 +7,7 @@ import unittest
 
 from robot_agent._inspection_runtime import RuleDecision, run_inspection
 from robot_agent._inspection_policy import Proposal
+from robot_agent._inspection_marker import MarkerReading, read_marker
 from combination.inspection_fixture import Camera
 from robot_agent.navigation import NavigationBudget
 from test_navigation import SessionFixture
@@ -48,6 +49,62 @@ class RuntimeTests(unittest.TestCase):
         self.assertTrue(all(not row.is_alive() for row in self.session.io_threads))
         self.assertEqual(result['native_cleanup'], 'unknown')
         self.assertEqual(result['task_verdict'], 'unassessed')
+
+    def test_located_reading_diagnostics_keep_accepted_source_identity_and_unknown_zero_b(self):
+        reading = MarkerReading('unknown', 'target_clipped_or_border_incomplete', (430, 140, 640, 300))
+        result = self.run_task(interpreter=lambda frame: reading)
+        self.assertEqual(result['status'], 'needs_help')
+        self.assertEqual([args['site'] for _, args in self.session.submissions], ['A'])
+        self.assertFalse(result['decisions'])
+        self.assertEqual(result['checks'][0]['classification'], 'unknown')
+        rows = result['reading_diagnostics']
+        self.assertEqual(len(rows), result['checks'][0]['samples'])
+        self.assertTrue(rows)
+        self.assertLessEqual(len(rows), 25)
+        self.assertTrue(all(row['generation'] == 7 and row['site'] == 'A'
+            and row['target'] == 'indicator-A' and row['reason'] == reading.reason for row in rows))
+        self.assertGreater(result['maximum_interpret_seconds'], 0)
+        self.assertNotIn('pixels', json.dumps(result))
+        self.assert_closed(result)
+
+    def test_real_shifted_pixels_use_the_opt_in_reader_in_the_existing_caller(self):
+        from test_inspection_marker import paint, panel
+        data = bytearray(640*480*3)
+        panel(data, 20, 20)
+        pixels = bytes(data)
+        self.camera = Camera(window_seconds=.8)
+        ingest = self.camera.source.ingest
+        self.camera.source.ingest = lambda sample: ingest(replace(sample, pixels=pixels))
+        result = self.run_task(interpreter=read_marker)
+        self.assertEqual(result['status'], 'completed', result)
+        self.assertEqual(result['checks'][0]['classification'], 'normal')
+        self.assertTrue(result['reading_diagnostics'])
+        self.assertTrue(all(tuple(row['region']) == (20, 20, 260, 180)
+                            for row in result['reading_diagnostics']))
+        self.assertEqual(len(self.session.submissions), 1)
+        self.assert_closed(result)
+
+    def test_late_structured_reading_is_not_reported_as_an_accepted_sample(self):
+        reading = MarkerReading('normal', None, (20, 20, 260, 180), 1., 1.)
+        def interpret(frame):
+            time.sleep(max(0, self.camera.window_deadline-time.monotonic())+.02)
+            return reading
+        result = self.run_task(interpreter=interpret)
+        self.assertEqual(result['checks'][0]['classification'], 'unknown')
+        self.assertFalse(result['reading_diagnostics'])
+        self.assertFalse(result['decisions'])
+        self.assertEqual(len(self.session.submissions), 1)
+        self.assert_closed(result)
+
+    def test_stop_during_structured_interpretation_still_blocks_decision_and_b(self):
+        def interpret(frame):
+            self.stop.set()
+            return MarkerReading('abnormal', None, (20, 20, 260, 180), 1., 1.)
+        result = self.run_task(interpreter=interpret)
+        self.assertEqual(result['status'], 'cancelled')
+        self.assertFalse(result['decisions'])
+        self.assertEqual(len(self.session.submissions), 1)
+        self.assert_closed(result)
 
     def test_normal_a_ends_once_with_no_b_and_no_pixel_or_truth_in_report(self):
         result = self.run_task()
