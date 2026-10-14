@@ -1397,3 +1397,16 @@ Synthetic image checks, installed packages and sampled interpreter cost do not
 qualify ROS camera geometry, visual target identity, physical stopping or a new
 complete inspection scene. Those remain separate qualifications before default
 or dependency migration.
+
+
+## Bright-white profile software checks
+
+Independent drawn pixels distinguish gray backgrounds (155/178) from a complete
+bright frame, and exercise the strict 220/221 boundary. Existing clipping,
+multiple/adjoining/open frames and mixed-color rejection also apply on gray.
+The private caller consumes a real drawn frame with v2 diagnostics under the
+original Source/close contract; outside-source installed checks cover a complete
+and clipped frame on gray. Legacy/default and v1 checks remain in discovery.
+Existing application and installed-combination workflows discover these additions.
+These software checks do not establish actual camera intrinsics, visibility or
+whole-task stop qualification; stationary camera experiments are separate.

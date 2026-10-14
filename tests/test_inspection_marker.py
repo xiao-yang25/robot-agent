@@ -3,7 +3,7 @@ from dataclasses import FrozenInstanceError, replace
 import json
 import unittest
 
-from robot_agent._inspection_marker import classify, read_marker
+from robot_agent._inspection_marker import classify, read_bright_marker, read_marker
 from robot_agent._inspection_source import Frame, SITES
 
 
@@ -164,6 +164,60 @@ class LocatedMarkerTests(unittest.TestCase):
             reading.reason = 'changed'
         from dataclasses import asdict
         self.assertNotIn('pixels', json.dumps(asdict(reading)))
+
+
+class BrightProfileTests(unittest.TestCase):
+    def test_neutral_grey_background_does_not_merge_with_a_bright_complete_frame(self):
+        for background in (155, 178):
+            for color, expected in (((20, 240, 20), 'normal'), ((240, 20, 20), 'abnormal')):
+                data = bytearray(bytes((background,)*3)*(640*480))
+                panel(data, 20, 20, color=color)
+                actual = frame(data)
+                self.assertEqual(read_marker(actual).classification, 'unknown')
+                reading = read_bright_marker(actual)
+                self.assertEqual(reading.classification, expected)
+                self.assertEqual(reading.profile, 'located-bright-panel-v2')
+                self.assertEqual(reading.region, (20, 20, 260, 180))
+
+    def test_brightness_boundary_is_stricter_while_old_profile_is_retained(self):
+        for brightness, expected in ((178, 'unknown'), (220, 'unknown'), (221, 'normal')):
+            data = bytearray(640*480*3)
+            panel(data, white=(brightness,)*3)
+            actual = frame(data)
+            self.assertEqual(read_bright_marker(actual).classification, expected)
+            self.assertEqual(read_marker(actual).classification, 'normal')
+            self.assertEqual(read_marker(actual).profile, 'located-white-panel-v1')
+
+    def test_grey_background_cannot_hide_clip_multiple_or_open_second_frame(self):
+        for condition in ('clipped', 'multiple', 'adjoining', 'open-second', 'mixed'):
+            data = bytearray(bytes((178,)*3)*(640*480))
+            if condition == 'clipped':
+                panel(data, 20, 20)
+                panel(data, 600, 250)
+            elif condition == 'multiple':
+                panel(data, 20, 140)
+                panel(data, 380, 140)
+            elif condition in ('adjoining', 'open-second'):
+                panel(data, 20, 140, width=200)
+                panel(data, 220, 140, width=200)
+                if condition == 'open-second':
+                    paint(data, (285, 140, 355, 170), (178,)*3)
+            else:
+                panel(data)
+                paint(data, (320, 170, 420, 270), (240, 20, 20))
+            self.assertEqual(read_bright_marker(frame(data)).classification, 'unknown', condition)
+
+    def test_bright_background_still_causes_view_ambiguity(self):
+        data = bytearray(bytes((240,)*3)*(640*480))
+        panel(data, 20, 20)
+        self.assertEqual(read_bright_marker(frame(data)).classification, 'unknown')
+
+    def test_low_color_quality_and_missing_marker_remain_unknown(self):
+        data = bytearray(bytes((178,)*3)*(640*480))
+        self.assertEqual(read_bright_marker(frame(data)).classification, 'unknown')
+        panel(data, color=(80,)*3)
+        paint(data, (300, 205, 340, 235), (20, 240, 20))
+        self.assertEqual(read_bright_marker(frame(data)).classification, 'unknown')
 
 
 if __name__ == '__main__':

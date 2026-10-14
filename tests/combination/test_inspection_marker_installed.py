@@ -12,8 +12,8 @@ class InstalledMarkerTests(unittest.TestCase):
         self.assertTrue(Path(marker.__file__).resolve().is_relative_to(
             Path(os.environ['COMBINATION_AGENT_PREFIX']).resolve()))
 
-    def pixels(self, clipped=False):
-        data = bytearray(640*480*3)
+    def pixels(self, clipped=False, background=0):
+        data = bytearray(bytes((background,)*3)*(640*480))
         x = 430 if clipped else 20
         for y in range(20, 180):
             for col in range(x, min(x+240, 640)):
@@ -56,3 +56,11 @@ class InstalledMarkerTests(unittest.TestCase):
         self.assertFalse(source.applicable(record))
         self.assertEqual(record.classification, 'abnormal')
         source.close()
+
+    def test_installed_bright_profile_separates_grey_but_keeps_clipping_unknown(self):
+        for clipped, expected in ((False, 'abnormal'), (True, 'unknown')):
+            actual = Frame(7, 1, 'A', 'indicator-A', .2, .2, SITES['A'],
+                           self.pixels(clipped, background=178))
+            reading = marker.read_bright_marker(actual)
+            self.assertEqual(reading.classification, expected)
+            self.assertEqual(reading.profile, 'located-bright-panel-v2')
