@@ -666,6 +666,18 @@ budgets and unknown-help policy remain unchanged. Work stays synchronous on the
 caller with bounded image/component traversal; measured cost is not a hard stop
 bound. Late reads are discarded under the original source/window deadlines.
 
+### Opt-in bright-white panel profile
+
+`read_bright_marker` uses the same locator and quality rules with a strictly
+brighter white-frame predicate: every RGB channel must exceed 220. Its
+`located-bright-panel-v2` profile targets the controlled emissive panel against
+neutral gray backgrounds. Select `--marker-reader located-bright-panel`
+explicitly; v1 retains its threshold of 150 and the default remains fixed-center.
+Both localized profiles retain the same scale, completeness, uniqueness, border
+and state-color checks. Bright backgrounds, clipping and uncertain observations
+remain unknown. This profile does not identify a physical target or qualify a
+moving task, camera view or stopping behavior.
+
 ## Private station inspection policy
 
 `_inspection_policy` implements a pure, bounded state transition at the Agent

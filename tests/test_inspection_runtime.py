@@ -7,7 +7,7 @@ import unittest
 
 from robot_agent._inspection_runtime import RuleDecision, run_inspection
 from robot_agent._inspection_policy import Proposal
-from robot_agent._inspection_marker import MarkerReading, read_marker
+from robot_agent._inspection_marker import MarkerReading, read_bright_marker, read_marker
 from combination.inspection_fixture import Camera
 from robot_agent.navigation import NavigationBudget
 from test_navigation import SessionFixture
@@ -93,6 +93,22 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(result['checks'][0]['classification'], 'unknown')
         self.assertFalse(result['reading_diagnostics'])
         self.assertFalse(result['decisions'])
+        self.assertEqual(len(self.session.submissions), 1)
+        self.assert_closed(result)
+
+    def test_bright_profile_consumes_real_pixels_without_changing_source_authority(self):
+        from test_inspection_marker import panel
+        data = bytearray(bytes((178,)*3)*(640*480))
+        panel(data, 20, 20)
+        pixels = bytes(data)
+        self.camera = Camera(window_seconds=.8)
+        ingest = self.camera.source.ingest
+        self.camera.source.ingest = lambda sample: ingest(replace(sample, pixels=pixels))
+        result = self.run_task(interpreter=read_bright_marker)
+        self.assertEqual(result['status'], 'completed', result)
+        self.assertEqual(result['checks'][0]['classification'], 'normal')
+        self.assertTrue(all(row['profile'] == 'located-bright-panel-v2'
+                            for row in result['reading_diagnostics']))
         self.assertEqual(len(self.session.submissions), 1)
         self.assert_closed(result)
 

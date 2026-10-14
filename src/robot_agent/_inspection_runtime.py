@@ -10,7 +10,7 @@ import time
 import uuid
 
 from ._inspection_camera import RosCamera
-from ._inspection_marker import MarkerReading, classify, read_marker
+from ._inspection_marker import MarkerReading, classify, read_bright_marker, read_marker
 from ._inspection_navigation import Admission, InspectionNavigation
 from ._inspection_policy import (Conditions, Control, Failure, NavigationFact, Proposal,
     TERMINAL, TARGETS, WindowClosed, advance, new_task, report)
@@ -393,7 +393,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--endpoint', required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--marker-reader', choices=('fixed-center', 'located-white-panel'),
+    parser.add_argument('--marker-reader', choices=('fixed-center', 'located-white-panel', 'located-bright-panel'),
                         default='fixed-center', help='Private interpreter profile; no automatic fallback')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
@@ -405,7 +405,8 @@ def main():
         from robot_harness import NavigationSession
         result = run_inspection(lambda: NavigationSession(args.endpoint),
                                 stop_requested=stopped.is_set, started_at=started,
-                                interpreter=read_marker if args.marker_reader == 'located-white-panel' else classify)
+                                interpreter={'fixed-center': classify, 'located-white-panel': read_marker,
+                                             'located-bright-panel': read_bright_marker}[args.marker_reader])
         (args.output/'report.json').write_text(json.dumps(result, indent=2)+'\n')
     finally:
         for sig, handler in handlers.items():
