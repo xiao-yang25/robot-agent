@@ -72,13 +72,17 @@ class RuntimeTests(unittest.TestCase):
         data = bytearray(640*480*3)
         panel(data, 20, 20)
         pixels = bytes(data)
-        self.camera = Camera(window_seconds=.8)
+        # This is a real-pixel integration check, not a subsecond throughput test.
+        # Use the production window; late/insufficient samples have separate tests.
+        self.camera = Camera(window_seconds=5.)
         ingest = self.camera.source.ingest
         self.camera.source.ingest = lambda sample: ingest(replace(sample, pixels=pixels))
-        result = self.run_task(interpreter=read_marker)
+        result = self.run_task(interpreter=read_marker,
+            budget=NavigationBudget(task_seconds=8., operation_seconds=2., decision_seconds=.6))
         self.assertEqual(result['status'], 'completed', result)
         self.assertEqual(result['checks'][0]['classification'], 'normal')
         self.assertTrue(result['reading_diagnostics'])
+        self.assertGreaterEqual(result['checks'][0]['samples'], 3)
         self.assertTrue(all(tuple(row['region']) == (20, 20, 260, 180)
                             for row in result['reading_diagnostics']))
         self.assertEqual(len(self.session.submissions), 1)
@@ -101,12 +105,14 @@ class RuntimeTests(unittest.TestCase):
         data = bytearray(bytes((178,)*3)*(640*480))
         panel(data, 20, 20)
         pixels = bytes(data)
-        self.camera = Camera(window_seconds=.8)
+        self.camera = Camera(window_seconds=5.)
         ingest = self.camera.source.ingest
         self.camera.source.ingest = lambda sample: ingest(replace(sample, pixels=pixels))
-        result = self.run_task(interpreter=read_bright_marker)
+        result = self.run_task(interpreter=read_bright_marker,
+            budget=NavigationBudget(task_seconds=8., operation_seconds=2., decision_seconds=.6))
         self.assertEqual(result['status'], 'completed', result)
         self.assertEqual(result['checks'][0]['classification'], 'normal')
+        self.assertGreaterEqual(result['checks'][0]['samples'], 3)
         self.assertTrue(all(row['profile'] == 'located-bright-panel-v2'
                             for row in result['reading_diagnostics']))
         self.assertEqual(len(self.session.submissions), 1)
