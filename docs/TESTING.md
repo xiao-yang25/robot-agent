@@ -1440,3 +1440,26 @@ Same-run local media preserves original speed and labels camera images as captur
 stills. This is a rule-provider decision-stop after arrival, not a real-model,
 moving emergency-stop, physical-error-envelope, default/pin migration or public
 showcase qualification. Machine-specific scenes remain outside hosted software CI.
+
+
+## Accepted navigation with inspection-camera loss
+
+One fresh Ubuntu22/Humble/Nav2/Gazebo scene disconnected the caller's Image
+subscription after true native acceptance and two valid in-flight progress facts.
+The original Source detected health expiry after 0.911s; advancing clock and an
+additional valid same-goal pending navigation fact preceded native completion.
+The caller observed the original A's settled/released arrival fact about 15.116s
+after source failure; independently observed physical error was 0.121m, within
+the unchanged 0.25m threshold. A was retained
+finished/succeeded/settled/released and the task requested help with zero checks,
+decisions, cancellation responses, B or retries.
+
+A single scene evaluator and focused independent safety review checked this
+controlled research scope. Caller elapsed 19.472s, maximum sampled pump gap 0.395s;
+these are finite observations, not health-detection or navigation time bounds.
+The offline container exited normally without OOM and was removed. As in the
+previous scene, the product launcher left 22 ROS descendants that research group
+SIGINT closed without force. Supported launcher closure, association negative
+scenes and the final installed combination remain open. Unknown native cleanup,
+unassessed task verdict, product defaults and the public dependency pin remain.
+No model, real robot or hosted-physics CI qualification is inferred.
