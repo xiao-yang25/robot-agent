@@ -1467,3 +1467,36 @@ SIGINT closed without force. Supported launcher closure, association negative
 scenes and the final installed combination remain open. Unknown native cleanup,
 unassessed task verdict, product defaults and the public dependency pin remain.
 No model, real robot or hosted-physics CI qualification is inferred.
+
+## Camera-binding rejection through the caller
+
+A new synthetic message producer passes through production CameraBinding rather
+than calling Source health/ingest directly. Existing direct-Source fixtures remain.
+A healthy control completes; missing
+images, old acquisition stamps with increasing receive sequences, and image-time
+map pose at B during A's window yield help with zero interpretation, checks,
+decisions, cancellation or B. Tests require the actual window and fault to occur,
+the specific source failure, original released A and complete resource disposal.
+The installed variants use actual Session/socket/Core and inspect the Core audit
+for only A; camera messages and native outcomes remain synthetic. A separate B
+guard test loses source validity during fresh preparation and observes no actual
+B submit call. Existing healthy historical-record waits, late/insufficient inputs
+and explicit-stop checks remain in discovery. Application and installed CI discover
+these cases without new workflows; software checks do not qualify ROS, physics,
+model behavior or a globally atomic submission cutoff.
+
+Three separate Humble/Nav2/Gazebo runs then opened the original A window only
+after native success, settlement and release. Missing Image subscription, replay
+of an original old/duplicate Image at the consumer, and a controlled wrong
+inspection map association each produced help with zero interpretation, samples,
+checks, decisions, cancellation or B. Independent A errors were 0.161m, 0.114m
+and 0.103m within the unchanged 0.25m limit. Source failure was observed after
+0.954s, 0.907s and 0.095s respectively; these are samples, not timing guarantees.
+
+Each run had one evaluator and a focused independent safety supplement. The replay
+and pose faults qualify their controlled consumer boundaries, not arbitrary ROS
+publishers or an isolated age threshold. Original images/window anchors were
+retained, with no new historical-record TTL. Each container exited normally and
+was removed; the same 22 product-launcher descendants still required research
+group SIGINT. Supported closure and final combination/tutorial delivery remain
+separate; native cleanup unknown/task verdict unassessed remain unchanged.

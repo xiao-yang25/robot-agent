@@ -11,7 +11,7 @@ import unittest
 
 from robot_agent import _inspection_runtime as runtime
 from robot_harness import NavigationSession
-from inspection_fixture import Camera
+from inspection_fixture import BindingCamera, Camera
 
 
 class InstalledLoopTests(unittest.TestCase):
@@ -43,10 +43,10 @@ class InstalledLoopTests(unittest.TestCase):
         self.assertEqual(code, 0, self.log.read())
         self.assertFalse(self.endpoint.exists())
 
-    def run_task(self, a_status, provider=runtime.RuleDecision):
+    def run_task(self, a_status, provider=runtime.RuleDecision, interpreter=None):
         result = runtime.run_inspection(lambda: NavigationSession(self.endpoint),
             camera_factory=lambda: self.camera, decision_factory=provider,
-            interpreter=lambda frame: (a_status if frame.site == 'A' else 'normal', 1., 1.))
+            interpreter=interpreter or (lambda frame: (a_status if frame.site == 'A' else 'normal', 1., 1.)))
         self.assertTrue(result['coordination']['resources_closed'], result)
         self.assertEqual(result['native_cleanup'], 'unknown')
         self.assertEqual(result['task_verdict'], 'unassessed')
@@ -95,6 +95,43 @@ class InstalledLoopTests(unittest.TestCase):
         self.assertEqual(len(facts['records']), 2)
         self.assertTrue(result['decisions'][-1]['withdrawn'])
         self.assertEqual(len(result['checks']), 2)
+
+    def check_camera_fault(self, fault):
+        self.camera = BindingCamera(fault)
+        def forbidden(frame):
+            self.fail('Unusable camera image reached interpretation')
+        result, facts = self.run_task('abnormal', interpreter=forbidden)
+        self.assertEqual(result['status'], 'needs_help', result)
+        self.assertIsNone(result['runtime_error'])
+        self.assertIsNotNone(self.camera.opened)
+        self.assertGreater(self.camera.bad_inputs, 0)
+        with self.camera.source.events.lock:
+            reason = self.camera.source.events.failure
+        self.assertEqual(reason, 'inspection sample association invalid' if fault == 'wrong-association'
+                         else 'inspection source health or clock expired')
+        self.assertEqual(result['samples'], 0)
+        for key in ('checks', 'decisions', 'reading_diagnostics', 'cancellation_responses'):
+            self.assertFalse(result[key])
+        self.assertEqual([row['site'] for row in facts['records']], ['A'])
+        self.assertEqual(len(result['operations']), 1)
+        self.assertFalse(facts['stops'])
+        operation = result['operations'][0]
+        record = facts['records'][0]
+        self.assertEqual((record['request_id'], record['operation_id']),
+                         (operation['request_id'], operation['operation_id']))
+        self.assertEqual(record['receipt']['settlement'], 'settled')
+        self.assertEqual(record['receipt']['authority_disposition'], 'released')
+        self.assertTrue(operation['reusable'])
+        self.assertTrue(self.camera.closed)
+
+    def test_installed_missing_window_images_have_only_released_a(self):
+        self.check_camera_fault('missing-frame')
+
+    def test_installed_old_window_images_have_only_released_a(self):
+        self.check_camera_fault('stale-frame')
+
+    def test_installed_wrong_window_pose_has_only_released_a(self):
+        self.check_camera_fault('wrong-association')
 
 
 if __name__ == '__main__':

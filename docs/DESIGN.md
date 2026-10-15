@@ -866,3 +866,15 @@ fail or when the user explicitly stops.
 The Agent still reports native cleanup unknown and task verdict unassessed.
 Research process-group disposal completed the scene; independent supported
 launcher process-tree closure remains a separate delivery requirement.
+
+## Inspection input rejection
+
+CameraBinding and Source check message freshness and image-time/station
+association before publishing an inspectable frame. For the selected faults
+introduced when the original A window opens, missing or old images and an invalid
+station association yield help with zero interpretation, decision or B. A remains
+the original released operation; a later failure does not erase earlier valid
+interpretations.
+B also rechecks its original source basis after fresh preparation, immediately
+before calling Session submit. Completed historical checks retain their existing
+Source applicability rules; incoming-image freshness adds no record TTL.

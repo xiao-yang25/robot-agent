@@ -8,7 +8,7 @@ import unittest
 from robot_agent._inspection_runtime import RuleDecision, run_inspection
 from robot_agent._inspection_policy import Proposal
 from robot_agent._inspection_marker import MarkerReading, read_bright_marker, read_marker
-from combination.inspection_fixture import Camera
+from combination.inspection_fixture import BindingCamera, Camera
 from robot_agent.navigation import NavigationBudget
 from test_navigation import SessionFixture
 
@@ -160,6 +160,54 @@ class RuntimeTests(unittest.TestCase):
                 self.assertEqual([args['site'] for _, args in self.session.submissions], ['A'] if site == 'A' else ['A', 'B'])
                 self.assertEqual(result['checks'][-1]['classification'], 'unknown')
                 self.assert_closed(result)
+
+    def test_message_binding_healthy_control_can_complete_a(self):
+        self.camera = BindingCamera(window_seconds=.25)
+        result = self.run_task()
+        self.assertEqual(result['status'], 'completed', result)
+        self.assertEqual(result['checks'][0]['classification'], 'normal')
+        self.assertGreaterEqual(result['checks'][0]['samples'], 3)
+        self.assertEqual([args['site'] for _, args in self.session.submissions], ['A'])
+        self.assert_closed(result)
+
+    def check_binding_fault(self, fault):
+        self.camera = BindingCamera(fault)
+        def no_interpretation(frame):
+            self.fail('Unusable image reached interpretation')
+        result = self.run_task(interpreter=no_interpretation,
+            budget=NavigationBudget(task_seconds=4., operation_seconds=1., decision_seconds=.6))
+        self.assertEqual(result['status'], 'needs_help', result)
+        self.assertIsNone(result['runtime_error'])
+        self.assertTrue(self.camera.opened)
+        self.assertGreater(self.camera.bad_inputs, 0)
+        self.assertEqual(result['samples'], 0)
+        for key in ('checks', 'decisions', 'reading_diagnostics', 'cancellation_responses'):
+            self.assertFalse(result[key], (key, result))
+        self.assertEqual([args['site'] for _, args in self.session.submissions], ['A'])
+        operation = result['operations'][0]
+        self.assertEqual(operation['outcome'], 'arrived')
+        self.assertTrue(operation['reusable'])
+        retained = result['execution_records'][operation['request_id']]['record']
+        self.assertEqual(retained['receipt']['settlement'], 'settled')
+        self.assertEqual(retained['receipt']['authority_disposition'], 'released')
+        with self.camera.source.events.lock:
+            reason = self.camera.source.events.failure
+        self.assertEqual(reason, 'inspection sample association invalid' if fault == 'wrong-association'
+                         else 'inspection source health or clock expired')
+        if fault == 'stale-frame':
+            self.assertGreater(self.camera.binding.sequence, self.camera.opened['sequence'])
+            stamp = self.camera.original_image.header.stamp
+            self.assertGreater(self.camera.clock-(stamp.sec+stamp.nanosec*1e-9), 1.)
+        self.assert_closed(result)
+
+    def test_missing_images_in_original_window_never_reach_interpretation_or_b(self):
+        self.check_binding_fault('missing-frame')
+
+    def test_old_images_with_new_receive_sequences_never_become_a_evidence(self):
+        self.check_binding_fault('stale-frame')
+
+    def test_wrong_image_time_station_association_never_becomes_a_evidence(self):
+        self.check_binding_fault('wrong-association')
 
     def waiting_provider(self, site):
         started = threading.Event()
