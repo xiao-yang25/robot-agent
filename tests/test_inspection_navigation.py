@@ -68,6 +68,18 @@ class BindingTests(unittest.TestCase):
         self.assertNotEqual(a.operation_id, b.operation_id)
         self.assertEqual(self.binding.attempts['inspection-B']['record']['receipt']['settlement'], 'pending')
 
+    def test_b_source_loss_during_fresh_preparation_never_calls_session_submit(self):
+        a = self.visit_a()
+        self.assertTrue(a.reusable)
+        self.binding.authorize(self.admission('B'))
+        self.session.after_observe = lambda: self.source.events.invalidate('camera lost during B preparation')
+        with self.assertRaises(ValueError):
+            self.binding.submit('inspection-B')
+        self.assertEqual([args['site'] for _, args in self.session.submissions], ['A'])
+        self.assertNotIn('inspection-B', self.binding.attempts)
+        self.assertEqual(self.binding.facts['inspection-A'], a)
+        self.assertFalse(self.source.applicable(self.basis))
+
     def test_guard_checks_source_stop_revoke_and_deadline_after_prepare_rpc(self):
         for fault in ('source', 'stop', 'revoke', 'deadline', 'permission'):
             with self.subTest(fault=fault):
