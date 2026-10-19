@@ -1,18 +1,17 @@
 # Robot Agent architecture
 
-Status: **private navigation, ALOHA, inspection policy and Session binding software implemented, 2026-10-12**. This document separates the implemented
-architecture from the proposed next increment. It does not add an API, qualify a
-new robot task, or change existing application or Harness contracts.
+Status: **experimental inspection command over the existing private loop,
+2026-10-19**. Navigation, ALOHA, inspection policy, ROS camera binding and Session
+adaptation are implemented. The installed inspection command reuses that loop
+without introducing another task owner or public Python framework API.
 
-Comparative embodied-system research now informs this responsibility design.
-The design baseline has passed independent review; inspection implementation
-and repository extraction are not delivered by that review. The selected next task is station-status
-inspection with capability-specific failure handling, described below. Its camera
-path and private event coordination now have scoped software/stationary ROS
-checks below; full task implementation and qualification remain pending.
-The selected deployment keeps execution in the existing Linux
-simulation container and model access on the host. Fragment delegation is deferred.
-No fragment interface or new robot capability is delivered by this proposal.
+Existing scoped simulation qualifications retain their recorded versions. A
+supported camera-equipped public scene/turnkey tutorial and fresh qualification
+of this command remain pending; software checks do not establish robot motion or
+physical stopping. The execution deployment remains the Linux simulation
+container. Inspection uses rule decisions in this increment; model consumption
+of inspection facts needs its own selected model/environment/budget. Fragment
+delegation and repository extraction remain deferred.
 
 Robot Agent turns a goal and fresh observations into a bounded sequence of
 skills, incorporates results and business instructions, and reports what remains

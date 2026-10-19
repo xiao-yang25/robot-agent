@@ -1,5 +1,29 @@
 # Testing and qualification
 
+## Installed inspection command
+
+The experimental [command](../src/robot_agent/inspection_cli.py) reuses the private
+inspection loop with explicit endpoint/output/marker-reader selection. It adds
+no model provider, task progression owner or new Harness contract. Application
+checks cover validation before resource creation, fresh-output refusal,
+success/help/cancel/close-failure exits, signal-to-original-stop handling, report
+failure with handler restoration and help without ROS/Harness/model imports.
+
+[Installed checks](../tests/combination/test_inspection_cli_installed.py) run the
+actual command in a child against real Core/Unix Session with synthetic camera
+pixels and native facts. Cases cover normal A only, abnormal A→single B, unknown
+zero followup, actual SIGINT during B sampling and completed observation with
+camera close failure. Assertions retain original request/operation correlation,
+released A/pending B, unknown native cleanup/unassessed task verdict; they observe
+Owner exit and socket removal. The pixel fixture uses the production five-second
+window rather than asserting throughput in a shortened window.
+
+Existing application/combination discovery includes these checks, and the
+Ubuntu installed-entry step now calls `robot-agent-inspection --help`. Accurate
+candidate CI remains required before merge. This increment is software-only:
+the supported scene/turnkey tutorial and fresh public-command camera/movement,
+model or physical-stop qualifications are not supplied by these fixtures.
+
 ## Current fixed combination
 
 [workspace.repos](../workspace.repos) selects Harness
