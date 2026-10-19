@@ -1,5 +1,31 @@
 # Testing and qualification
 
+## Current fixed combination
+
+[workspace.repos](../workspace.repos) selects Harness
+`97351c1952dd824a438540c9c52ee97c0c618f2a`, which includes the ROS shutdown-order
+and supported simulation process-tree cleanup fixes. This changes the fixed
+software dependency; application defaults, public Session contracts and the
+private ACT worker transport remain unchanged.
+
+Fresh macOS and offline Ubuntu 22.04/Python 3.10 Core/Agent installations each
+passed all 58 existing combination checks outside both source trees; the macOS
+application suite passed 330 checks. The new pin also passed 23 tutorial checks.
+Coverage includes legacy navigation/ALOHA, coordinated waiting/withdrawal, and inspection
+normal/single-B/source/frame failures, with actual Core/Unix Session and controlled
+native/model edges. Pending settlement, unknown native cleanup and unassessed
+task verdict assertions remain in force. Both fresh Core installations passed
+the existing `python_session` check. The offline Linux container exited zero
+without OOM and was removed. Exact candidate CI is required before merging this
+dependency change.
+
+The existing Ubuntu installed-combination workflow builds this manifest's
+immutable dependency and discovers the same checks. Harness CI separately keeps
+its older fixed Agent consumer; this update does not move that reciprocal pin.
+These are software checks, not fresh camera, model, movement or physical-stop
+qualification. Historical runs and videos below retain their recorded versions.
+New paired moving tutorials and inspection media remain to be qualified.
+
 ## Proposal input and exit checks
 
 The private proposal transport accepts at most 1 MiB of UTF-8 prompt data before
@@ -765,7 +791,7 @@ reliability, Owner loss, complete native closure, hard stop or physical hardware
 
 ## Updated fixed pairing
 
-[workspace.repos](../workspace.repos) pins delivered Harness
+At this historical increment, [workspace.repos](../workspace.repos) pinned Harness
 `ea7b1eb1a075cd91ef590475f2496a48d19ca52a`, including the final cancellation fix.
 A fresh macOS ARM64 Core build and optional-package install, together with a newly
 built Agent wheel, passed all nine installed combination checks outside both
@@ -975,8 +1001,9 @@ are not presented as recordings of this new evaluation run.
 
 ## Explicit coordination tutorial
 
-The current checkout pins Harness
-`747d7d48a846ad361cf7260d2339b010c0b92a00`. The
+The original coordination tutorial qualified Harness
+`747d7d48a846ad361cf7260d2339b010c0b92a00`; the current software dependency is
+listed in [Current fixed combination](#current-fixed-combination). The
 [tutorial](../examples/navigation/README.md#experimental-coordination) explicitly
 selects the experimental assembly and an Owner terminal query budget. Existing
 public task defaults and historical qualifications retain their own versions.

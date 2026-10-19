@@ -5,8 +5,9 @@ and the installed public Agent CLI. The default task visits A then B with
 controlled executable proposals. Checkpoint, revision and single-failure recovery
 are explicit task choices; an optional host model mode is described below.
 An [experimental coordination assembly](#experimental-coordination) separately
-demonstrates decision waiting and execution close. The optional host model
-transport has software coverage; its new assembly still needs real-model qualification.
+demonstrates decision waiting and execution close. Recorded host-model
+qualifications retain their original Agent/Harness versions; a new pair or model
+needs a separate qualification.
 The Agent still checks fresh observations, proposal identity and deadlines, and
 retains final pending settlement and unknown native cleanup.
 
@@ -20,6 +21,9 @@ different or modified Harness checkout.
 
 This tutorial uses the Agent `0.1.0a1` wheel built from your selected checkout,
 and its pinned Harness source; it does not install Agent from a package index.
+The current software pair uses Harness `97351c1` (the full immutable revision is
+in the manifest), including the supported-launcher cleanup fixes. Installed
+compatibility does not repeat the recorded moving or model qualifications.
 Record `git rev-parse HEAD` for that checkout before preparing the pair. A changed
 Agent revision needs its own verification; existing videos retain their versions.
 
