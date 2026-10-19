@@ -21,34 +21,50 @@ window rather than asserting throughput in a shortened window.
 Existing application/combination discovery includes these checks, and the
 Ubuntu installed-entry step now calls `robot-agent-inspection --help`. Accurate
 candidate CI remains required before merge. This increment is software-only:
-the supported scene/turnkey tutorial and fresh public-command camera/movement,
-model or physical-stop qualifications are not supplied by these fixtures.
+the [supported tutorial](../examples/inspection/README.md#run-the-controlled-simulation)
+is separately assembled; fresh public-command camera/movement, model or physical-stop
+qualifications are not supplied by these fixtures.
 
 ## Current fixed combination
 
 [workspace.repos](../workspace.repos) selects Harness
-`97351c1952dd824a438540c9c52ee97c0c618f2a`, which includes the ROS shutdown-order
-and supported simulation process-tree cleanup fixes. This changes the fixed
-software dependency; application defaults, public Session contracts and the
-private ACT worker transport remain unchanged.
+`083fb7e4732c498d54799785aadb9a1e06ae98d3`, adding the explicit optional inspection
+scene, pre-admission actual controller-parameter checks and owned display closure
+to the previous software pair's shutdown fixes. Public Session/Core contracts,
+legacy application defaults and the private ACT worker transport are unchanged.
+The existing installed-combination workflow builds this immutable dependency;
+Harness CI separately retains its older fixed Agent consumer. Neither pin moves
+automatically with the other repository.
 
-Fresh macOS and offline Ubuntu 22.04/Python 3.10 Core/Agent installations each
-passed all 58 existing combination checks outside both source trees; the macOS
-application suite passed 330 checks. The new pin also passed 23 tutorial checks.
-Coverage includes legacy navigation/ALOHA, coordinated waiting/withdrawal, and inspection
-normal/single-B/source/frame failures, with actual Core/Unix Session and controlled
-native/model edges. Pending settlement, unknown native cleanup and unassessed
-task verdict assertions remain in force. Both fresh Core installations passed
-the existing `python_session` check. The offline Linux container exited zero
-without OOM and was removed. Exact candidate CI is required before merging this
-dependency change.
+New macOS Core/Agent installation and offline Ubuntu Agent installation against
+the directly checked retained Core prefix each passed all63 combination checks
+outside both source trees. Mac/Linux application343, final selector5, actual
+container import roots and help passed; the fresh Mac Core passed python_session.
+Historical fixed-pair330/58 and command338/63 checks retain their recorded
+versions; exact CI remains required before merging this dependency update. Software installation does not repeat earlier physics or
+model qualifications. New paired moving tutorials and inspection media remain
+separate qualifications.
 
-The existing Ubuntu installed-combination workflow builds this manifest's
-immutable dependency and discovers the same checks. Harness CI separately keeps
-its older fixed Agent consumer; this update does not move that reciprocal pin.
-These are software checks, not fresh camera, model, movement or physical-stop
-qualification. Historical runs and videos below retain their recorded versions.
-New paired moving tutorials and inspection media remain to be qualified.
+## Inspection simulation tutorial
+
+The [host selector](../examples/inspection/run.py) requires an explicit normal or
+recheck scene, exact clean Harness source and matching new Linux installations.
+It execs the existing Harness launcher; the
+[installed selector](../src/robot_agent/inspection_demo_client.py) checks its Agent/
+Harness import roots and execs the original inspection CLI with the explicit
+bright-panel reader. It supplies no fixture state to task decisions, model mode,
+new task loop or supervisor. Application discovery tests valid selection and
+wrong/dirty source, old/missing installs, existing output and unsupported options
+before execution. Existing combination discovery covers actual Core/Unix Session,
+legacy applications and inspection command positives, faults and SIGINT.
+
+The preparation reuses the existing navigation script and a visual image, with
+fresh ABI-correct Core and Agent installations. New selector checks and installed legacy/inspection compatibility passed on
+macOS and offline Ubuntu; exact candidate/main CI remain delivery gates. They do not establish actual camera
+rendering, navigation arrival, a physical inspection verdict, model behavior or
+new recordings. Use the task report, launcher exit/cleanup and independent
+physical evaluation for their separate concerns; passive A/B pose collection is
+not an inspection-task verdict.
 
 ## Proposal input and exit checks
 

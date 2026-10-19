@@ -21,8 +21,8 @@ different or modified Harness checkout.
 
 This tutorial uses the Agent `0.1.0a1` wheel built from your selected checkout,
 and its pinned Harness source; it does not install Agent from a package index.
-The current software pair uses Harness `97351c1` (the full immutable revision is
-in the manifest), including the supported-launcher cleanup fixes. Installed
+The current software pair uses Harness `083fb7e` (the full immutable revision is
+in the manifest), including the supported-launcher cleanup fixes and optional inspection scene. Installed
 compatibility does not repeat the recorded moving or model qualifications.
 Record `git rev-parse HEAD` for that checkout before preparing the pair. A changed
 Agent revision needs its own verification; existing videos retain their versions.

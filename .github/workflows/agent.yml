@@ -21,6 +21,8 @@ jobs:
           robot-agent-handoff --help
           robot-agent-navigation --help
           robot-agent-inspection --help
+          python "$GITHUB_WORKSPACE/examples/inspection/run.py" --help
+          python -m robot_agent.inspection_demo_client --help
           robot-agent-navigation-host-proposal --version
           python -m robot_agent.navigation_host_model --help
           robot-agent-evaluate-handoff --help
