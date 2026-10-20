@@ -28,15 +28,15 @@ qualifications are not supplied by these fixtures.
 ## Current fixed combination
 
 [workspace.repos](../workspace.repos) selects Harness
-`083fb7e4732c498d54799785aadb9a1e06ae98d3`, adding the explicit optional inspection
-scene, pre-admission actual controller-parameter checks and owned display closure
-to the previous software pair's shutdown fixes. Public Session/Core contracts,
+`542400c6f5defb776da1b789d53fc35cee485978`, adding explicit image platform
+selection and architecture mismatch rejection before container creation to the
+previous inspection scene/controller-parameter/display baseline. Public Session/Core contracts,
 legacy application defaults and the private ACT worker transport are unchanged.
 The existing installed-combination workflow builds this immutable dependency;
 Harness CI separately retains its older fixed Agent consumer. Neither pin moves
 automatically with the other repository.
 
-New macOS Core/Agent installation and offline Ubuntu Agent installation against
+The previous `083fb7e` combination's new macOS Core/Agent installation and offline Ubuntu Agent installation against
 the directly checked retained Core prefix each passed all63 combination checks
 outside both source trees. Mac/Linux application343, final selector5, actual
 container import roots and help passed; the fresh Mac Core passed python_session.
@@ -57,9 +57,13 @@ new task loop or supervisor. Application discovery tests valid selection and
 wrong/dirty source, old/missing installs, existing output and unsupported options
 before execution. Existing combination discovery covers actual Core/Unix Session,
 legacy applications and inspection command positives, faults and SIGINT.
+Platform checks cover the unchanged amd64 default, explicit ARM64 forwarding and
+rejection of an unsupported platform before Git/process calls. These checks do
+not supply a native image or qualify an ARM64 scene. The dependency update's
+exact candidate CI must also validate the installed combination.
 
 The preparation reuses the existing navigation script and a visual image, with
-fresh ABI-correct Core and Agent installations. New selector checks and installed legacy/inspection compatibility passed on
+fresh ABI-correct Core and Agent installations. The previous pair's selector and installed legacy/inspection compatibility passed on
 macOS and offline Ubuntu; exact candidate/main CI remain delivery gates. They do not establish actual camera
 rendering, navigation arrival, a physical inspection verdict, model behavior or
 new recordings. Use the task report, launcher exit/cleanup and independent
