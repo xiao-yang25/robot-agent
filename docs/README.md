@@ -6,8 +6,9 @@ Core belongs to Harness; the dependency runs from Agent to Harness.
 [Architecture](DESIGN.md) maps the shared coordinator, existing navigation/ALOHA
 applications and private station-inspection loop. The experimental
 [inspection command](../examples/inspection/README.md) connects that loop to a
-prepared Owner and ROS camera; its supported simulation scene/turnkey launcher
-and fresh public-entry qualifications remain separate work. No general task
+prepared Owner and ROS camera. The [controlled simulation tutorial](../examples/inspection/README.md#run-the-controlled-simulation)
+assembles the supported Harness scene and command; fresh public-entry moving
+qualification and recordings remain separate work. No general task
 engine or robot-independent camera/skill SDK is delivered.
 
 ## Application artifacts and reusable boundaries
@@ -20,7 +21,7 @@ engine or robot-independent camera/skill SDK is delivered.
 | `robot-agent-evaluate-handoff` and [fixed profile](../src/robot_agent/handoff_profile.json) | Installed offline evaluation of the declared recorded task | Task-specific predicate; evaluation does not drive decisions or authorize execution |
 | `robot-agent-navigation` and [scene tutorial](../examples/navigation/README.md) | Installed bounded A→B application; controlled or host model proposals in the isolated Nav2 scene | Same-container owner; bounded local process cleanup, remote cleanup unknown |
 | [RecoveryNavigationTask](../src/robot_agent/navigation_recovery.py) | Experimental Python task and explicit CLI mode: A, or one pre-authorized backup B after confirmed failed-A release | Prepared-owner and actual-model checks; explicit public scene tutorial |
-| `robot-agent-inspection` and [prepared-environment guide](../examples/inspection/README.md) | Experimental installed station-status application with explicit controlled marker reader and rule decisions | Prepared fixed navigation/ROS camera contracts; private loop, no model or turnkey scene in this increment |
+| `robot-agent-inspection` and [prepared-environment guide](../examples/inspection/README.md) | Experimental installed station-status application with explicit controlled marker reader and rule decisions | Prepared fixed navigation/ROS camera contracts; private loop and controlled scene tutorial; no model, new moving qualification pending |
 | [Combination CI](../.github/workflows/combination.yml) | Reproducible installed Agent/Harness boundary checks | Explicit no-physics providers; not a model/robot task qualification |
 
 These delivered artifacts are useful applications, policies and verification

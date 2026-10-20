@@ -18,10 +18,11 @@ explains those installations. Run this command in the same isolated Ubuntu
 22.04/ROS 2 Humble environment as the prepared Owner and camera, with its ROS
 setup sourced and the installed Agent/Harness packages on `PYTHONPATH`.
 
-This increment supplies the application command. A supported camera-equipped
-simulation scene and turnkey launcher are subsequent work; the stock navigation
-scene alone does not supply the inspection camera or panels. Research scene
-wrappers and existing recordings retain their original versions and scope.
+For the controlled simulator, use the [one-command tutorial](#run-the-controlled-simulation)
+below. It selects Harness's optional camera/panel scene and this installed command;
+ordinary navigation without that selection has no inspection camera. Existing
+recordings retain their original versions; the tutorial's new moving qualification
+and same-run recordings are separate from its software checks.
 
 The prepared environment must supply:
 
@@ -81,3 +82,100 @@ The command does not start an Owner, camera, container or model, and does not
 retry ambiguous submission. Its internal policy/coordinator/source classes are
 private implementation, not a reusable Agent or Skill SDK. See [Testing](../../docs/TESTING.md#installed-inspection-command)
 for software evidence and the remaining simulation qualifications.
+
+
+## Run the controlled simulation
+
+Use Python 3.10+ on the host and Docker. The fixed simulation target is Ubuntu
+22.04/ROS 2 Humble, Linux amd64; Apple Silicon uses Docker Desktop emulation.
+Run these host commands from this Agent checkout. The runtime uses the existing
+2 CPU / 4 GiB, offline container and 420-second host limit. No model is called.
+
+### Prepare the fixed source and visual image
+
+Clone into a new directory and select the exact immutable dependency:
+
+```sh
+git clone https://github.com/xiao-yang25/robot-harness.git ../harness-inspection
+HARNESS_REVISION=$(python3 -c 'import re; from pathlib import Path; r=re.findall(r"^    version: ([0-9a-f]{40})$", Path("workspace.repos").read_text(), re.M); assert len(r)==1; print(r[0])')
+git -C ../harness-inspection checkout "$HARNESS_REVISION"
+python3 ../harness-inspection/integrations/ros2/simulation/simulate.py build \
+  --visual --image robot-inspection-demo:humble
+```
+
+The current pin is Harness `083fb7e`; a different or modified source checkout is
+rejected (tracked or nonignored untracked changes). This visual image is required for RGB rendering, even without a viewer.
+It supplies Xvfb, native scoped workers/drive and the fixed ROS/Gazebo dependencies.
+An existing compatible image may be selected explicitly; record its identity
+and qualification. A tag alone does not prove compatibility.
+
+### Prepare new Linux installations
+
+Use a new consumer directory. The existing navigation preparation script builds
+Core/Python and installs this Agent wheel; it introduces no second runtime or
+inspection-specific dependency. It may download Python headers in its disposable
+preparation container if absent. The controlled marker reader uses image bytes;
+no LLM, vision package extra, checkpoint or model credential is required.
+
+```sh
+mkdir inspection-consumer
+python3 -m pip wheel --no-deps --wheel-dir inspection-consumer/dist .
+python3 -m pip download --no-deps --only-binary=:all: \
+  --dest inspection-consumer/bootstrap pip==25.0.1
+
+docker run --rm --platform linux/amd64 --cpus=2 --memory=4g --entrypoint bash \
+  --env DEMO_UID="$(id -u)" --env DEMO_GID="$(id -g)" \
+  --mount "type=bind,source=$(cd ../harness-inspection && pwd),target=/harness-source,readonly" \
+  --mount "type=bind,source=$PWD/inspection-consumer,target=/consumer" \
+  --mount "type=bind,source=$PWD/examples/navigation/prepare.sh,target=/prepare.sh,readonly" \
+  --mount "type=bind,source=$PWD/inspection-consumer/dist/robot_agent-0.1.0a1-py3-none-any.whl,target=/robot_agent-0.1.0a1-py3-none-any.whl,readonly" \
+  --mount "type=bind,source=$PWD/inspection-consumer/bootstrap/pip-25.0.1-py3-none-any.whl,target=/pip-25.0.1-py3-none-any.whl,readonly" \
+  robot-inspection-demo:humble /prepare.sh
+```
+
+The prefix must match Linux's Python ABI. A macOS installation cannot replace it.
+The preparation refuses existing build/install/agent-install paths. Record the
+Agent checkout revision before building; a wheel version alone does not identify
+the source revision. `python_session` checks software, not physical arrival.
+
+### Launch one inspection
+
+```sh
+python3 examples/inspection/run.py --harness-source ../harness-inspection \
+  --python-prefix inspection-consumer/install --agent-prefix inspection-consumer/agent-install \
+  --image robot-inspection-demo:humble --case normal --output runs/inspection-normal-01
+```
+
+For red A / green B, use `--case recheck` and a new output such as
+`runs/inspection-recheck-01`. Expected task behavior is A normal → finish, or A
+abnormal → at most one B recheck. Unknown images request help. The selector uses the case to configure the simulator. The inspection command
+does not consume that selection or simulator truth as decision input; it uses
+image observations. The fixture environment remains visible in the shared
+container, so this is an input boundary, not security isolation. The installed client selects `located-bright-panel` explicitly.
+Original sampling, freshness, proposal/task budgets and close semantics remain.
+
+The host selector replaces itself with Harness's existing launcher; its installed
+client replaces itself with the inspection CLI. No extra supervisor or task loop
+is started. The Owner permits 45 seconds of caller idle time. Both native
+controller tolerances are checked before public Session admission by Harness.
+
+| Record | Meaning |
+|---|---|
+| `run.json` | Container exit/OOM and cleanup; `passed` is process completion |
+| `verification.json` | Clean client/Owner/simulator process completion, not a physical task verdict |
+| `agent/report.json` | Camera checks, decisions, original A/B identities, task status and local resource closure |
+| `inspection-scene.json`, `caller.jsonl` | Scene selection and actual pre-admission controller-parameter facts |
+| `display-process.json`, `launcher-processes.json` | Display/group force, remaining processes and reaping |
+
+Read the Agent report alongside launcher results. Native cleanup stays unknown
+and task verdict unassessed; completed task logic or closed OS resources cannot
+prove physical success. Errors, help, cancellation or incomplete cleanup remain
+nonzero exits. Ctrl-C on this host command asks Harness to tear down the whole
+container; it is not the Agent CLI's task cancellation or an emergency stop.
+
+You may append `--record-evaluation` for passive pose collection. It records
+independent evidence only; the collector's original A/B observations are not an
+inspection-task evaluator, and normal A-only is not a missing-B task failure.
+Do not infer an inspection verdict from collection completion. This tutorial
+starts no viewer or recorder. [Software verification and remaining qualification](../../docs/TESTING.md#inspection-simulation-tutorial)
+keep fresh moving tests and same-run media distinct from the software delivery.

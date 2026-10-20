@@ -6,8 +6,9 @@ adaptation are implemented. The installed inspection command reuses that loop
 without introducing another task owner or public Python framework API.
 
 Existing scoped simulation qualifications retain their recorded versions. A
-supported camera-equipped public scene/turnkey tutorial and fresh qualification
-of this command remain pending; software checks do not establish robot motion or
+[supported camera scene and thin tutorial selectors](../examples/inspection/README.md#run-the-controlled-simulation)
+reuse the original Harness launcher and inspection CLI. Fresh moving qualification
+of this command remains pending; software checks do not establish robot motion or
 physical stopping. The execution deployment remains the Linux simulation
 container. Inspection uses rule decisions in this increment; model consumption
 of inspection facts needs its own selected model/environment/budget. Fragment

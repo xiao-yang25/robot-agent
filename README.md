@@ -34,9 +34,10 @@ Docker Desktop emulation. The default path needs no model service or weights.
 | Application | Task | Setup and contract |
 |---|---|---|
 | Navigation | Fixed A→B, or opt-in checkpoint / in-motion instructions | [Tutorial](examples/navigation/README.md) · [Contract](docs/README.md#navigation-application) |
+| Inspection (current checkout) | Read A; finish or recheck B once from camera observations | [Tutorial](examples/inspection/README.md#run-the-controlled-simulation) · [Limits](docs/TESTING.md#inspection-simulation-tutorial) |
 | ALOHA / ACT | Transfer a cube, then hold for one simulated second using visual proposals | [Skill setup](skills/aloha/README.md) · [Contract](docs/README.md#aloha-application) |
 
-Both applications use Harness's public Session and shared execution coordinator.
+These applications use Harness's public Session and shared execution coordinator.
 Model decisions stay separate from execution authority and independent evaluation.
 See [adaptation boundaries](docs/README.md#adapt-an-existing-application) for changing
 models or extending an application.
