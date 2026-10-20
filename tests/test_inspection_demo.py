@@ -44,12 +44,26 @@ class InspectionDemoTests(unittest.TestCase):
                 self.assertEqual(command[command.index('--inspection-case')+1],case)
                 self.assertEqual(command[command.index('--client-script')+1],str(root/'agent/robot_agent/inspection_demo_client.py'))
                 self.assertEqual(command[command.index('--caller-wait-seconds')+1],'45')
+                self.assertEqual(command[command.index('--platform')+1],'linux/amd64')
                 self.assertIn('--record-evaluation',command)
                 self.assertNotIn('--model',command)
                 self.assertFalse((root/'new').exists())
 
+    def test_native_platform_reaches_original_launcher(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary).resolve();args=self.arguments(root,'--case','normal','--platform','linux/arm64')
+            with patch('sys.argv',args), patch.object(selector.subprocess,'check_output',side_effect=[REVISION,'']), \
+                    patch.object(selector.os,'execv') as execute:
+                selector.main()
+            executable,command=execute.call_args.args
+            self.assertEqual(executable,sys.executable)
+            self.assertEqual(command[command.index('--platform')+1],'linux/arm64')
+            self.assertEqual(command[2],'session')
+            self.assertEqual(command[command.index('--inspection-case')+1],'normal')
+            self.assertFalse((root/'new').exists())
+
     def test_unsupported_or_existing_output_rejects_before_git_or_process(self):
-        for extra in ((),('--case','other'),('--case','normal','--model','model'),('--case','normal','--scene','occupied-a'),('--case','normal','--existing')):
+        for extra in ((),('--case','other'),('--case','normal','--model','model'),('--case','normal','--scene','occupied-a'),('--case','normal','--platform','linux/other'),('--case','normal','--existing')):
             with self.subTest(extra=extra), tempfile.TemporaryDirectory() as temporary:
                 root=Path(temporary).resolve()
                 if '--existing' in extra:

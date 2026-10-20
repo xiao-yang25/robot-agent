@@ -103,11 +103,17 @@ python3 ../harness-inspection/integrations/ros2/simulation/simulate.py build \
   --visual --image robot-inspection-demo:humble
 ```
 
-The current pin is Harness `083fb7e`; a different or modified source checkout is
+The current pin is Harness `542400c`; a different or modified source checkout is
 rejected (tracked or nonignored untracked changes). This visual image is required for RGB rendering, even without a viewer.
 It supplies Xvfb, native scoped workers/drive and the fixed ROS/Gazebo dependencies.
 An existing compatible image may be selected explicitly; record its identity
 and qualification. A tag alone does not prove compatibility.
+
+The selector also accepts explicit `--platform linux/arm64` for a separately
+prepared compatible visual image and matching ARM64 Linux installations. Use
+the same platform for preparation and launch. The supplied Classic Dockerfile
+still depends on amd64 binaries; the flag does not provide an ARM64 build recipe
+or transfer existing amd64 scenario qualification to a native environment.
 
 ### Prepare new Linux installations
 
