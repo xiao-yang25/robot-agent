@@ -42,6 +42,7 @@ class _Loop:
         self.owners = []
         self.nav = None
         self.nav_error = None
+        self.localization_failure = None
         self.next_read = 0.
         self.camera_failed = False
         self.camera_attempted = False
@@ -70,7 +71,11 @@ class _Loop:
 
     def _conditions(self, incoming_record=None):
         now = time.monotonic()
-        valid = self.nav is not None and self.nav_error is None
+        observed_loss = getattr(self.camera, 'localization_failure', None)
+        if observed_loss is not None:
+            self.localization_failure = self.localization_failure or str(observed_loss)
+        valid = (self.nav is not None and self.nav_error is None
+                 and self.localization_failure is None)
         valid = valid and 0 <= now-self.nav['received_at'] <= 1.
         if valid and self.state.phase.startswith(('check_', 'decision_')):
             site = self.state.operations[-1].site
@@ -354,7 +359,7 @@ class _Loop:
                 camera_close = dict(returned=True, not_started=True)
         result = report(self.state)
         result.update(status=self.state.phase, decisions=self.decisions, camera_close=camera_close,
-                      runtime_error=self.runtime_error, samples=self.samples, turns=self.turns,
+                      runtime_error=self.runtime_error, localization_failure=self.localization_failure, samples=self.samples, turns=self.turns,
                       cancellation_responses=self.closing_calls,
                       reading_diagnostics=self.reading_diagnostics,
                       maximum_interpret_seconds=self.maximum_interpret_seconds)

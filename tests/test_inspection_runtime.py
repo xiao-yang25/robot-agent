@@ -279,6 +279,15 @@ class RuntimeTests(unittest.TestCase):
         self.assertFalse(self.session.cancellations)
         self.assert_closed(result)
 
+    def test_localization_loss_after_acceptance_cancels_shared_navigation(self):
+        entered = self.progress_gate()
+        self.camera.on_pump = lambda: setattr(self.camera, 'localization_failure', 'reset observed') if entered.is_set() else None
+        result = self.run_task()
+        self.assertEqual(result['status'], 'needs_help', result)
+        self.assertEqual(self.session.cancellations, [result['operations'][0]['request_id']])
+        self.assertFalse(result['checks'])
+        self.assert_closed(result)
+
     def test_explicit_stop_during_original_io_retains_late_arrival_and_cancels_once(self):
         entered = self.progress_gate()
         self.camera.on_pump = lambda: self.stop.set() if entered.is_set() else None
@@ -307,6 +316,16 @@ class RuntimeTests(unittest.TestCase):
         result = self.run_task()
         self.assertEqual(result['status'], 'needs_help')
         self.assertIn('controlled provider failure', result['reason'])
+        self.assertEqual(len(self.session.submissions), 1)
+        self.assert_closed(result)
+
+    def test_localization_loss_with_healthy_camera_withdraws_decision(self):
+        self.labels['A'] = 'abnormal'
+        started = self.waiting_provider('A')
+        self.camera.on_pump = lambda: setattr(self.camera, 'localization_failure', 'reset observed') if started.is_set() else None
+        result = self.run_task()
+        self.assertEqual(result['status'], 'needs_help', result)
+        self.assertTrue(result['decisions'][0]['withdrawn'])
         self.assertEqual(len(self.session.submissions), 1)
         self.assert_closed(result)
 
