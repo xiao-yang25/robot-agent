@@ -878,3 +878,20 @@ interpretations.
 B also rechecks its original source basis after fresh preparation, immediately
 before calling Session submit. Completed historical checks retain their existing
 Source applicability rules; incoming-image freshness adds no record TTL.
+
+### Observed localization discontinuity (candidate)
+
+The inspection reference task shares localization between navigation and image
+association. Its ROS binding observes AMCL lifecycle transitions and latches an
+observed discontinuity separately from camera health. The caller also latches
+that condition for the task lifetime and routes it through existing navigation
+condition failure, withdrawal and cancellation handling. Later active events do
+not revive a task or its old decision. Historical results and settlement remain.
+The task report includes the observed localization failure reason.
+
+This conservative candidate retains the existing AMCL pose-age gate. It does not
+certify positive readiness, detect every missed event or rapid restart, provide
+a durable localization epoch, or guarantee physical stopping. The event timestamp
+is not used as an authority. Camera-only failure retains its independent-navigation
+policy; deployments with distinct localization dependencies require an explicit
+profile. No recovery command is issued by the Agent.

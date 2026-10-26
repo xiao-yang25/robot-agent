@@ -33,6 +33,13 @@ class BindingTests(unittest.TestCase):
         self.pose=SITES['A']
         self.binding=CameraBinding(lambda:tuple(self.publisher),self.transforms,clock=self.clock)
 
+    def test_localization_reset_latches_without_claiming_camera_failure(self):
+        self.binding.localization_transition(N(start_state=N(id=3),goal_state=N(id=14)))
+        reason=self.binding.localization_failure
+        self.binding.localization_transition(N(start_state=N(id=13),goal_state=N(id=3)))
+        self.assertEqual(self.binding.localization_failure,reason)
+        self.assertIsNone(self.binding.failure)
+
     def transforms(self,value,need_map):
         if not self.tf_available:
             return None

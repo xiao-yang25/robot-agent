@@ -1571,3 +1571,22 @@ retained, with no new historical-record TTL. Each container exited normally and
 was removed; the same 22 product-launcher descendants still required research
 group SIGINT. Supported closure and final combination/tutorial delivery remain
 separate; native cleanup unknown/task verdict unassessed remain unchanged.
+
+### Observed localization loss candidate
+
+Local software verification: 347 application tests passed, including 139 inspection
+tests. New controls distinguish shared localization loss after accepted navigation
+(cancel original request) from independent camera loss (retain existing policy),
+and withdraw a pending decision without admitting B. Independent review checked
+that restored camera attributes and active events cannot clear the task latch;
+46 camera/runtime tests passed in that review. These software checks alone do
+not establish ROS delivery or model/physics qualification.
+
+A fresh-install native ARM64/Humble fault experiment subsequently exercised one
+actual A navigation followed by localization-manager PAUSE. The caller reported
+localization loss and needs_help, requested cancellation of the same accepted request and admitted
+no B. Authority was revoked; native outcome and settlement remained pending,
+closure/stop unknown. The native log also reported a follow_path halt result
+retrieval failure. Process cleanup completed without forcing. This qualifies
+that bounded rejection/cancellation path, not final settlement, physical stopping,
+model-wait withdrawal in a real scene or positive localization readiness.
