@@ -17,7 +17,7 @@ def main(argv=None):
     # The CLI does not consume fixture selection/truth as task inputs.
     os.execv(sys.executable, [sys.executable, '-m', 'robot_agent.inspection_cli',
         '--endpoint', args.endpoint, '--output', '/output/agent',
-        '--marker-reader', 'located-bright-panel'])
+        '--marker-reader', 'located-bright-panel', '--control'])
 
 
 if __name__ == '__main__':

@@ -895,3 +895,19 @@ a durable localization epoch, or guarantee physical stopping. The event timestam
 is not used as an authority. Camera-only failure retains its independent-navigation
 policy; deployments with distinct localization dependencies require an explicit
 profile. No recovery command is issued by the Agent.
+
+## Local task control
+
+The experimental inspection command optionally exposes file-based status/cancel
+in its fresh output directory; the simulation tutorial opts in. One Agent-owned
+worker publishes the latest bounded task snapshot and consumes an instance-bound
+cancel request into the existing stop Event. The task loop remains the sole
+business state owner, and its original Session path owns cancellation. No second
+mission engine, supervisor or execution authority is introduced.
+
+The task callback performs only in-memory publication; file I/O runs on the
+worker. Closing joins the worker within one second and reports a worker error or
+incomplete close as an application error. Status is recorded evidence, not a live
+health guarantee. Request written, request consumed, task terminal, local closure
+and physical stop are distinct. Control files require trusted local storage and
+are not a remote access-control boundary. See the [usage and limitations](../examples/inspection/README.md#observe-and-cancel-one-task).

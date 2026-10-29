@@ -50,12 +50,17 @@ class InstalledInspectionCommandTests(unittest.TestCase):
         with (self.root/'command.log').open('w+') as log:
             child = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT)
             try:
-                if scenario == 'stop':
+                if scenario in ('stop', 'control-stop'):
                     until = time.monotonic()+15
                     while not ready.exists() and child.poll() is None and time.monotonic() < until:
                         time.sleep(.005)
                     self.assertTrue(ready.exists(), 'B sampling was never reached')
-                    os.kill(child.pid, signal.SIGINT)
+                    if scenario == 'control-stop':
+                        from robot_agent.inspection_control import request_cancel
+                        control = self.root/'task/control'
+                        request_cancel(control)
+                    else:
+                        os.kill(child.pid, signal.SIGINT)
                 code = child.wait(timeout=20)
             finally:
                 if child.poll() is None:
@@ -108,6 +113,22 @@ class InstalledInspectionCommandTests(unittest.TestCase):
         self.assertEqual(facts['records'][-1]['receipt']['authority_disposition'], 'revoked')
         self.assertEqual(facts['records'][-1]['receipt']['settlement'], 'pending')
         self.assertTrue(result['coordination']['resources_closed'])
+
+    def test_control_request_cancels_original_b_without_process_signal(self):
+        result, facts = self.run_command('control-stop')
+        self.assertEqual(result['status'], 'cancelled')
+        self.assertEqual([row['site'] for row in facts['records']], ['A', 'B'])
+        b = result['operations'][-1]
+        self.assertEqual(facts['stops'], [b['request_id']])
+        self.assertEqual(facts['records'][-1]['operation_id'], b['operation_id'])
+        self.assertEqual(facts['records'][-1]['receipt']['authority_disposition'], 'revoked')
+        self.assertEqual(facts['records'][-1]['receipt']['settlement'], 'pending')
+        self.assertTrue(result['coordination']['resources_closed'])
+        self.assertTrue(result['control']['worker_stopped'])
+        status = json.loads((self.root/'task/control/status.json').read_text())
+        self.assertEqual(status['lifecycle'], 'finished')
+        self.assertTrue(status['cancel_requested'])
+        self.assertEqual(status['task']['phase'], 'cancelled')
 
     def test_completed_observation_with_close_error_is_unsuccessful(self):
         result, facts = self.run_command('close-failure')

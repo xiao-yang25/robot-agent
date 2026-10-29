@@ -22,7 +22,7 @@ REVISION = re.search(r'version: ([0-9a-f]{40})', (ROOT/'workspace.repos').read_t
 class InspectionDemoTests(unittest.TestCase):
     def arguments(self, root, *extra):
         files = ('agent/robot_agent/inspection_demo_client.py', 'agent/robot_agent/inspection_cli.py',
-                 'agent/bin/robot-agent-inspection',
+                 'agent/robot_agent/inspection_control.py', 'agent/bin/robot-agent-inspection',
                  'core/lib/robot-harness/python/robot_harness_nav2/_inspection.py')
         (root/'harness').mkdir()
         for name in files:
@@ -75,10 +75,11 @@ class InspectionDemoTests(unittest.TestCase):
                 self.assertEqual(caught.exception.code,2);git.assert_not_called();execute.assert_not_called()
 
     def test_wrong_dirty_pin_or_old_installs_cannot_launch(self):
-        for failure in ('pin','dirty','untracked','agent','core'):
+        for failure in ('pin','dirty','untracked','agent','core','control'):
             with self.subTest(failure=failure), tempfile.TemporaryDirectory() as temporary:
                 root=Path(temporary).resolve();args=self.arguments(root,'--case','normal')
                 if failure=='agent':(root/'agent/robot_agent/inspection_demo_client.py').unlink()
+                if failure=='control':(root/'agent/robot_agent/inspection_control.py').unlink()
                 if failure=='core':(root/'core/lib/robot-harness/python/robot_harness_nav2/_inspection.py').unlink()
                 status = ' M changed.py' if failure=='dirty' else '?? extra.py' if failure=='untracked' else ''
                 with patch('sys.argv',args), contextlib.redirect_stderr(io.StringIO()), \
@@ -92,7 +93,7 @@ class InspectionDemoTests(unittest.TestCase):
         with patch.dict(sys.modules,modules), patch.object(client.os,'execv') as execute:
             client.main(['/prepared/navigation.sock'])
         execute.assert_called_once_with(sys.executable,[sys.executable,'-m','robot_agent.inspection_cli',
-            '--endpoint','/prepared/navigation.sock','--output','/output/agent','--marker-reader','located-bright-panel'])
+            '--endpoint','/prepared/navigation.sock','--output','/output/agent','--marker-reader','located-bright-panel','--control'])
 
     def test_wrong_import_roots_reject_before_cli_exec(self):
         for bad in ('robot_agent','robot_harness'):

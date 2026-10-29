@@ -1598,3 +1598,14 @@ closure/stop unknown. The native log also reported a follow_path halt result
 retrieval failure. Process cleanup completed without forcing. This qualifies
 that bounded rejection/cancellation path, not final settlement, physical stopping,
 model-wait withdrawal in a real scene or positive localization readiness.
+
+## Local inspection task control
+
+The unit suite covers matching and stale requests, terminal rejection, control
+write failure, and worker closure. The installed-combination suite adds a real
+CLI subprocess case: after the original B operation starts, a file request
+cancels that same request/operation without sending a process signal, with no
+new navigation request. Existing normal, camera-failure and signal cases remain.
+Both suites are already discovered by the existing Ubuntu/macOS CI jobs; no
+separate workflow is needed. These tests use scripted camera/native fixtures and
+the installed Core; they do not establish ROS motion or physical stop latency.

@@ -19,7 +19,7 @@ def image(color):
 
 def main():
     scenario, endpoint, output, ready = sys.argv[1:]
-    assert scenario in ('normal', 'recheck', 'unknown', 'stop', 'close-failure')
+    assert scenario in ('normal', 'recheck', 'unknown', 'stop', 'control-stop', 'close-failure')
     green, red = image((10, 220, 10)), image((220, 10, 10))
     class Pixels(Camera):
         def __init__(self):
@@ -27,13 +27,13 @@ def main():
             ingest = self.source.ingest
             def record(frame):
                 pixels = (bytes(640*480*3) if scenario == 'unknown' else
-                          red if scenario in ('recheck', 'stop') and frame.site == 'A' else green)
+                          red if scenario in ('recheck', 'stop', 'control-stop') and frame.site == 'A' else green)
                 return ingest(replace(frame, pixels=pixels))
             self.source.ingest = record
 
         def open_window(self, site, target):
             result = super().open_window(site, target)
-            if scenario == 'stop' and site == 'B':
+            if scenario in ('stop', 'control-stop') and site == 'B':
                 Path(ready).write_text('B sampling active')
             return result
 
@@ -44,7 +44,7 @@ def main():
 
     inspection_cli.RosCamera = Pixels
     return inspection_cli.main(['--endpoint', endpoint, '--output', output,
-                                '--marker-reader', 'located-bright-panel'])
+                                '--marker-reader', 'located-bright-panel', *(['--control'] if scenario == 'control-stop' else [])])
 
 
 if __name__ == '__main__':

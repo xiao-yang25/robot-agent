@@ -272,11 +272,17 @@ class RuntimeTests(unittest.TestCase):
     def test_camera_loss_after_confirmed_acceptance_allows_independent_a_to_finish(self):
         entered = self.progress_gate()
         self.camera.on_pump = lambda: self.camera.source.events.invalidate('camera independent of navigation') if entered.is_set() else None
-        result = self.run_task()
+        snapshots = []
+        result = self.run_task(progress=snapshots.append)
         self.assertEqual(result['status'], 'needs_help', result)
         self.assertTrue(result['operations'][0]['reusable'])
         self.assertFalse(result['checks'])
         self.assertFalse(self.session.cancellations)
+        self.assertTrue(any(row['source_failure'] for row in snapshots))
+        # Source invalidation is distinct from a camera pump exception.
+        self.assertFalse(any(row['camera_failed'] for row in snapshots))
+        self.assertEqual(snapshots[0]['phase'], 'prepare')
+        self.assertNotIn('pixels', json.dumps(snapshots))
         self.assert_closed(result)
 
     def test_localization_loss_after_acceptance_cancels_shared_navigation(self):
