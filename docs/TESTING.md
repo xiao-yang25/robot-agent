@@ -28,13 +28,21 @@ qualifications are not supplied by these fixtures.
 ## Current fixed combination
 
 [workspace.repos](../workspace.repos) selects Harness
-`542400c6f5defb776da1b789d53fc35cee485978`, adding explicit image platform
-selection and architecture mismatch rejection before container creation to the
-previous inspection scene/controller-parameter/display baseline. Public Session/Core contracts,
+`c8e2344cef0773d5c2d254fc2fa90a4f1b9d115c`, adding three-degree heading
+tolerances for both optional inspection controllers and typed readback of the
+selected checker, plugin, stateful flag, heading and XY tolerances before admission.
+The original shared four-second startup deadline and explicit platform checks remain. Public Session/Core contracts,
 legacy application defaults and the private ACT worker transport are unchanged.
 The existing installed-combination workflow builds this immutable dependency;
 Harness CI separately retains its older fixed Agent consumer. Neither pin moves
 automatically with the other repository.
+
+The reference-heading pair passed a fresh offline Ubuntu 22.04/Humble ARM64
+Core/Agent installation: `python_session`, all 63 installed combination checks,
+six selector checks and installed inspection CLI help. macOS passed the same
+six selector checks. These checks use synthetic native/camera edges; moving
+normal/recheck/stop qualification for this pair is still pending. Exact-candidate
+CI remains required before merge.
 
 The previous `083fb7e` combination's new macOS Core/Agent installation and offline Ubuntu Agent installation against
 the directly checked retained Core prefix each passed all63 combination checks

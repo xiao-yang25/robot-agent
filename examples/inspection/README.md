@@ -103,7 +103,7 @@ python3 ../harness-inspection/integrations/ros2/simulation/simulate.py build \
   --visual --image robot-inspection-demo:humble
 ```
 
-The current pin is Harness `542400c`; a different or modified source checkout is
+The current pin is Harness `c8e2344`; a different or modified source checkout is
 rejected (tracked or nonignored untracked changes). This visual image is required for RGB rendering, even without a viewer.
 It supplies Xvfb, native scoped workers/drive and the fixed ROS/Gazebo dependencies.
 An existing compatible image may be selected explicitly; record its identity
@@ -163,7 +163,12 @@ Original sampling, freshness, proposal/task budgets and close semantics remain.
 The host selector replaces itself with Harness's existing launcher; its installed
 client replaces itself with the inspection CLI. No extra supervisor or task loop
 is started. The Owner permits 45 seconds of caller idle time. Both native
-controller tolerances are checked before public Session admission by Harness.
+controllers use a three-degree heading tolerance and 0.15 m XY tolerances for this
+explicit inspection scene. Harness checks the selected checker, plugin, stateful
+flag and tolerances before public Session admission within its original shared
+four-second deadline. Ordinary navigation is unchanged. Configuration agreement
+does not prove actual arrival accuracy, visual readability or physical stopping;
+new paired moving qualification remains separate.
 
 | Record | Meaning |
 |---|---|
