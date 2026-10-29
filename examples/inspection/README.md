@@ -190,3 +190,35 @@ inspection-task evaluator, and normal A-only is not a missing-B task failure.
 Do not infer an inspection verdict from collection completion. This tutorial
 starts no viewer or recorder. [Software verification and remaining qualification](../../docs/TESTING.md#inspection-simulation-tutorial)
 keep fresh moving tests and same-run media distinct from the software delivery.
+
+## Observe and cancel one task
+
+Add `--control` to the direct inspection command to enable a local control
+directory. The controlled-simulation tutorial enables it automatically.
+From a second terminal using the installed Agent, run:
+
+```sh
+python3 -m robot_agent.inspection_control status --directory /path/to/task-output/control
+python3 -m robot_agent.inspection_control cancel --directory /path/to/task-output/control
+```
+
+For the simulation tutorial, task output is `<simulation-output>/agent`.
+The standalone installed `robot_agent/inspection_control.py` also runs with a
+host Python interpreter without importing ROS or the Core extension.
+
+A cancel response with `request=written` is not acknowledgement. The Agent
+worker sets `cancel_requested=true` only after consuming a matching instance
+request. The original task loop then requests cancellation of the original
+operation through Session. This command does not kill the launcher or container.
+Closing/finished tasks reject new requests; stale instance requests cannot stop a
+different task. The output directory is trusted local storage, not an authenticated
+remote control service.
+
+Status includes task phase, operation identities and camera/navigation/localization
+failure facts. `published_at` is the file worker's timestamp;
+`task_updated_at` records the last task snapshot. Neither proves live health or
+physical stopping. Final task phase, local resource closure, native cleanup and
+independent task verdict remain separate facts. Control status-publication/worker failure requests
+withdrawal and makes the application unsuccessful. Invalid or unreadable requests
+are reported as `request_error` and do not themselves stop the task. A stalled worker or dead Agent
+can leave an old status file; no hard cancellation latency is promised.

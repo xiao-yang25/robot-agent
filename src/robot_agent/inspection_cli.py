@@ -21,27 +21,39 @@ def main(argv=None):
     parser.add_argument('--output', type=Path, required=True, help='new task output directory')
     parser.add_argument('--marker-reader', choices=tuple(READERS), required=True,
                         help='explicit controlled marker interpretation; no automatic fallback')
+    parser.add_argument('--control', action='store_true', help='enable local task status/cancel in output/control')
     args = parser.parse_args(argv)
     if not args.endpoint.strip():
         parser.error('--endpoint must not be empty')
     output = args.output.expanduser().resolve()
     output.mkdir(parents=True, exist_ok=False)
     stopped, handlers = threading.Event(), {}
+    control = None
     started = time.monotonic()
     result = dict(status='needs_help', task_verdict='unassessed', native_cleanup='unknown',
                   runtime_error=None, coordination=dict(resources_closed=False))
     try:
         for sig in (signal.SIGINT, signal.SIGTERM):
             handlers[sig] = signal.signal(sig, lambda *_: stopped.set())
+        options = {}
+        if args.control:
+            from .inspection_control import LocalTaskControl
+            control = LocalTaskControl(output, stopped)
+            control.start()
+            options['progress'] = control.publish
         from robot_harness import NavigationSession
         result = run_inspection(lambda: NavigationSession(args.endpoint),
             camera_factory=RosCamera, stop_requested=stopped.is_set, started_at=started,
-            interpreter=READERS[args.marker_reader])
+            interpreter=READERS[args.marker_reader], **options)
     except Exception as error:
         # An unexpected loop/import failure cannot certify resource closure.
         result.update(runtime_error=f'{type(error).__name__}: {error}')
     finally:
         try:
+            if control is not None:
+                result['control'] = control.finish(result)
+                if result['control']['error'] or not result['control']['worker_stopped']:
+                    result['runtime_error'] = result['runtime_error'] or 'task control unavailable or not closed'
             result['wall_seconds'] = time.monotonic() - started
             result['application'] = dict(name='station-inspection',
                 marker_reader=args.marker_reader, decision_provider='rules-no-model')

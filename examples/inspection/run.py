@@ -38,6 +38,7 @@ def main():
         parser.error('Harness tracked or untracked changes refused; use a clean checkout')
     client = prefix/'robot_agent/inspection_demo_client.py'
     if not all(path.is_file() for path in (client, prefix/'robot_agent/inspection_cli.py',
+            prefix/'robot_agent/inspection_control.py',
             prefix/'bin/robot-agent-inspection',
             python_prefix/'lib/robot-harness/python/robot_harness_nav2/_inspection.py')):
         parser.error('prepare matching new Linux Harness and Agent installations')

@@ -31,10 +31,13 @@ class RuleDecision:
 
 class _Loop:
     def __init__(self, session_factory, camera_factory, decision_factory, budget,
-                 stop_requested, started_at, startup_seconds, cleanup_seconds, interpreter):
+                 stop_requested, started_at, startup_seconds, cleanup_seconds, interpreter, progress):
         self.session_factory, self.camera_factory = session_factory, camera_factory
         self.decision_factory, self.interpret = decision_factory, interpreter
         self.stop_requested = stop_requested
+        self.progress = progress
+        self.next_progress = 0.
+        self.progress_phase = None
         self.state = new_task(uuid.uuid4().hex, started_at=started_at, budget=budget)
         self.startup_deadline = min(self.state.deadline, started_at+startup_seconds)
         self.cleanup_seconds = cleanup_seconds
@@ -56,6 +59,19 @@ class _Loop:
         self.decisions = []
         self.closing_calls = []
         self.runtime_error = None
+
+    def _publish_progress(self):
+        if self.progress is None:
+            return
+        now = time.monotonic()
+        if now < self.next_progress and self.progress_phase == self.state.phase:
+            return
+        self.next_progress, self.progress_phase = now+.2, self.state.phase
+        self.progress(dict(task_id=self.state.task_id, phase=self.state.phase,
+            reason=self.state.reason, operations=[asdict(row) for row in self.state.operations],
+            samples=self.samples, camera_failed=self.camera_failed,
+            source_failure=self.state.source_failure, navigation_error=self.nav_error,
+            localization_failure=self.localization_failure))
 
     def _pump(self):
         if self.camera_failed:
@@ -288,6 +304,7 @@ class _Loop:
         camera_close = dict(returned=False)
         terminal = {}
         try:
+            self._publish_progress()
             self._start()
             while self.state.phase not in TERMINAL:
                 self.turns += 1
@@ -301,6 +318,7 @@ class _Loop:
                     self._step(Control('tick'))
                 completed = self.coordinator.poll()
                 self._consume(completed)
+                self._publish_progress()
                 if self.state.phase in TERMINAL:
                     break
                 if (self.state.phase.startswith('check_') and self.camera.window_deadline is not None
@@ -376,7 +394,7 @@ class _Loop:
 
 def run_inspection(session_factory, *, camera_factory=RosCamera, decision_factory=RuleDecision,
                    budget=NavigationBudget(), stop_requested=lambda: False, started_at=None,
-                   startup_seconds=55., cleanup_seconds=12., interpreter=classify):
+                   startup_seconds=55., cleanup_seconds=12., interpreter=classify, progress=None):
     """One opt-in task; caller owns camera, original owners hold Session/provider."""
     now = time.monotonic()
     started_at = now if started_at is None else started_at
@@ -386,7 +404,7 @@ def run_inspection(session_factory, *, camera_factory=RosCamera, decision_factor
         if not finite(value) or not 0 < value <= maximum:
             raise ValueError('invalid inspection startup/closing limit')
     return _Loop(session_factory, camera_factory, decision_factory, budget, stop_requested,
-                 started_at, startup_seconds, cleanup_seconds, interpreter).run()
+                 started_at, startup_seconds, cleanup_seconds, interpreter, progress).run()
 
 
 def main():
